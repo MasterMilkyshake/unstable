@@ -1,0 +1,2076 @@
+{
+ "tool": "tools/long-session.mjs",
+ "commit": "a4d5a52",
+ "url": "http://localhost:5211/",
+ "chrome": "155.0.8059.80",
+ "started": "2026-10-16T07:19:57.265Z",
+ "minutes": 120,
+ "sampleMinutes": 5,
+ "viewport": "1600x900",
+ "vsync": true,
+ "region": "",
+ "clearNav": true,
+ "heapProfile": true,
+ "samples": [
+  {
+   "i": 0,
+   "minute": 0,
+   "phase": "wander",
+   "cycle": 0,
+   "simMin": 0,
+   "inRift": false,
+   "skyTime": 0.3,
+   "state": "playing",
+   "frames": 1,
+   "fps": 20,
+   "p50": 50,
+   "p95": 50,
+   "p99": 50,
+   "max": 50,
+   "over50": 0,
+   "over33": 1,
+   "heapUsedMB": 519,
+   "actors": 12,
+   "teams": {
+    "player": 1,
+    "enemy": 11
+   },
+   "projectiles": 0,
+   "boats": 0,
+   "spawnersAwake": 2,
+   "particles": 2,
+   "effects": 0,
+   "trails": 1,
+   "numbers": 0,
+   "emitters": 84,
+   "sceneChildren": 2798,
+   "geometries": 653,
+   "textures": 22,
+   "programs": 68,
+   "navTiles": 0,
+   "kills": 0,
+   "killTypes": {},
+   "casts": 0,
+   "sailedM": 0,
+   "liveHeapMB": 519,
+   "v8UsedMB": 112,
+   "v8WithTilesMB": 112.41,
+   "v8UsedExactMB": 111.52,
+   "tilesKB": 911.3,
+   "domNodes": 440,
+   "jsListeners": 40,
+   "load": 4,
+   "errors": 0
+  },
+  {
+   "i": 1,
+   "minute": 5,
+   "phase": "fight",
+   "cycle": 0,
+   "simMin": 4.8,
+   "inRift": false,
+   "skyTime": 0.622,
+   "state": "playing",
+   "frames": 17945,
+   "fps": 60,
+   "p50": 16.7,
+   "p95": 16.7,
+   "p99": 16.8,
+   "max": 50,
+   "over50": 0,
+   "over33": 2,
+   "heapUsedMB": 534,
+   "actors": 19,
+   "teams": {
+    "player": 1,
+    "enemy": 18
+   },
+   "projectiles": 0,
+   "boats": 0,
+   "spawnersAwake": 7,
+   "particles": 11,
+   "effects": 0,
+   "trails": 10,
+   "numbers": 1,
+   "emitters": 84,
+   "sceneChildren": 2814,
+   "geometries": 2617,
+   "textures": 66,
+   "programs": 68,
+   "navTiles": 186,
+   "kills": 4,
+   "killTypes": {
+    "scuttler": 2,
+    "brigand": 2
+   },
+   "casts": 18,
+   "sailedM": 0,
+   "liveHeapMB": 529,
+   "v8UsedMB": 121,
+   "v8WithTilesMB": 124.2,
+   "v8UsedExactMB": 121.16,
+   "tilesKB": 3108.4,
+   "domNodes": 453,
+   "jsListeners": 40,
+   "load": 3.7,
+   "errors": 0,
+   "heap": {
+    "sites": [
+     [
+      "(anonymous) /src/game/game.js:962",
+      0.95
+     ],
+     [
+      "createBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9299",
+      0.69
+     ],
+     [
+      "_Object3D /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4469",
+      0.66
+     ],
+     [
+      "getBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9280",
+      0.57
+     ],
+     [
+      "cloneUniforms /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7375",
+      0.48
+     ],
+     [
+      "setup /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9251",
+      0.38
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10968",
+      0.38
+     ],
+     [
+      "set (native):0",
+      0.38
+     ],
+     [
+      "createBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8190",
+      0.34
+     ],
+     [
+      "WebGLRenderer.renderBufferDirect /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17515",
+      0.28
+     ],
+     [
+      "updateShown /src/core/sceneMatrices.js:32",
+      0.23
+     ],
+     [
+      "updateMatrix /src/core/sceneMatrices.js:11",
+      0.22
+     ],
+     [
+      "saveCache /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9345",
+      0.22
+     ],
+     [
+      "clone /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:971",
+      0.19
+     ],
+     [
+      "projectObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17794",
+      0.18
+     ],
+     [
+      "Material /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:5700",
+      0.16
+     ],
+     [
+      "seqWithValue /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11689",
+      0.16
+     ],
+     [
+      "addEventListener /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:202",
+      0.16
+     ],
+     [
+      "_BoxGeometry /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7291",
+      0.16
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8279",
+      0.1
+     ],
+     [
+      "clone /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:5501",
+      0.09
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10707",
+      0.09
+     ],
+     [
+      "push (native):0",
+      0.07
+     ],
+     [
+      "setValueV3f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11109",
+      0.07
+     ],
+     [
+      "getProgram /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17962",
+      0.06
+     ],
+     [
+      "Sphere /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:3118",
+      0.06
+     ],
+     [
+      "Uint16BufferAttribute /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6399",
+      0.06
+     ],
+     [
+      "add (native):0",
+      0.06
+     ],
+     [
+      "has /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10650",
+      0.03
+     ],
+     [
+      "getParameters /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:12426",
+      0.03
+     ],
+     [
+      "islandDist /src/data/world.js:369",
+      0.03
+     ],
+     [
+      "intersectsObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8105",
+      0.03
+     ],
+     [
+      "renderObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17944",
+      0.03
+     ],
+     [
+      "setValueV1f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11089",
+      0.03
+     ],
+     [
+      "markReflective /src/world/water.js:334",
+      0.03
+     ],
+     [
+      "enable /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4431",
+      0.03
+     ],
+     [
+      "tryCast /src/entities/player.js:659",
+      0.03
+     ],
+     [
+      "flashCrosshair /src/ui/ui.js:530",
+      0.03
+     ],
+     [
+      "bot (native):232",
+      0.03
+     ],
+     [
+      "survival /src/entities/player.js:1277",
+      0.03
+     ]
+    ],
+    "files": [
+     [
+      "/@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js",
+      6.26
+     ],
+     [
+      "/src/game/game.js",
+      0.95
+     ],
+     [
+      "(native)",
+      0.57
+     ],
+     [
+      "/src/core/sceneMatrices.js",
+      0.45
+     ],
+     [
+      "/src/entities/player.js",
+      0.06
+     ],
+     [
+      "/src/ui/ui.js",
+      0.06
+     ],
+     [
+      "/src/entities/enemy.js",
+      0.06
+     ],
+     [
+      "/src/data/world.js",
+      0.03
+     ],
+     [
+      "/src/world/water.js",
+      0.03
+     ],
+     [
+      "/src/world/atmosphere.js",
+      0.03
+     ],
+     [
+      "/src/entities/nav.js",
+      0.03
+     ],
+     [
+      "/src/entities/npc.js",
+      0.03
+     ],
+     [
+      "/src/game/events.js",
+      0.03
+     ],
+     [
+      "/src/world/wildlife.js",
+      0.03
+     ],
+     [
+      "/src/game/warmup.js",
+      0.03
+     ]
+    ],
+    "totalMB": 8.67
+   }
+  },
+  {
+   "i": 2,
+   "minute": 10,
+   "phase": "rift",
+   "cycle": 0,
+   "simMin": 9.8,
+   "inRift": true,
+   "skyTime": 0.954,
+   "state": "playing",
+   "frames": 17978,
+   "fps": 60,
+   "p50": 16.7,
+   "p95": 16.8,
+   "p99": 16.8,
+   "max": 66.6,
+   "over50": 1,
+   "over33": 1,
+   "heapUsedMB": 540,
+   "actors": 26,
+   "teams": {
+    "player": 1,
+    "enemy": 25
+   },
+   "projectiles": 0,
+   "boats": 1,
+   "spawnersAwake": 11,
+   "particles": 0,
+   "effects": 0,
+   "trails": 12,
+   "numbers": 0,
+   "emitters": 84,
+   "sceneChildren": 2824,
+   "geometries": 2735,
+   "textures": 66,
+   "programs": 69,
+   "navTiles": 47,
+   "kills": 10,
+   "killTypes": {
+    "scuttler": 2,
+    "brigand": 5,
+    "brigand_brute": 1,
+    "brigand_cutthroat": 2
+   },
+   "casts": 21,
+   "sailedM": 2379,
+   "liveHeapMB": 538,
+   "v8UsedMB": 129,
+   "v8WithTilesMB": 129.96,
+   "v8UsedExactMB": 129.44,
+   "tilesKB": 532,
+   "domNodes": 450,
+   "jsListeners": 40,
+   "load": 9.1,
+   "errors": 0,
+   "heap": {
+    "sites": [
+     [
+      "set (native):0",
+      3.91
+     ],
+     [
+      "fill /src/world/weather.js:34",
+      1.91
+     ],
+     [
+      "update /src/world/weather.js:93",
+      1.51
+     ],
+     [
+      "(anonymous) /src/game/game.js:962",
+      1.1
+     ],
+     [
+      "_Object3D /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4469",
+      1.03
+     ],
+     [
+      "createBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9299",
+      0.78
+     ],
+     [
+      "getBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9280",
+      0.69
+     ],
+     [
+      "cloneUniforms /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7375",
+      0.64
+     ],
+     [
+      "setup /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9251",
+      0.41
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10968",
+      0.38
+     ],
+     [
+      "clone /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:971",
+      0.34
+     ],
+     [
+      "createBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8190",
+      0.34
+     ],
+     [
+      "saveCache /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9345",
+      0.25
+     ],
+     [
+      "_BoxGeometry /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7291",
+      0.22
+     ],
+     [
+      "updateMatrix /src/core/sceneMatrices.js:11",
+      0.22
+     ],
+     [
+      "topAt /src/world/colliders.js:121",
+      0.22
+     ],
+     [
+      "projectObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17794",
+      0.18
+     ],
+     [
+      "updateShown /src/core/sceneMatrices.js:32",
+      0.16
+     ],
+     [
+      "Uint16BufferAttribute /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6399",
+      0.16
+     ],
+     [
+      "seqWithValue /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11689",
+      0.13
+     ],
+     [
+      "addEventListener /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:202",
+      0.13
+     ],
+     [
+      "(IDLE_EXTERNAL) (native):0",
+      0.12
+     ],
+     [
+      "updateMatrixWorld /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4766",
+      0.09
+     ],
+     [
+      "setValueV3f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11109",
+      0.07
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8279",
+      0.06
+     ],
+     [
+      "setValueV1f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11089",
+      0.06
+     ],
+     [
+      "intersectsObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8105",
+      0.06
+     ],
+     [
+      "Material /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:5700",
+      0.06
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10707",
+      0.06
+     ],
+     [
+      "Sphere /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:3118",
+      0.06
+     ],
+     [
+      "buildPlane /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7322",
+      0.06
+     ],
+     [
+      "clone /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:481",
+      0.06
+     ],
+     [
+      "add (native):0",
+      0.06
+     ],
+     [
+      "setValueM4 /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11175",
+      0.05
+     ],
+     [
+      "has /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10650",
+      0.03
+     ],
+     [
+      "world.sky.update /src/world/rift.js:132",
+      0.03
+     ],
+     [
+      "getParameters /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:12426",
+      0.03
+     ],
+     [
+      "renderObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17944",
+      0.03
+     ],
+     [
+      "markReflective /src/world/water.js:334",
+      0.03
+     ],
+     [
+      "enable /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4431",
+      0.03
+     ]
+    ],
+    "files": [
+     [
+      "/@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js",
+      7.13
+     ],
+     [
+      "(native)",
+      4.22
+     ],
+     [
+      "/src/world/weather.js",
+      3.42
+     ],
+     [
+      "/src/game/game.js",
+      1.1
+     ],
+     [
+      "/src/core/sceneMatrices.js",
+      0.38
+     ],
+     [
+      "/src/world/colliders.js",
+      0.22
+     ],
+     [
+      "/src/world/rift.js",
+      0.03
+     ],
+     [
+      "/src/world/water.js",
+      0.03
+     ],
+     [
+      "/src/entities/player.js",
+      0.03
+     ],
+     [
+      "/src/entities/actor.js",
+      0.03
+     ],
+     [
+      "/src/world/atmosphere.js",
+      0.03
+     ],
+     [
+      "/src/entities/nav.js",
+      0.03
+     ],
+     [
+      "/src/combat/vfx.js",
+      0.03
+     ],
+     [
+      "/src/ui/ui.js",
+      0.03
+     ],
+     [
+      "/src/entities/npc.js",
+      0.03
+     ],
+     [
+      "/src/game/events.js",
+      0.03
+     ],
+     [
+      "/src/entities/enemy.js",
+      0.03
+     ],
+     [
+      "/src/world/wildlife.js",
+      0.03
+     ],
+     [
+      "/src/game/warmup.js",
+      0.03
+     ]
+    ],
+    "totalMB": 16.87
+   }
+  },
+  {
+   "i": 3,
+   "minute": 15,
+   "phase": "fight",
+   "cycle": 1,
+   "simMin": 14.7,
+   "inRift": false,
+   "skyTime": 0.283,
+   "state": "playing",
+   "frames": 17983,
+   "fps": 60,
+   "p50": 16.7,
+   "p95": 16.7,
+   "p99": 16.8,
+   "max": 16.8,
+   "over50": 0,
+   "over33": 0,
+   "heapUsedMB": 533,
+   "actors": 18,
+   "teams": {
+    "player": 1,
+    "enemy": 17
+   },
+   "projectiles": 0,
+   "boats": 1,
+   "spawnersAwake": 6,
+   "particles": 30,
+   "effects": 1,
+   "trails": 11,
+   "numbers": 2,
+   "emitters": 84,
+   "sceneChildren": 2816,
+   "geometries": 2645,
+   "textures": 66,
+   "programs": 69,
+   "navTiles": 153,
+   "kills": 11,
+   "killTypes": {
+    "scuttler": 2,
+    "brigand": 5,
+    "brigand_brute": 2,
+    "brigand_cutthroat": 2
+   },
+   "casts": 31,
+   "sailedM": 2379,
+   "liveHeapMB": 530,
+   "v8UsedMB": 122,
+   "v8WithTilesMB": 124.69,
+   "v8UsedExactMB": 121.99,
+   "tilesKB": 2761.8,
+   "domNodes": 454,
+   "jsListeners": 40,
+   "load": 4.9,
+   "errors": 0,
+   "heap": {
+    "sites": [
+     [
+      "(anonymous) /src/game/game.js:962",
+      1.03
+     ],
+     [
+      "_Object3D /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4469",
+      0.88
+     ],
+     [
+      "cloneUniforms /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7375",
+      0.73
+     ],
+     [
+      "createBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9299",
+      0.69
+     ],
+     [
+      "set (native):0",
+      0.63
+     ],
+     [
+      "getBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9280",
+      0.57
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10968",
+      0.45
+     ],
+     [
+      "setup /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9251",
+      0.38
+     ],
+     [
+      "clone /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:971",
+      0.34
+     ],
+     [
+      "createBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8190",
+      0.34
+     ],
+     [
+      "WebGLRenderer.renderBufferDirect /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17515",
+      0.22
+     ],
+     [
+      "updateMatrix /src/core/sceneMatrices.js:11",
+      0.22
+     ],
+     [
+      "saveCache /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9345",
+      0.22
+     ],
+     [
+      "seqWithValue /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11689",
+      0.19
+     ],
+     [
+      "projectObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17794",
+      0.18
+     ],
+     [
+      "updateShown /src/core/sceneMatrices.js:32",
+      0.13
+     ],
+     [
+      "addEventListener /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:202",
+      0.13
+     ],
+     [
+      "getProgram /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17962",
+      0.13
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10707",
+      0.13
+     ],
+     [
+      "(IDLE_EXTERNAL) (native):0",
+      0.12
+     ],
+     [
+      "intersectsObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8105",
+      0.1
+     ],
+     [
+      "_BufferGeometry /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6508",
+      0.09
+     ],
+     [
+      "_BoxGeometry /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7291",
+      0.09
+     ],
+     [
+      "Uint16BufferAttribute /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6399",
+      0.09
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8279",
+      0.06
+     ],
+     [
+      "setValueV1f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11089",
+      0.06
+     ],
+     [
+      "add (native):0",
+      0.06
+     ],
+     [
+      "topAt /src/world/colliders.js:121",
+      0.06
+     ],
+     [
+      "setValueM4 /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11175",
+      0.05
+     ],
+     [
+      "has /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10650",
+      0.03
+     ],
+     [
+      "setValueV3f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11109",
+      0.03
+     ],
+     [
+      "world.sky.update /src/world/rift.js:132",
+      0.03
+     ],
+     [
+      "getParameters /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:12426",
+      0.03
+     ],
+     [
+      "renderObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17944",
+      0.03
+     ],
+     [
+      "updateBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8230",
+      0.03
+     ],
+     [
+      "markReflective /src/world/water.js:334",
+      0.03
+     ],
+     [
+      "enable /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4431",
+      0.03
+     ],
+     [
+      "bot (native):232",
+      0.03
+     ],
+     [
+      "survival /src/entities/player.js:1277",
+      0.03
+     ],
+     [
+      "setMode /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9575",
+      0.03
+     ]
+    ],
+    "files": [
+     [
+      "/@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js",
+      6.88
+     ],
+     [
+      "/src/game/game.js",
+      1.03
+     ],
+     [
+      "(native)",
+      0.91
+     ],
+     [
+      "/src/core/sceneMatrices.js",
+      0.35
+     ],
+     [
+      "/src/game/events.js",
+      0.06
+     ],
+     [
+      "/src/world/colliders.js",
+      0.06
+     ],
+     [
+      "/src/world/rift.js",
+      0.03
+     ],
+     [
+      "/src/world/water.js",
+      0.03
+     ],
+     [
+      "/src/entities/player.js",
+      0.03
+     ],
+     [
+      "/src/world/atmosphere.js",
+      0.03
+     ],
+     [
+      "/src/entities/nav.js",
+      0.03
+     ],
+     [
+      "/src/entities/npc.js",
+      0.03
+     ],
+     [
+      "/src/entities/actor.js",
+      0.03
+     ],
+     [
+      "/src/entities/enemy.js",
+      0.03
+     ],
+     [
+      "/src/world/wildlife.js",
+      0.03
+     ],
+     [
+      "/src/game/warmup.js",
+      0.03
+     ]
+    ],
+    "totalMB": 9.6
+   }
+  },
+  {
+   "i": 4,
+   "minute": 20,
+   "phase": "sail",
+   "cycle": 1,
+   "simMin": 19.6,
+   "inRift": false,
+   "skyTime": 0.609,
+   "state": "playing",
+   "frames": 17984,
+   "fps": 60,
+   "p50": 16.7,
+   "p95": 16.7,
+   "p99": 16.8,
+   "max": 16.8,
+   "over50": 0,
+   "over33": 0,
+   "heapUsedMB": 530,
+   "actors": 9,
+   "teams": {
+    "player": 1,
+    "enemy": 8
+   },
+   "projectiles": 0,
+   "boats": 1,
+   "spawnersAwake": 1,
+   "particles": 50,
+   "effects": 0,
+   "trails": 3,
+   "numbers": 0,
+   "emitters": 84,
+   "sceneChildren": 2798,
+   "geometries": 2358,
+   "textures": 66,
+   "programs": 69,
+   "navTiles": 38,
+   "kills": 16,
+   "killTypes": {
+    "scuttler": 2,
+    "brigand": 8,
+    "brigand_brute": 2,
+    "brigand_cutthroat": 4
+   },
+   "casts": 45,
+   "sailedM": 2379,
+   "liveHeapMB": 528,
+   "v8UsedMB": 120,
+   "v8WithTilesMB": 120.36,
+   "v8UsedExactMB": 119.98,
+   "tilesKB": 387.6,
+   "domNodes": 452,
+   "jsListeners": 40,
+   "load": 4.5,
+   "errors": 0,
+   "heap": {
+    "sites": [
+     [
+      "(anonymous) /src/game/game.js:962",
+      0.92
+     ],
+     [
+      "set (native):0",
+      0.85
+     ],
+     [
+      "createBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9299",
+      0.69
+     ],
+     [
+      "getBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9280",
+      0.57
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10968",
+      0.42
+     ],
+     [
+      "setup /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9251",
+      0.38
+     ],
+     [
+      "createBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8190",
+      0.34
+     ],
+     [
+      "updateMatrix /src/core/sceneMatrices.js:11",
+      0.22
+     ],
+     [
+      "saveCache /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9345",
+      0.22
+     ],
+     [
+      "cloneUniforms /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7375",
+      0.19
+     ],
+     [
+      "_Object3D /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4469",
+      0.19
+     ],
+     [
+      "projectObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17794",
+      0.18
+     ],
+     [
+      "updateShown /src/core/sceneMatrices.js:32",
+      0.13
+     ],
+     [
+      "seqWithValue /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11689",
+      0.13
+     ],
+     [
+      "WebGLRenderer.renderBufferDirect /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17515",
+      0.13
+     ],
+     [
+      "addEventListener /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:202",
+      0.13
+     ],
+     [
+      "(IDLE_EXTERNAL) (native):0",
+      0.12
+     ],
+     [
+      "intersectsObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8105",
+      0.1
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8279",
+      0.1
+     ],
+     [
+      "topAt /src/world/colliders.js:121",
+      0.09
+     ],
+     [
+      "setMode /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9575",
+      0.07
+     ],
+     [
+      "setValueV3f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11109",
+      0.07
+     ],
+     [
+      "setValueV1f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11089",
+      0.06
+     ],
+     [
+      "getProgram /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17962",
+      0.06
+     ],
+     [
+      "add (native):0",
+      0.06
+     ],
+     [
+      "fill /src/world/weather.js:34",
+      0.06
+     ],
+     [
+      "has /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10650",
+      0.03
+     ],
+     [
+      "world.sky.update /src/world/rift.js:132",
+      0.03
+     ],
+     [
+      "getParameters /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:12426",
+      0.03
+     ],
+     [
+      "renderObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17944",
+      0.03
+     ],
+     [
+      "updateBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8230",
+      0.03
+     ],
+     [
+      "markReflective /src/world/water.js:334",
+      0.03
+     ],
+     [
+      "enable /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4431",
+      0.03
+     ],
+     [
+      "bot (native):232",
+      0.03
+     ],
+     [
+      "survival /src/entities/player.js:1277",
+      0.03
+     ],
+     [
+      "copy /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:1559",
+      0.03
+     ],
+     [
+      "pushLight /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:13396",
+      0.03
+     ],
+     [
+      "(anonymous) /src/world/atmosphere.js:247",
+      0.03
+     ],
+     [
+      "renderObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:13682",
+      0.03
+     ],
+     [
+      "getUniformList /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:18025",
+      0.03
+     ]
+    ],
+    "files": [
+     [
+      "/@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js",
+      4.57
+     ],
+     [
+      "(native)",
+      1.12
+     ],
+     [
+      "/src/game/game.js",
+      0.92
+     ],
+     [
+      "/src/core/sceneMatrices.js",
+      0.35
+     ],
+     [
+      "/src/world/colliders.js",
+      0.09
+     ],
+     [
+      "/src/world/weather.js",
+      0.06
+     ],
+     [
+      "/src/world/rift.js",
+      0.03
+     ],
+     [
+      "/src/world/water.js",
+      0.03
+     ],
+     [
+      "/src/entities/player.js",
+      0.03
+     ],
+     [
+      "/src/world/atmosphere.js",
+      0.03
+     ],
+     [
+      "/src/entities/nav.js",
+      0.03
+     ],
+     [
+      "/src/entities/npc.js",
+      0.03
+     ],
+     [
+      "/src/entities/actor.js",
+      0.03
+     ],
+     [
+      "/src/game/events.js",
+      0.03
+     ],
+     [
+      "/src/entities/enemy.js",
+      0.03
+     ],
+     [
+      "/src/world/wildlife.js",
+      0.03
+     ],
+     [
+      "/src/game/warmup.js",
+      0.03
+     ]
+    ],
+    "totalMB": 7.46
+   }
+  },
+  {
+   "i": 5,
+   "minute": 25,
+   "phase": "wander",
+   "cycle": 2,
+   "simMin": 24.6,
+   "inRift": false,
+   "skyTime": 0.942,
+   "state": "playing",
+   "frames": 17347,
+   "fps": 57.9,
+   "p50": 16.7,
+   "p95": 16.8,
+   "p99": 33.4,
+   "max": 66.7,
+   "over50": 3,
+   "over33": 121,
+   "heapUsedMB": 543,
+   "actors": 34,
+   "teams": {
+    "player": 1,
+    "enemy": 16,
+    "guard": 17
+   },
+   "projectiles": 0,
+   "boats": 1,
+   "spawnersAwake": 20,
+   "particles": 28,
+   "effects": 0,
+   "trails": 19,
+   "numbers": 1,
+   "emitters": 84,
+   "sceneChildren": 2840,
+   "geometries": 3065,
+   "textures": 67,
+   "programs": 69,
+   "navTiles": 151,
+   "kills": 16,
+   "killTypes": {
+    "scuttler": 2,
+    "brigand": 8,
+    "brigand_brute": 2,
+    "brigand_cutthroat": 4
+   },
+   "casts": 45,
+   "sailedM": 4890,
+   "liveHeapMB": 540,
+   "v8UsedMB": 132,
+   "v8WithTilesMB": 134.36,
+   "v8UsedExactMB": 131.84,
+   "tilesKB": 2577.6,
+   "domNodes": 456,
+   "jsListeners": 40,
+   "load": 7.9,
+   "errors": 0,
+   "heap": {
+    "sites": [
+     [
+      "set (native):0",
+      4
+     ],
+     [
+      "fill /src/world/weather.js:34",
+      1.69
+     ],
+     [
+      "cloneUniforms /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7375",
+      1.6
+     ],
+     [
+      "_Object3D /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4469",
+      1.6
+     ],
+     [
+      "(anonymous) /src/game/game.js:962",
+      1.23
+     ],
+     [
+      "createBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9299",
+      0.69
+     ],
+     [
+      "getBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9280",
+      0.57
+     ],
+     [
+      "clone /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:971",
+      0.56
+     ],
+     [
+      "WebGLRenderer.renderBufferDirect /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17515",
+      0.5
+     ],
+     [
+      "update /src/world/weather.js:93",
+      0.45
+     ],
+     [
+      "_BoxGeometry /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7291",
+      0.44
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10968",
+      0.42
+     ],
+     [
+      "_BufferGeometry /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6508",
+      0.41
+     ],
+     [
+      "setup /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9251",
+      0.38
+     ],
+     [
+      "createBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8190",
+      0.34
+     ],
+     [
+      "updateMatrix /src/core/sceneMatrices.js:11",
+      0.22
+     ],
+     [
+      "saveCache /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9345",
+      0.22
+     ],
+     [
+      "updateShown /src/core/sceneMatrices.js:32",
+      0.19
+     ],
+     [
+      "seqWithValue /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11689",
+      0.19
+     ],
+     [
+      "buildPlane /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7322",
+      0.19
+     ],
+     [
+      "projectObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17794",
+      0.18
+     ],
+     [
+      "Uint16BufferAttribute /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6399",
+      0.16
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10707",
+      0.16
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8279",
+      0.13
+     ],
+     [
+      "Material /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:5700",
+      0.13
+     ],
+     [
+      "add /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4624",
+      0.13
+     ],
+     [
+      "clone /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:5501",
+      0.13
+     ],
+     [
+      "addEventListener /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:202",
+      0.13
+     ],
+     [
+      "(IDLE_EXTERNAL) (native):0",
+      0.12
+     ],
+     [
+      "setValueV3f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11109",
+      0.1
+     ],
+     [
+      "intersectsObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8105",
+      0.1
+     ],
+     [
+      "topAt /src/world/colliders.js:121",
+      0.09
+     ],
+     [
+      "setMode /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9575",
+      0.07
+     ],
+     [
+      "setValueV1f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11089",
+      0.06
+     ],
+     [
+      "setValueM4 /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11175",
+      0.06
+     ],
+     [
+      "computeBoundingSphere /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6698",
+      0.06
+     ],
+     [
+      "Float32BufferAttribute /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:6496",
+      0.06
+     ],
+     [
+      "updateMatrixWorld /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4766",
+      0.06
+     ],
+     [
+      "add (native):0",
+      0.06
+     ],
+     [
+      "has /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10650",
+      0.03
+     ]
+    ],
+    "files": [
+     [
+      "/@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js",
+      10.52
+     ],
+     [
+      "(native)",
+      4.35
+     ],
+     [
+      "/src/world/weather.js",
+      2.14
+     ],
+     [
+      "/src/game/game.js",
+      1.23
+     ],
+     [
+      "/src/core/sceneMatrices.js",
+      0.41
+     ],
+     [
+      "/src/world/colliders.js",
+      0.09
+     ],
+     [
+      "/src/entities/enemy.js",
+      0.06
+     ],
+     [
+      "/src/world/rift.js",
+      0.03
+     ],
+     [
+      "/src/world/water.js",
+      0.03
+     ],
+     [
+      "/src/entities/player.js",
+      0.03
+     ],
+     [
+      "/src/world/atmosphere.js",
+      0.03
+     ],
+     [
+      "/src/entities/nav.js",
+      0.03
+     ],
+     [
+      "/src/entities/npc.js",
+      0.03
+     ],
+     [
+      "/src/entities/rig.js",
+      0.03
+     ],
+     [
+      "/src/game/events.js",
+      0.03
+     ],
+     [
+      "/src/world/wildlife.js",
+      0.03
+     ],
+     [
+      "/src/game/warmup.js",
+      0.03
+     ]
+    ],
+    "totalMB": 19.11
+   }
+  },
+  {
+   "i": 6,
+   "minute": 30,
+   "phase": "sail",
+   "cycle": 2,
+   "simMin": 29.4,
+   "inRift": false,
+   "skyTime": 0.263,
+   "state": "playing",
+   "frames": 17969,
+   "fps": 60,
+   "p50": 16.7,
+   "p95": 16.7,
+   "p99": 16.8,
+   "max": 33.3,
+   "over50": 0,
+   "over33": 0,
+   "heapUsedMB": 535,
+   "actors": 7,
+   "teams": {
+    "player": 1,
+    "enemy": 6
+   },
+   "projectiles": 0,
+   "boats": 1,
+   "spawnersAwake": 0,
+   "particles": 28,
+   "effects": 0,
+   "trails": 1,
+   "numbers": 0,
+   "emitters": 84,
+   "sceneChildren": 2794,
+   "geometries": 2317,
+   "textures": 67,
+   "programs": 69,
+   "navTiles": 143,
+   "kills": 23,
+   "killTypes": {
+    "scuttler": 2,
+    "brigand": 11,
+    "brigand_brute": 3,
+    "brigand_cutthroat": 4,
+    "gloomowl": 3
+   },
+   "casts": 56,
+   "sailedM": 4890,
+   "liveHeapMB": 533,
+   "v8UsedMB": 125,
+   "v8WithTilesMB": 127.58,
+   "v8UsedExactMB": 125.36,
+   "tilesKB": 2275.2,
+   "domNodes": 453,
+   "jsListeners": 40,
+   "load": 4.9,
+   "errors": 0,
+   "heap": {
+    "sites": [
+     [
+      "set (native):0",
+      3.91
+     ],
+     [
+      "fill /src/world/weather.js:34",
+      2.38
+     ],
+     [
+      "(anonymous) /src/game/game.js:962",
+      0.95
+     ],
+     [
+      "createBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9299",
+      0.69
+     ],
+     [
+      "getBindingState /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9280",
+      0.57
+     ],
+     [
+      "update /src/world/weather.js:93",
+      0.45
+     ],
+     [
+      "createBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8190",
+      0.34
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10968",
+      0.3
+     ],
+     [
+      "setup /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9251",
+      0.28
+     ],
+     [
+      "updateMatrix /src/core/sceneMatrices.js:11",
+      0.22
+     ],
+     [
+      "saveCache /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9345",
+      0.22
+     ],
+     [
+      "projectObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17794",
+      0.18
+     ],
+     [
+      "updateShown /src/core/sceneMatrices.js:32",
+      0.16
+     ],
+     [
+      "seqWithValue /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11689",
+      0.13
+     ],
+     [
+      "addEventListener /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:202",
+      0.13
+     ],
+     [
+      "(IDLE_EXTERNAL) (native):0",
+      0.12
+     ],
+     [
+      "WebGLRenderer.renderBufferDirect /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17515",
+      0.11
+     ],
+     [
+      "intersectsObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8105",
+      0.1
+     ],
+     [
+      "update /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8279",
+      0.1
+     ],
+     [
+      "_BoxGeometry /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:7291",
+      0.09
+     ],
+     [
+      "topAt /src/world/colliders.js:121",
+      0.09
+     ],
+     [
+      "setValueV3f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11109",
+      0.07
+     ],
+     [
+      "setValueV1f /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11089",
+      0.06
+     ],
+     [
+      "_Object3D /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4469",
+      0.06
+     ],
+     [
+      "add (native):0",
+      0.06
+     ],
+     [
+      "has /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:10650",
+      0.03
+     ],
+     [
+      "world.sky.update /src/world/rift.js:132",
+      0.03
+     ],
+     [
+      "getParameters /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:12426",
+      0.03
+     ],
+     [
+      "renderObject /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:17944",
+      0.03
+     ],
+     [
+      "setValueM4 /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:11175",
+      0.03
+     ],
+     [
+      "updateBuffer /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:8230",
+      0.03
+     ],
+     [
+      "markReflective /src/world/water.js:334",
+      0.03
+     ],
+     [
+      "push /src/game/travel.js:90",
+      0.03
+     ],
+     [
+      "enable /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:4431",
+      0.03
+     ],
+     [
+      "bot (native):232",
+      0.03
+     ],
+     [
+      "Boat /src/entities/boat.js:111",
+      0.03
+     ],
+     [
+      "survival /src/entities/player.js:1277",
+      0.03
+     ],
+     [
+      "Enemy /src/entities/enemy.js:25",
+      0.03
+     ],
+     [
+      "setMode /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:9575",
+      0.03
+     ],
+     [
+      "copy /@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js:1559",
+      0.03
+     ]
+    ],
+    "files": [
+     [
+      "(native)",
+      4.16
+     ],
+     [
+      "/@fs/Users/abhishekpallepati/Downloads/unstable/node_modules/.vite-perf-a/deps/chunk-LP2A4JWZ.js",
+      4.02
+     ],
+     [
+      "/src/world/weather.js",
+      2.82
+     ],
+     [
+      "/src/game/game.js",
+      0.95
+     ],
+     [
+      "/src/core/sceneMatrices.js",
+      0.38
+     ],
+     [
+      "/src/entities/enemy.js",
+      0.09
+     ],
+     [
+      "/src/world/colliders.js",
+      0.09
+     ],
+     [
+      "/src/world/rift.js",
+      0.03
+     ],
+     [
+      "/src/world/water.js",
+      0.03
+     ],
+     [
+      "/src/game/travel.js",
+      0.03
+     ],
+     [
+      "/src/entities/boat.js",
+      0.03
+     ],
+     [
+      "/src/entities/player.js",
+      0.03
+     ],
+     [
+      "/src/world/atmosphere.js",
+      0.03
+     ],
+     [
+      "/src/entities/nav.js",
+      0.03
+     ],
+     [
+      "/src/entities/npc.js",
+      0.03
+     ],
+     [
+      "/src/game/events.js",
+      0.03
+     ],
+     [
+      "/src/world/wildlife.js",
+      0.03
+     ],
+     [
+      "/src/game/warmup.js",
+      0.03
+     ]
+    ],
+    "totalMB": 12.87
+   }
+  }
+ ],
+ "hitches": [
+  {
+   "sample": 2,
+   "t": 350.7,
+   "ms": 66.6,
+   "phase": "sail",
+   "inRift": false,
+   "transitioning": false,
+   "actors": 11,
+   "sinceTeleport": 0.1
+  },
+  {
+   "sample": 5,
+   "t": 1353.9,
+   "ms": 50.1,
+   "phase": "rift",
+   "inRift": true,
+   "transitioning": false,
+   "actors": 27,
+   "sinceTeleport": 122.7
+  },
+  {
+   "sample": 5,
+   "t": 1355.2,
+   "ms": 66.7,
+   "phase": "rift",
+   "inRift": true,
+   "transitioning": false,
+   "actors": 27,
+   "sinceTeleport": 124
+  },
+  {
+   "sample": 5,
+   "t": 1380.5,
+   "ms": 66.7,
+   "phase": "rift",
+   "inRift": true,
+   "transitioning": false,
+   "actors": 26,
+   "sinceTeleport": 149.3
+  }
+ ],
+ "events": [
+  {
+   "sample": 0,
+   "t": 8.8,
+   "simT": 0,
+   "phase": "wander",
+   "what": "phase wander"
+  },
+  {
+   "sample": 1,
+   "t": 89.9,
+   "simT": 80.6,
+   "phase": "wander",
+   "what": "unstuck: teleported to its goal"
+  },
+  {
+   "sample": 1,
+   "t": 159.2,
+   "simT": 150,
+   "phase": "fight",
+   "what": "camp scuttler at 130, 70"
+  },
+  {
+   "sample": 1,
+   "t": 159.2,
+   "simT": 150,
+   "phase": "fight",
+   "what": "phase fight"
+  },
+  {
+   "sample": 1,
+   "t": 217.5,
+   "simT": 203.9,
+   "phase": "fight",
+   "what": "unstuck: teleported to its goal"
+  },
+  {
+   "sample": 1,
+   "t": 224.4,
+   "simT": 210.7,
+   "phase": "fight",
+   "what": "camp cleared or empty; next camp brigand"
+  },
+  {
+   "sample": 1,
+   "t": 251.6,
+   "simT": 236.2,
+   "phase": "fight",
+   "what": "camp cleared or empty; next camp brigand"
+  },
+  {
+   "sample": 2,
+   "t": 350.7,
+   "simT": 330,
+   "phase": "sail",
+   "what": "sail dock_salt -> dock_meridian (2 waypoints)"
+  },
+  {
+   "sample": 2,
+   "t": 350.7,
+   "simT": 330,
+   "phase": "sail",
+   "what": "phase sail"
+  },
+  {
+   "sample": 2,
+   "t": 387.5,
+   "simT": 366.8,
+   "phase": "sail",
+   "what": "boat wedged: turned and re-planned"
+  },
+  {
+   "sample": 2,
+   "t": 530.7,
+   "simT": 510,
+   "phase": "sail",
+   "what": "left the boat after 2379 m sailed in all"
+  },
+  {
+   "sample": 2,
+   "t": 530.7,
+   "simT": 510,
+   "phase": "rift",
+   "what": "phase rift"
+  },
+  {
+   "sample": 3,
+   "t": 710.7,
+   "simT": 690.1,
+   "phase": "wander",
+   "what": "phase wander"
+  },
+  {
+   "sample": 3,
+   "t": 797.8,
+   "simT": 777.1,
+   "phase": "wander",
+   "what": "unstuck: teleported to its goal"
+  },
+  {
+   "sample": 3,
+   "t": 860.7,
+   "simT": 840.1,
+   "phase": "fight",
+   "what": "camp brigand_brute at 1365, 115"
+  },
+  {
+   "sample": 3,
+   "t": 860.7,
+   "simT": 840.1,
+   "phase": "fight",
+   "what": "phase fight"
+  },
+  {
+   "sample": 4,
+   "t": 977.3,
+   "simT": 949.8,
+   "phase": "fight",
+   "what": "unstuck: teleported to its goal"
+  },
+  {
+   "sample": 4,
+   "t": 984.8,
+   "simT": 957.3,
+   "phase": "fight",
+   "what": "camp cleared or empty; next camp brigand_cutthroat"
+  },
+  {
+   "sample": 4,
+   "t": 1051.2,
+   "simT": 1020.1,
+   "phase": "sail",
+   "what": "sail dock_meridian -> dock_thorn (2 waypoints)"
+  },
+  {
+   "sample": 4,
+   "t": 1051.2,
+   "simT": 1020.1,
+   "phase": "sail",
+   "what": "phase sail"
+  },
+  {
+   "sample": 5,
+   "t": 1231.2,
+   "simT": 1200.1,
+   "phase": "sail",
+   "what": "left the boat after 4890 m sailed in all"
+  },
+  {
+   "sample": 5,
+   "t": 1231.2,
+   "simT": 1200.1,
+   "phase": "rift",
+   "what": "phase rift"
+  },
+  {
+   "sample": 5,
+   "t": 1411.2,
+   "simT": 1380.1,
+   "phase": "wander",
+   "what": "phase wander"
+  },
+  {
+   "sample": 6,
+   "t": 1539.7,
+   "simT": 1508.6,
+   "phase": "wander",
+   "what": "unstuck: teleported to its goal"
+  },
+  {
+   "sample": 6,
+   "t": 1561.3,
+   "simT": 1530.1,
+   "phase": "fight",
+   "what": "camp brigand at 1280, 190"
+  },
+  {
+   "sample": 6,
+   "t": 1561.3,
+   "simT": 1530.1,
+   "phase": "fight",
+   "what": "phase fight"
+  },
+  {
+   "sample": 6,
+   "t": 1608.9,
+   "simT": 1575.7,
+   "phase": "fight",
+   "what": "camp cleared or empty; next camp gloomowl"
+  },
+  {
+   "sample": 6,
+   "t": 1670.2,
+   "simT": 1633.1,
+   "phase": "fight",
+   "what": "camp cleared or empty; next camp gloomowl"
+  },
+  {
+   "sample": 6,
+   "t": 1714.5,
+   "simT": 1675.3,
+   "phase": "fight",
+   "what": "could not reach brigand_brute: teleported beside it"
+  },
+  {
+   "sample": 6,
+   "t": 1752.3,
+   "simT": 1710.1,
+   "phase": "sail",
+   "what": "sail dock_thorn -> dock_frost (2 waypoints)"
+  },
+  {
+   "sample": 6,
+   "t": 1752.3,
+   "simT": 1710.1,
+   "phase": "sail",
+   "what": "phase sail"
+  }
+ ],
+ "errors": [
+  {
+   "at": 1792137012969,
+   "msg": "tool: page.waitForTimeout: Target page, context or browser has been closed"
+  }
+ ],
+ "bootS": 8.739,
+ "camps": 98,
+ "ended": "2026-10-16T07:50:12.969Z"
+}

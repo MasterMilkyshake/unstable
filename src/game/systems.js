@@ -1,0 +1,39 @@
+// Entry point for self-contained gameplay systems (owned by the content session).
+// Import each system module here; at import time they register with ./hooks.js
+// (MOD_PROVIDERS / UPDATE_HOOKS / START_HOOKS / KILL_HOOKS / ACTIONS).
+import './killwatch.js';
+import './gear.js';
+import './loot.js';
+import './bank.js';
+import './legacy.js';
+import './tips.js';
+import './captions.js';
+import './order.js';
+import './fishing.js';
+import './journal.js';
+import './exploration.js';
+import './conditions.js';
+import './vowpowers.js';
+import './talentpowers.js';
+import './arena.js';
+import './events.js';
+import './dungeons.js';
+import './bells.js';
+import './hightoll.js';
+import './ziplines.js';
+import './temper.js';
+import './markers.js';
+import './sparks.js';
+import './resonance.js';
+import './travel.js';
+import './riftfall.js';
+import './riftResearch.js';
+import './riftSpire.js';
+import './ascentLifts.js';
+import './riftFooting.js';
+import '../world/weather.js';
+import './realm.js';
+import './story.js';
+import '../ui/hotkeys.js';
+import '../ui/worldmap.js';
+export {};

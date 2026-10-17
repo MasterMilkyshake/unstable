@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unstable</title>
+    <meta name="description" content="Unstable — a hardcore souls-like RPG of shattered islands, parries, mantras and exploration." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0c10'/%3E%3Cpath d='M32 6 L52 32 L32 58 L12 32 Z' fill='none' stroke='%23d6c496' stroke-width='4'/%3E%3Cpath d='M32 18 L40 32 L32 46 L24 32 Z' fill='%23a274ff'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="dmg-layer"></div>
+    <div id="world-ui"></div>
+    <div id="vignette">
+      <div class="v dmg"></div>
+      <div class="v low"></div>
+      <div class="v sanity"></div>
+      <div class="v blind"></div>
+      <div class="v knock"></div>
+    </div>
+    <div id="hud" class="veiled"></div>
+    <div id="screens"></div>
+    <div id="fade"></div>
+    <div id="loading" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;color:#d6c496;font-family:Cinzel,Georgia,serif;letter-spacing:.4em;font-size:22px;z-index:100">SHAPING THE ISLES</div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

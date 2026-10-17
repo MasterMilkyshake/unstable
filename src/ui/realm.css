@@ -1,0 +1,12 @@
+/* Story, standing and faction UI (game/story.js, game/factions.js, ui/journalContent.js). */
+#wanted { margin-top: 6px; color: #ffb35a; font-size: 12px; letter-spacing: 0.22em; text-shadow: 0 0 10px rgba(255, 140, 40, 0.6); }
+.act-title { font-family: var(--display); color: var(--gold-2); letter-spacing: 0.14em; font-size: 15px; margin: 18px 0 6px; border-bottom: 1px solid rgba(214, 196, 150, 0.25); padding-bottom: 4px; }
+.story-steps { list-style: none; margin: 6px 0 8px; padding: 0; }
+.story-steps li { color: var(--muted); padding: 2px 0; font-size: 15px; }
+.story-steps li.found { color: #b9b19b; }
+.story-steps li.now { color: var(--gold-2); }
+.pill.gold { color: var(--gold-2); border-color: rgba(214, 196, 150, 0.6); }
+.pill.bad { color: #ff8a7a; border-color: rgba(255, 120, 100, 0.5); }
+.standing-bar { position: relative; height: 8px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.12); margin: 6px 0 8px; overflow: hidden; }
+.standing-bar > i { position: absolute; left: 0; top: 0; bottom: 0; opacity: 0.85; }
+.standing-bar::after { content: ''; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: rgba(255, 255, 255, 0.35); }

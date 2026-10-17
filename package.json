@@ -1,0 +1,24 @@
+{
+  "name": "unstable",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Unstable - a hardcore souls-like RPG of shattered islands",
+  "scripts": {
+    "dev": "vite --open",
+    "lan": "vite --host --open",
+    "build": "vite build",
+    "preview": "vite preview --open",
+    "lan:prod": "vite build && vite preview --host --open",
+    "tunnel": "cloudflared tunnel --url http://localhost:5173",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.0",
+    "vite": "^6.0.0",
+    "ws": "^8.22.0"
+  }
+}
