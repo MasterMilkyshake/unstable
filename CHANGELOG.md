@@ -4,6 +4,11 @@ What changed for players, newest first.
 
 ## Unreleased
 
+### Traits by the fire
+- **Traits are assigned at a campfire**, like attribute points: sit by a fire and use the Attributes tab, where the four traits now sit beside your attributes. Sitting down tells you when trait points wait.
+- **Trinkets are worn from the backpack**, anywhere, alongside weapons and outfits.
+- **`K` no longer opens Gear & Traits**: the panel is gone, and the key is unbound.
+
 ### Big beasts
 - **Sharkos**: pale, hunched walkers three times a person's height that roam open country in pairs, in the meadows short of Shimmerfen, Thornwood's far uplands, Meridian's lowland, the woods under the Ashen Spire, Frosthollow's snow and the Verdance. Nothing staggers one. Parry its rakes, roll its kick (orange) and step aside from its charge (red); its roar breaks posture. Drops Sharko Teeth and meat.
 - **The great owls, rebuilt**: gloomowls, thunderwings and Old Hookbeak are now hunched, near-black birds three times a person's height, with a pale heart-shaped face, lamp eyes, horn tufts and ragged wings they open wide to dive or screech. **They hunt alone**: every owl nest holds one, much stronger than before (gloomowl level 7, 480 health), and each drops two or three feathers. The Enclave's owl contract asks for the one.

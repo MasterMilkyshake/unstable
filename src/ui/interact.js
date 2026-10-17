@@ -301,13 +301,13 @@ export function openCampfire(ui, it) {
   growthAtRest(ui);
 }
 
-// Sitting by a fire is where you invest your points, as in Deepwoken (the systems session's
+// Sitting by a fire is where you invest your points and assign trait points, as in Deepwoken (the systems session's
 // ACTIONS.readyToRise and openRest; this does nothing in a build without them). Talent and mantra
 // cards are chosen anywhere, and an inn only sets where you wake. A Power that waits opens at
 // once; points that wait are named.
 export function growthAtRest(ui) {
   const w = ACTIONS.readyToRise && ACTIONS.readyToRise();
-  if (!w || !(w.rise || w.points > 0)) return false;
+  if (!w || !(w.rise || w.points > 0 || w.traits > 0)) return false;
   if (w.rise && ACTIONS.openRest) return !!ACTIONS.openRest(ui);
   ui.toast(keyText('Your growth waits: {menu} to invest while you sit here.'), 'good');
   return true;

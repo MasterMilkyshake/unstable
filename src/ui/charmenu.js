@@ -10,6 +10,7 @@ import { QUESTS } from '../data/quests.js';
 import { renderBackpack, backpackClick, bindBackpack } from './backpack.js';
 import { shuffle, escapeHtml } from '../core/util.js';
 import { ACTIONS } from '../game/hooks.js';
+import { traitFree, traitsHtml, assignTrait } from '../game/gear.js';
 
 const TABS = [
   ['attrs', 'Attributes'],
@@ -25,7 +26,7 @@ export function open(ui, tab) {
   if (tab) state.tab = tab;
   else {
     const ch = G.player.ch;
-    if (ch.points > 0) state.tab = 'attrs';
+    if (ch.points > 0 || traitFree(ch) > 0) state.tab = 'attrs';
     else if (ch.talentPicks > 0) state.tab = 'talents';
     else if (ch.mantraPicks > 0 && eligibleMantras(ch).length) state.tab = 'mantras';
   }
@@ -37,8 +38,8 @@ export function open(ui, tab) {
   render();
 }
 
-// Points are invested only while resting at a campfire (Player.resting), as in Deepwoken; away from
-// one the Attributes tab shows everything and holds the points. Talent and mantra cards are chosen anywhere.
+// Points and trait points are invested only while resting at a campfire (Player.resting), as in
+// Deepwoken; away from one the Attributes tab shows everything and holds the points. Talent and mantra cards are chosen anywhere.
 const REST_NOTE = 'Rest at a campfire to invest your points.';
 const restNote = (p) => (p.resting() ? '' : `<div class="muted rest-note" style="margin:0 0 10px">${REST_NOTE}</div>`);
 
@@ -46,7 +47,7 @@ const restNote = (p) => (p.resting() ? '' : `<div class="muted rest-note" style=
 ACTIONS.readyToRise = () => {
   const ch = G.player && G.player.ch;
   if (!ch) return null;
-  return { points: ch.points, talentPicks: ch.talentPicks, mantraPicks: ch.mantraPicks, rise: (ch.earned || 0) >= POINTS_PER_LEVEL && ch.level < MAX_LEVEL };
+  return { points: ch.points, traits: traitFree(ch), talentPicks: ch.talentPicks, mantraPicks: ch.mantraPicks, rise: (ch.earned || 0) >= POINTS_PER_LEVEL && ch.level < MAX_LEVEL };
 };
 // At a campfire (the player already sitting by it), open the menu on whatever waits: points, then
 // talent, then mantra cards. Returns false if nothing waits or the player is not resting at a fire.
@@ -54,7 +55,7 @@ ACTIONS.openRest = (ui) => {
   const p = G.player;
   const r = ACTIONS.readyToRise();
   if (!p || !r || !p.resting()) return false;
-  const tab = r.points > 0 ? 'attrs' : r.talentPicks > 0 ? 'talents' : r.mantraPicks > 0 && eligibleMantras(p.ch).length ? 'mantras' : null;
+  const tab = r.points > 0 || r.traits > 0 ? 'attrs' : r.talentPicks > 0 ? 'talents' : r.mantraPicks > 0 && eligibleMantras(p.ch).length ? 'mantras' : null;
   if (!tab) return false;
   open(ui, tab);
   return true;
@@ -101,7 +102,7 @@ function renderAll(ui, el) {
   const p = G.player;
   const ch = p.ch;
   const badges = {
-    attrs: ch.points,
+    attrs: ch.points + traitFree(ch),
     talents: ch.talentPicks,
     mantras: eligibleMantras(ch).length ? ch.mantraPicks : 0,
   };
@@ -142,7 +143,7 @@ function renderAttrs(p, ch) {
   const d = p.derived;
   const res = (el) => Math.round((p.resist[el] || 0) * 100) + '%';
   const race = RACE_BY_ID[ch.race];
-  return `${ch.points > 0 ? restNote(p) : ''}
+  return `${ch.points > 0 || traitFree(ch) > 0 ? restNote(p) : ''}
     <div class="row-flex" style="margin-bottom:12px">
       <div><span style="font-family:var(--display);font-size:22px;color:var(--gold-2)">${escapeHtml(ch.name)}</span>
       <span class="muted"> · ${race.name} · Power ${ch.level}${ch.vow ? ' · ' + VOWS[ch.vow].name : ''}</span></div>
@@ -156,6 +157,7 @@ function renderAttrs(p, ch) {
       <div class="attr-col"><h3>BASE</h3>${BASE_ATTRS.map(row).join('')}<h3>WEAPON</h3>${WEAPON_ATTRS.map(row).join('')}</div>
       <div class="attr-col"><h3>ATTUNEMENT ${ch.manaUnlocked ? `<span class="muted">(${attuneTotal}/${ATTUNE_TOTAL_CAP})</span>` : '<span class="muted">— locked</span>'}</h3>${ATTUNE_ATTRS.map(row).join('')}
         ${ch.manaUnlocked ? '' : '<div class="muted" style="font-size:14px;margin-top:6px">Speak with Sage Ilvar in Saltreach (Power 2) to awaken your attunement.</div>'}
+        ${traitsHtml(ch, p.resting())}
       </div>
       <div class="attr-col"><h3>DERIVED</h3>
         <div class="stat-list">
@@ -302,6 +304,16 @@ function onClick(ui, el, e, render) {
       state.pending[k] = (state.pending[k] || 0) + 1;
     }
     G.audio.play('ui', { pitch: 1.3 });
+    return render();
+  }
+  const tr = t.closest('[data-trait]');
+  if (tr) {
+    if (!assignTrait(p, tr.dataset.trait)) {
+      if (!p.resting()) ui.toast(REST_NOTE, 'bad');
+      return render();
+    }
+    G.audio.play('levelup', { vol: 0.4 });
+    G.game.save();
     return render();
   }
   const dec = t.closest('[data-dec]');

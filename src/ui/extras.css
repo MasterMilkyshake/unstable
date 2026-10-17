@@ -6,18 +6,9 @@
 .xpanel .bad { color: #ff7a6a; }
 .xpanel .good { color: #8fe08f; }
 
-.trait-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 10px 12px; margin-bottom: 8px; border: 1px solid rgba(214, 196, 150, 0.18); background: rgba(255, 255, 255, 0.03); }
-.trait-row .tn { font-family: var(--display); font-size: 16px; letter-spacing: 0.06em; }
-.trait-row .td { font-size: 14px; color: var(--muted, #a8a092); }
 .trait-pips { display: flex; gap: 4px; align-items: center; }
 .trait-pips i { width: 14px; height: 14px; border: 1px solid var(--gold, #d6c496); transform: rotate(45deg); display: inline-block; margin: 0 3px; }
 .trait-pips i.on { background: var(--gold, #d6c496); box-shadow: 0 0 8px rgba(214, 196, 150, 0.6); }
-
-.gear-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px; }
-.gear-slot { border: 1px solid rgba(214, 196, 150, 0.25); padding: 10px; min-height: 92px; background: rgba(0, 0, 0, 0.25); }
-.gear-slot .sl { font-family: var(--display); font-size: 11px; letter-spacing: 0.14em; color: var(--muted, #a8a092); }
-.gear-slot .gn { font-family: var(--display); font-size: 15px; margin: 4px 0; }
-.gear-slot .gd { font-size: 13px; color: var(--muted, #a8a092); }
 
 .lore-entry { padding: 10px 12px; margin-bottom: 8px; border-left: 2px solid var(--gold, #d6c496); background: rgba(255, 255, 255, 0.03); }
 .lore-entry .lt { font-family: var(--display); font-size: 15px; color: var(--gold-2, #f1e3b5); }

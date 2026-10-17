@@ -7,6 +7,7 @@ import { ITEMS } from '../data/items.js';
 import { RARITY_COLORS } from '../data/weapons.js';
 import { ELEMENTS, meetsReqs, reqsText } from '../data/stats.js';
 import { escapeHtml, uid } from '../core/util.js';
+import { keyText } from '../core/input.js';
 import { openPanel } from '../ui/panel.js';
 
 const MOD_LABELS = {
@@ -123,7 +124,7 @@ export function giveTrinket(game, id, silent = false, pips = 0) {
   if (pips > 0) t.pips = rollPips(pips);
   ch.trinkets.push(t);
   if (!silent) {
-    G.ui.toast(`+ ${trinketName(t)} — wear it from Gear & Traits [K]`, 'loot');
+    G.ui.toast(keyText(`+ ${trinketName(t)}: wear it from your backpack {backpack}`), 'loot');
     G.audio.play('chest', { vol: 0.5 });
   }
   return t;
@@ -152,7 +153,7 @@ START_HOOKS.push((game, ch, isNew) => {
   lastLevel = ch.level;
   if (traitFree(ch) > 0) {
     setTimeout(() => {
-      if (game.ch === ch && game.state === 'playing') G.ui.toast(isNew ? 'Choose your Traits: press [K]' : `You have ${traitFree(ch)} unspent trait point${traitFree(ch) > 1 ? 's' : ''} [K]`, 'quest');
+      if (game.ch === ch && game.state === 'playing') G.ui.toast(isNew ? 'Choose your Traits by a campfire: sit by one and open the Attributes tab.' : `You have ${traitFree(ch)} unspent trait point${traitFree(ch) > 1 ? 's' : ''}: assign them by a campfire.`, 'quest');
     }, isNew ? 9000 : 3000);
   }
 });
@@ -162,71 +163,33 @@ UPDATE_HOOKS.push((game) => {
   if (ch.level !== lastLevel) {
     const before = traitPoints(lastLevel);
     lastLevel = ch.level;
-    if (traitPoints(ch.level) > before) G.ui.toast('A new Trait point is available [K]', 'quest');
+    if (traitPoints(ch.level) > before) G.ui.toast('A new Trait point waits: assign it by a campfire.', 'quest');
   }
 });
 
-// ---------------------------------------------------------------- panel
-function trinketCard(ch, t, opts = {}) {
-  const d = TRINKETS[t.id];
-  const ok = meetsReqs(d.reqs, ch.attrs);
-  const worn = ch.gear[d.slot] === t.uid;
-  const pips = t.pips && t.pips.length ? `<div class="ds gold">✦ ${modsText(pipMods(t))}</div>` : '';
-  return `<div class="shop-row"><div class="ico">${TRINKET_SLOTS[d.slot].icon}</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(trinketName(t))} <span class="pill">${TRINKET_SLOTS[d.slot].name}</span></div>
-    <div class="ds">${modsText(d.mods)}${d.reqs ? ` · <span class="${ok ? '' : 'bad'}">req ${reqsText(d.reqs)}</span>` : ''}</div>${pips}<div class="ds"><i>${escapeHtml(d.desc)}</i></div></div>
-    ${opts.noButtons ? '' : worn ? `<button class="btn small" data-unequip="${d.slot}">Remove</button>` : `<button class="btn small primary" data-wear="${t.uid}" ${ok ? '' : 'disabled title="Requirements not met"'}>Wear</button>`}</div>`;
+// ---------------------------------------------------------------- traits at rest
+// Traits are assigned as attribute points are invested: only while resting at a campfire
+// (Player.resting). The character menu's Attributes tab shows them (traitsHtml) and assigns them
+// (assignTrait). Trinkets are worn from the backpack (ui/backpack.js), anywhere.
+export function assignTrait(player, key) {
+  const ch = ensure(player.ch);
+  if (!TRAITS[key] || !player.resting() || traitFree(ch) <= 0 || (ch.traits[key] || 0) >= TRAIT_MAX) return false;
+  ch.traits[key] = (ch.traits[key] || 0) + 1;
+  player.recompute();
+  return true;
 }
-
-export function openGearPanel(ui, tab = 'gear') {
-  const game = ui.game;
-  const ch = ensure(game.ch);
-  const p = G.player;
-  let state = { tab };
-  const render = () => {
-    const free = traitFree(ch);
-    const tabs = `<div class="tabs-x"><button class="btn small ${state.tab === 'gear' ? 'primary' : ''}" data-tab="gear">Trinkets</button><button class="btn small ${state.tab === 'traits' ? 'primary' : ''}" data-tab="traits">Traits${free > 0 ? ` <span class="pill">${free}</span>` : ''}</button></div>`;
-    let body = '';
-    if (state.tab === 'traits') {
-      body = `<p class="muted" style="margin-top:0">Traits are innate talents of body and spirit. You gain points at creation and at Power 5, 10, 15 and 20 (max ${TRAIT_MAX} each). They can be reassigned at the Shrine of Order.</p>
-        <div class="pill" style="margin-bottom:10px">${free} point${free === 1 ? '' : 's'} to assign · ${traitSpent(ch)}/${traitPoints(ch.level)} spent</div>
-        ${Object.entries(TRAITS).map(([k, t]) => {
-          const n = ch.traits[k] || 0;
-          return `<div class="trait-row"><div><div class="tn" style="color:${t.color}">${t.name}</div><div class="td">${t.desc}</div>${n ? `<div class="td good">Now: ${modsText(Object.fromEntries(Object.entries(t.per).map(([a, b]) => [a, +(b * n).toFixed(3)])))}</div>` : ''}</div>
-            <div class="trait-pips">${Array.from({ length: TRAIT_MAX }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}<button class="btn small" data-trait="${k}" ${free > 0 && n < TRAIT_MAX ? '' : 'disabled'}>+</button></div></div>`;
-        }).join('')}`;
-    } else {
-      const slots = Object.entries(TRINKET_SLOTS).map(([s, def]) => {
-        const t = ch.trinkets.find((x) => x.uid === ch.gear[s]);
-        const d = t && TRINKETS[t.id];
-        return `<div class="gear-slot"><div class="sl">${def.icon} ${def.name.toUpperCase()}</div>${d ? `<div class="gn" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(trinketName(t))}</div><div class="gd">${modsText(d.mods)}</div>${t.pips && t.pips.length ? `<div class="gd gold">✦ ${modsText(pipMods(t))}</div>` : ''}` : '<div class="gd" style="margin-top:8px">Empty</div>'}</div>`;
-      }).join('');
-      const owned = ch.trinkets.length ? ch.trinkets.map((t) => trinketCard(ch, t)).join('') : '<div class="muted">You own no trinkets. Corwin the jeweler in Saltreach sells them, and great foes sometimes carry them.</div>';
-      body = `<div class="gear-slots">${slots}</div><h3>OWNED</h3><div class="shop-list scroll">${owned}</div>`;
-    }
-    return `<h2>GEAR &amp; TRAITS</h2>${tabs}${body}<div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px"><kbd>K</kbd> to close</span><span class="space"></span><button class="btn" data-a="close">Close</button></div>`;
-  };
-  openPanel(ui, 'gear', {
-    width: 760,
-    render,
-    onClick: (e, rerender) => {
-      const tb = e.target.closest('[data-tab]');
-      if (tb) state.tab = tb.dataset.tab;
-      const tr = e.target.closest('[data-trait]');
-      if (tr && traitFree(ch) > 0 && (ch.traits[tr.dataset.trait] || 0) < TRAIT_MAX) {
-        ch.traits[tr.dataset.trait]++;
-        p.recompute();
-        G.audio.play('levelup', { vol: 0.4 });
-        game.save();
-      }
-      const w = e.target.closest('[data-wear]');
-      if (w) wearTrinket(game, w.dataset.wear);
-      const u = e.target.closest('[data-unequip]');
-      if (u) takeOffTrinket(game, u.dataset.unequip);
-      rerender();
-    },
-  });
+export function traitsHtml(ch, resting) {
+  ensure(ch);
+  const free = traitFree(ch);
+  const rows = Object.entries(TRAITS).map(([k, t]) => {
+    const n = ch.traits[k] || 0;
+    const now = n ? ` Now: ${modsText(Object.fromEntries(Object.entries(t.per).map(([a, b]) => [a, +(b * n).toFixed(3)])))}.` : '';
+    const pips = Array.from({ length: TRAIT_MAX }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
+    return `<div class="attr trait" title="${escapeHtml(t.desc + now)}"><span class="pip" style="background:${t.color}"></span><span class="an">${t.name}</span><span class="trait-pips">${pips}</span>
+      <button class="btn small" data-trait="${k}" ${free > 0 && n < TRAIT_MAX && resting ? '' : 'disabled'}>+</button></div>`;
+  }).join('');
+  return `<h3 style="margin-top:16px">TRAITS ${free > 0 ? `<span class="muted">(${free} to assign)</span>` : ''}</h3>${rows}`;
 }
-ACTIONS.openGear = (ui, tab) => openGearPanel(ui || G.ui, tab);
 
 // ---------------------------------------------------------------- jeweler
 export function openJeweler(ui) {
@@ -262,7 +225,7 @@ export function openJeweler(ui) {
       if (!rows) rows = '<div class="muted">Nothing to sell. (Worn trinkets cannot be sold.)</div>';
     }
     return `<h2>CORWIN'S CURIOS</h2><div class="row-flex" style="margin-bottom:10px"><button class="btn small ${mode === 'buy' ? 'primary' : ''}" data-mode="buy">Buy</button><button class="btn small ${mode === 'sell' ? 'primary' : ''}" data-mode="sell">Sell</button><span class="space"></span><span style="font-family:var(--display)">${ch.silver} silver</span></div>
-      <div class="shop-list scroll">${rows}</div><div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px">Wear trinkets from Gear &amp; Traits <kbd>K</kbd>.</span><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`;
+      <div class="shop-list scroll">${rows}</div><div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px">${keyText('Wear trinkets from your backpack {backpack}.', (k) => `<kbd>${k}</kbd>`)}</span><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`;
   };
   openPanel(ui, 'jeweler', {
     width: 780,

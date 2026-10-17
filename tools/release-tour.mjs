@@ -82,7 +82,7 @@ const key = (page, code) => page.evaluate((code) => {
     g.ch.armed = true;
   });
   const menus = async () => {
-    for (const code of ['Tab', 'Backquote', 'KeyM', 'KeyJ', 'KeyK']) {
+    for (const code of ['Tab', 'Backquote', 'KeyM', 'KeyJ']) {
       await key(page, code);
       await page.waitForTimeout(350);
       const opened = await page.evaluate(() => window.__unstable.ui.modal && window.__unstable.ui.modal.id);

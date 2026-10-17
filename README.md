@@ -58,7 +58,6 @@ Each player needs their own browser profile or computer, because saves live in t
 | `Tab` | Character: attributes and investment, talents, mantras, the backpack, quests. |
 | `` ` `` | Backpack: everything you carry and the mantras you know, as tiles; drag supplies and mantras onto the hotbar. |
 | `M` | Map. |
-| `K` | Gear & Traits. |
 | `J` | Journal: the story, standing, the Atlas, sources, investigations, the Guide. |
 | `Z` | Resonance ability (from Power 15, once attuned at the Vowkeeper). |
 | `Esc` | Pause, and release the mouse. |
@@ -126,7 +125,7 @@ Keys can't be rebound. **How to Play** in the menu lists the same controls.
 - Characters begin with 3 lives, spent only by quitting or reloading while in **danger**; losing the last also ends the character. An Ember of Life restores one lost life, up to your maximum.
 
 **Progression & activities**
-- **Traits** (Vitality, Erudition, Proficiency, Songchant): points at creation and every 5 Power, assigned in Gear & Traits [K].
+- **Traits** (Vitality, Erudition, Proficiency, Songchant): points at creation and every 5 Power, assigned like attribute points while sitting by a campfire (the Attributes tab).
 - **Trinkets** in three slots (head, neck, ring). Corwin sells and forges them; great foes carry unique ones. Dropped trinkets can roll bonus "pips".
 - **Mantra Sparks:** each spark at the altar adds a star and a modifier: Potent, Swift, Thrifty, Far-Reaching, Twin, Lingering or Empowered.
 - **Bells:** slaying a great foe teaches you its rare, attunement-free mantra.

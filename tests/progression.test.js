@@ -219,8 +219,10 @@ test('the talent and mantra cards a rise brings are chosen anywhere; the campfir
   // what agent 4's campfire asks of the menu
   const { ACTIONS } = await import('../src/game/hooks.js');
   await import('../src/ui/charmenu.js');
+  const { traitFree } = await import('../src/game/gear.js');
   p.addXp(xpForLevel(2));
-  assert.deepEqual(ACTIONS.readyToRise(), { points: POINTS_PER_LEVEL, talentPicks: 0, mantraPicks: 0, rise: true });
+  // trait points wait for a campfire too (they are assigned there, like attribute points)
+  assert.deepEqual(ACTIONS.readyToRise(), { points: POINTS_PER_LEVEL, traits: traitFree(ch), talentPicks: 0, mantraPicks: 0, rise: true });
   const opened = [];
   const el = { querySelector: () => ({ innerHTML: '' }), addEventListener() {} };
   p.sitting = false;

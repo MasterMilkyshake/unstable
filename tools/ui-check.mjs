@@ -28,7 +28,6 @@ const PANELS = [
   { id: 'hud-boss', open: () => { const g = window.__unstable; const e = g.spawnEnemy('duelist', g.player.pos.clone().add({ x: 6, y: 0, z: 6 }), {}); g.startBoss(e); }, sel: '#hud' },
   { id: 'pause', open: () => window.__unstable.ui.openPause(), sel: '#pause .panel' },
   ...['attrs', 'talents', 'mantras', 'inventory', 'quests', 'vow'].map((t) => ({ id: `character-${t}`, open: new Function(`window.__unstable.ui.openCharMenu('${t}')`), sel: '#charmenu .panel' })),
-  ...['traits', 'gear'].map((t) => ({ id: `gear-${t}`, open: new Function(`return import('/src/game/hooks.js').then((h) => h.ACTIONS.openGear(window.__unstable.ui, '${t}'))`), sel: '#gear .panel' })),
   ...['story', 'standing', 'chronicle', 'atlas', 'investigations', 'lore', 'bestiary', 'records', 'guide'].map((t) => ({ id: `journal-${t}`, open: new Function(`return import('/src/game/hooks.js').then((h) => h.ACTIONS.openJournal(window.__unstable.ui, '${t}'))`), sel: '#journal .panel' })),
   { id: 'map', open: () => window.__unstable.ui.openMap(), sel: '#map .panel' },
   { id: 'shop-dorran', open: () => window.__unstable.ui.openShop('dorran'), sel: '#shop .panel, .screen .panel' },
