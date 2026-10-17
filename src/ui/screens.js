@@ -43,7 +43,6 @@ export function showMainMenu(ui) {
   const legacy = Legacy.load();
   mm.innerHTML = `
     <div class="title">UNSTABLE</div>
-    <div class="subtitle">a tale of shattered isles and the things beneath them</div>
     <div class="menu-btns">
       ${cont ? `<button class="btn primary" data-a="continue">Continue<span class="cont-info">${escapeHtml(cont.name)} · ${raceName(cont.race)} · Power ${cont.level}</span></button>` : ''}
       ${filled ? `<button class="btn" data-a="load">Load<span class="cont-info">${filled} of ${SLOT_COUNT} slots</span></button>` : ''}
