@@ -52,7 +52,7 @@ ACTIONS.openBank = (ui = G.ui) => {
     const btns = e.keep ? `<span class="muted" style="font-size:12px">${escapeHtml(e.keep)}</span>`
       : qty && e.n > one ? `<button class="btn small" data-${act}="${e.key}" data-n="${one}">${e.kind === 'silver' ? one : 1}</button><button class="btn small primary" data-${act}="${e.key}">All</button>`
         : `<button class="btn small primary" data-${act}="${e.key}">${verb}</button>`;
-    return `<div class="shop-row loot-row ${e.keep ? 'kept' : ''}"><div class="ico">${e.icon}</div><div style="flex:1;min-width:0"><div class="nm" ${e.rarity ? `style="color:${RARITY_COLORS[e.rarity]}"` : ''}>${escapeHtml(e.name)} <span class="muted">${e.kind === 'silver' ? e.n : e.n > 1 ? '×' + e.n : ''}</span></div></div>${btns}</div>`;
+    return `<div class="shop-row loot-row ${e.keep ? 'kept' : ''}"><div style="flex:1;min-width:0"><div class="nm" ${e.rarity ? `style="color:${RARITY_COLORS[e.rarity]}"` : ''}>${escapeHtml(e.name)} <span class="muted">${e.kind === 'silver' ? e.n : e.n > 1 ? '×' + e.n : ''}</span></div></div>${btns}</div>`;
   };
   const render = () => {
     const mine = carried(ch);

@@ -2,6 +2,8 @@ import { WORLD_LAYOUT } from '../data/worldPlacement.js';
 // Game orchestrator: rendering, camera, game states, spawning, interaction,
 // death/Rift flow, travel, saving and the main loop.
 import * as THREE from 'three';
+import { paid } from '../data/loot.js';
+import { installLogDepth } from '../core/logDepth.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -34,12 +36,14 @@ import { VOWS } from '../data/vows.js';
 import { newAttrs, START_POINTS, ATTRS } from '../data/stats.js';
 import { clamp, rand, randInt, chance, choice, uid, angleWrap, hypot } from '../core/util.js';
 import { bodyRadius } from '../combat/combat.js';
-import { cameraOrbit } from './cameraCollision.js';
+import { cameraOrbit, cameraClearance, easeFocus } from './cameraCollision.js';
 import { Warmup } from './warmup.js';
 import { applyStartingAttunement } from './creation.js';
 
 const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
+const _v3 = new THREE.Vector3();
+const _v4 = new THREE.Vector3();
 
 // three.js's render-list order, compared instead of subtracted: a sort comparator that
 // returns a fractional difference allocates a number on every one of thousands of calls.
@@ -83,7 +87,7 @@ export class Spawner {
     for (const pp of points) d = Math.min(d, hypot(pp.x - this.def.x, pp.z - this.def.z));
     const ch = this.game.ch;
     if (this.def.boss && ch.bossesDefeated.includes(this.def.type)) return;
-    // story-gated spawners (e.g. an occupation that only exists during one chapter)
+    // gated spawners (e.g. a foe that only appears at war, or once another has fallen)
     if (this.def.when && !this.def.when(ch)) {
       if (this.active) {
         for (const e of this.alive) if (!e.aggro) e.despawn = true;
@@ -125,8 +129,6 @@ export class Spawner {
     const [x, y, z] = spawnSpot(G.world, this.def.x + Math.cos(a) * r, this.def.z + Math.sin(a) * r, perch, this.def.y);
     const e = this.game.spawnEnemy(this.def.type, new THREE.Vector3(x, y + 0.1, z), {
       spawner: this,
-      // a camp may raise its foes to its own level (`def.level`: a high tier holds harder foes)
-      scaleTo: Math.max(this.def.level || 0, this.rift && G.player ? G.player.level : 0),
       patrol: this.def.patrol, face: this.def.face,
     });
     this.alive.push(e);
@@ -137,6 +139,21 @@ export class Spawner {
   }
 }
 
+// The framed view of someone resting at a fire: from the fire's side, a quarter turn round,
+// looking at a point between the rester's chest and the flames, pulled in short of any wall.
+const _rf = new THREE.Vector3();
+function restFrame(world, p, fire, prev) {
+  if (prev && prev.fire === fire) return prev;
+  const dx = p.pos.x - fire.x, dz = p.pos.z - fire.z, L = Math.hypot(dx, dz) || 1;
+  const ux = dx / L, uz = dz / L; // fire to rester
+  const look = new THREE.Vector3((p.pos.x + fire.x) / 2, Math.max(p.pos.y + 0.9, fire.y + 0.6), (p.pos.z + fire.z) / 2);
+  const a = 1.05; // the quarter turn, toward the rester's right
+  const vx = ux * Math.cos(a) - uz * Math.sin(a), vz = ux * Math.sin(a) + uz * Math.cos(a);
+  const dir = _rf.set(vx, 0.42, vz).normalize();
+  const dist = Math.min(4.4, cameraClearance(world, look, dir, 4.4));
+  return { fire, look, pos: look.clone().addScaledVector(dir, Math.max(1.2, dist)) };
+}
+
 export class Game {
   constructor(canvas) {
     G.game = this;
@@ -145,7 +162,15 @@ export class Game {
     this._quality = this.settings.quality;
     this.state = 'loading';
 
-    const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }));
+    // Logarithmic depth: a face 1 cm over another stays resolved out to the horizon, where a
+    // linear buffer fought (flickered) from ~250 m. Our own shaders follow it (core/logDepth.js).
+    // Settings > Graphics > "Precise depth" switches it (read here, so it applies on reload);
+    // `?logdepth=0` / `?logdepth=1` in the URL overrides the setting for that page load.
+    const ldq = typeof location !== 'undefined' ? /[?&]logdepth=([01])\b/.exec(location.search) : null;
+    const logDepth = ldq ? ldq[1] === '1' : this.settings.logDepth !== false;
+    this.logDepthActive = logDepth;
+    if (logDepth) installLogDepth();
+    const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', logarithmicDepthBuffer: logDepth }));
     r.setPixelRatio(Math.min(window.devicePixelRatio, PIXEL_RATIO[this.settings.quality] || 1.5));
     r.setSize(window.innerWidth, window.innerHeight);
     r.shadowMap.enabled = true;
@@ -158,7 +183,10 @@ export class Game {
     G.renderer = r;
 
     this.scene = G.scene = new THREE.Scene();
-    this.camera = G.camera = new THREE.PerspectiveCamera(this.settings.fov, window.innerWidth / window.innerHeight, 0.1, 5600);
+    // Near plane 0.3 m: depth precision scales with it, and at 0.1 m surfaces a few centimetres
+    // apart fought (flickered) from ~100 m out. The camera's clearance (game/cameraCollision.js)
+    // keeps geometry 0.12 m behind the lens and a 0.24 m box clear around its line of sight.
+    this.camera = G.camera = new THREE.PerspectiveCamera(this.settings.fov, window.innerWidth / window.innerHeight, 0.3, 5600);
     this.camera.position.set(0, 30, -60);
 
     this.composer = new EffectComposer(r);
@@ -433,9 +461,24 @@ export class Game {
     if (lanRole) this.net.connect(lanRole);
     if (isNew) {
       this.ui.banner('UNSTABLE');
-      setTimeout(() => this.ui.toast(keyText('Speak with Old Wren by the campfire [{interact}]'), 'quest'), 2500);
+      this.showIntro();
       this.save();
     }
+  }
+
+  // The opening: who you are and that the coast is open. One card, then the beach.
+  showIntro() {
+    const el = this.ui.openModal('intro', `<div class="panel" style="width:520px"><h2>TIDE-BORN</h2>
+      <p>The sea gave you back on the Wash, the southern beach of the Saltreach Coast, with no name and no past. It does that. People call you tide-born.</p>
+      <p>Nobody is waiting for you and nothing has to be done first. Towns to trade and train in, islands across the water, old guardians, a Rift under the sea where the dead wake up: go where you like, in any order.</p>
+      <p>Old Wren, at the fire on this beach, can point you a few ways.</p>
+      <div class="divider"></div><button class="btn wide primary" data-a="close">Get up</button></div>`, { pauses: true, noX: true });
+    el.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-a="close"]')) return;
+      this.ui.closeModal();
+      this.input.requestLock();
+      setTimeout(() => this.ui.toast(keyText('Old Wren is by the campfire. Talk to her [{interact}] for directions, or just set off.'), 'quest'), 1200);
+    });
   }
 
   save(force = false) {
@@ -694,6 +737,7 @@ export class Game {
       if (this.player !== p || this.state !== 'playing') return;
       p.revive(pos, fromDeath ? 1 : Math.max(0.3, p.hp / p.maxHp));
       if (!fromDeath) this.ch.stats.riftEscapes = (this.ch.stats.riftEscapes || 0) + 1;
+      p.dangerT = 0; // what hunted you stays below: the surface is a fresh start, not a fight to flee
       this.inRift = false;
       this.areaName = null;
       this.ui.suppressPause = false;
@@ -754,7 +798,8 @@ export class Game {
     for (const b of this.boats) {
       const d = b.pos.distanceTo(p.pos);
       const seat = b.netProxy ? this.net.passengerSeat(b) >= 0 : b.freeSeat ? b.freeSeat() >= 0 : !b.driver;
-      if (d < 4.5 && seat) consider({ kind: 'boat', boat: b, label: b.driver ? 'Board as Passenger' : 'Board Boat' }, d);
+      // a rented boat moors 3 m off the dock's end, where its fishing spot is: within reach, boarding wins
+      if (d < 4.5 && seat) consider({ kind: 'boat', boat: b, label: b.driver ? 'Board as Passenger' : 'Board Boat' }, d - 3.5);
     }
     for (const a of G.actors) {
       if (a.knocked && !a.dead && (a.team === 'enemy' || a.team === 'guard')) {
@@ -802,7 +847,7 @@ export class Game {
         break;
       case 'boat':
         p.enterBoat(it.boat);
-        this.ui.toast('W/S throttle · A/D steer · Shift to go fast · E to disembark');
+        this.ui.toast('W/S throttle, A/D steer, Shift to go fast, E to disembark');
         break;
       default:
         if (it.use) it.use(this, it);
@@ -819,7 +864,7 @@ export class Game {
     this.ch.chestsOpened.push(chest.def.id);
     this.audio.play('chest', { pos: chest.mesh.position });
     this.vfx.burst(chest.mesh.position.clone().add(new THREE.Vector3(0, 0.8, 0)), 'phys', 30, { color: '#ffd27a', speed: 5, up: 3 });
-    const silver = Math.round(rand(loot.silver[0], loot.silver[1]) * this.player.derived.silverMul);
+    const silver = paid(rand(loot.silver[0], loot.silver[1]) * this.player.derived.silverMul, 'chest');
     if (silver) {
       this.player.addSilver(silver);
       this.ui.toast(`+ ${silver} silver`, 'silver');
@@ -870,19 +915,11 @@ export class Game {
     this.ui.openFerry(dockId);
   }
 
-  rentBoat(dockId) {
-    const ch = this.ch;
-    if (ch.silver < 20) return this.ui.toast('Not enough silver.', 'bad');
-    const dock = this.world.docks[dockId];
-    if (!dock) return;
-    ch.silver -= 20;
-    // replace our previous rental, but keep friends' synced boats
-    for (const old of this.boats.filter((x) => !x.netProxy)) old.dispose();
-    const pos = dock.end.clone().add(new THREE.Vector3(dock.dir.z * 3, 0, -dock.dir.x * 3));
-    const b = new Boat(pos, dock.yaw);
-    this.boats = [...this.boats.filter((x) => x.netProxy), b];
-    this.audio.play('coin');
-    this.ui.toast('Your boat is moored at the end of the dock.', 'good');
+  // one rental path: the boatyard's (game/travel.js), with its boat types, price modifiers and
+  // rules for whose boat is returned. This used to rent its own flagless boat at a flat 20s and
+  // dispose of every local boat, a ferry included.
+  rentBoat(dockId, type = 'skiff') {
+    return ACTIONS.rentBoat ? ACTIONS.rentBoat(dockId, type) : false;
   }
 
   // Soft aim assist targets monsters, plus guards that are fighting us.
@@ -950,8 +987,11 @@ export class Game {
     }
     if (this.state === 'playing' && this.player) {
       const p = this.player;
-      const focus = _v.set(p.pos.x, p.pos.y + (p.boat ? 2.2 : 1.6), p.pos.z);
-      if (p.knocked) focus.y -= 1;
+      const body = _v3.set(p.pos.x, p.pos.y + (p.boat ? 2.2 : 1.6) - (p.knocked ? 1 : 0), p.pos.z);
+      // the follow point: exact across the ground, its height eased (stairs, kerbs, ledge catches)
+      const focus = (this._camFocus = easeFocus(this._camFocus, body, dt, { grounded: p.grounded || p.climbing || !!p.boat }));
+      // the eased point is checked before the arm is swept from it
+      if (this.world.colliders.pointInside(focus.x, focus.y, focus.z)) focus.copy(body);
       const fx = Math.sin(this.camYaw);
       const fz = Math.cos(this.camYaw);
       const cp = Math.cos(this.camPitch);
@@ -959,17 +999,38 @@ export class Game {
       const dist = this.camDist * (p.boat ? 1.8 : 1);
       const side = 0.4; // over-the-right-shoulder offset; right vector = (-fz, 0, fx)
       const desired = _v2.set(focus.x - fx * cp * dist - fz * side, focus.y + sp * dist, focus.z - fz * cp * dist + fx * side);
-      const orbit = cameraOrbit(this.world, focus, desired);
-      const allowed = orbit.allowed;
+      // A raised or lowered arm, when the shoulder view is blocked, is blended in and out rather
+      // than cut to; the blended direction is swept again, so the blend never passes a wall.
+      const orbit = cameraOrbit(this.world, focus, desired, 1.35, this._camLift ?? null);
+      this._camLift = orbit.lift;
+      const liftT = orbit.lift != null ? orbit.lift : 0;
+      this._camLiftNow = (this._camLiftNow ?? liftT) + (liftT - (this._camLiftNow ?? liftT)) * (1 - Math.exp(-7 * dt));
+      const base = desired.clone().sub(focus).normalize();
+      const direction = Math.abs(this._camLiftNow - liftT) < 1e-3 ? orbit.direction : base.setY(base.y + this._camLiftNow).normalize();
+      const allowed = direction === orbit.direction ? orbit.allowed : cameraClearance(this.world, focus, direction, dist);
+      // a spring arm: in at once when something comes between (never through it), out again
+      // gently, and not for the last few centimetres, which only made it breathe at a wall
       if (this._camAllowed == null || allowed < this._camAllowed) this._camAllowed = allowed;
-      else this._camAllowed += (allowed - this._camAllowed) * (1 - Math.exp(-10 * dt));
-      const target = focus.clone().addScaledVector(orbit.direction, Math.min(allowed, this._camAllowed));
+      else if (allowed > this._camAllowed + 0.03) this._camAllowed += (allowed - this._camAllowed) * (1 - Math.exp(-5 * dt));
+      const target = focus.clone().addScaledVector(direction, Math.min(allowed, this._camAllowed));
       this.camPos.copy(target);
       cam.position.copy(target);
       const camD = cam.position.distanceTo(focus);
       if (p.model?.setOpacity && p.stealth <= 0) p.model.setOpacity(clamp((camD - 0.4) / 1.15, 0.18, 1));
       const so = Math.min(side, this._camAllowed * 0.1);
-      cam.lookAt(focus.x - fz * so, focus.y, focus.z + fx * so);
+      const look = _v4.set(focus.x - fz * so, focus.y, focus.z + fx * so);
+      // Seated by a fire: ease to a framed three-quarter view of the rester and the flames, and
+      // back to the shoulder view on standing (the orbit above keeps running underneath).
+      const seated = !!(p.sitting && p.restFire && !p.dead && !p.boat);
+      this._seatT = clamp((this._seatT || 0) + (seated ? dt / 1.1 : -dt / 0.6), 0, 1);
+      if (seated) this._seatFrame = restFrame(this.world, p, p.restFire, this._seatFrame);
+      if (this._seatT > 0 && this._seatFrame) {
+        const k = this._seatT * this._seatT * (3 - 2 * this._seatT);
+        cam.position.lerp(this._seatFrame.pos, k);
+        look.lerp(this._seatFrame.look, k);
+        if (p.model?.setOpacity && p.stealth <= 0) p.model.setOpacity(1);
+      } else this._seatFrame = null;
+      cam.lookAt(look);
     } else {
       // menu orbit
       this.menuT += dt * 0.03;
@@ -1209,7 +1270,7 @@ export class Game {
     this.world.beauty?.update(dt, this.camera, this.inRift, p.pos);
 
     // region / adaptive score
-    const loc = this.world.locationAt(p.pos.x, p.pos.z);
+    const loc = this.world.locationAt(p.pos.x, p.pos.z, p.pos.y);
     const isl = this.world.islandAt(p.pos.x, p.pos.z);
     // dry ground between named places goes by its region's name, not the open sea's
     const ashore = !this.inRift && isl && !p.boat && this.world.terrain.heightAt(p.pos.x, p.pos.z) > 0;
@@ -1288,7 +1349,8 @@ export class Game {
 
     // interaction prompt
     const it = this.findInteractable();
-    this.ui.setPrompt(it ? it.label : null);
+    // seated by a fire the rest card already lists its keys (E Cook, Tab, move to stand)
+    this.ui.setPrompt(it && !(p.sitting && it.kind === 'campfire') ? it.label : null);
   }
 }
 

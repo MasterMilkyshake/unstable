@@ -177,10 +177,10 @@ export const ARCHES_FOG = [
 // Named cameras for ?vista= previews (merged into VISTA_SHOTS).
 const shot = (from, y, to, ly, time, title) => ({ x: from[0], y, z: from[1], lx: to[0], ly, lz: to[1], time, title });
 export const ARCHES_SHOTS = {
-  arches_wash: shot([-4, -346], 15.6, at(bay(8.1)), 30, 0.36, 'The Hundred Arches · from the Wash, where the drowned wake'),
-  arches_sunset: shot([-266, -276], 38, at(bay(8.1)), 28, 0.745, 'The Hundred Arches · sunset from the Seamspire Rise'),
-  arches_mere: shot(at(bay(11.15), 34), 1.6, at(bay(5.3)), 34, 0.29, 'The Arch Mere · morning among the piers'),
-  arches_deck: shot(at(ARCH_BAY * 7 - 6), B.deck + 2.3, at(LEN), B.deck - 12, 0.7, 'The Hundred Arches · the end of the road'),
-  arches_reedbank: shot([-470, -300], 9, at(bay(7)), 34, 0.36, 'The Hundred Arches · from Reedbank'),
-  arches_ramp: shot(at(-60, 10), 6, at(bay(3.2)), 40, 0.33, "The Arches' Foot · the hill onto the road"),
+  arches_wash: shot([-4, -346], 15.6, at(bay(8.1)), 30, 0.36, 'The Hundred Arches, from the Wash, where the drowned wake'),
+  arches_sunset: shot([-266, -276], 38, at(bay(8.1)), 28, 0.745, 'The Hundred Arches, sunset from the Seamspire Rise'),
+  arches_mere: shot(at(bay(11.15), 34), 1.6, at(bay(5.3)), 34, 0.29, 'The Arch Mere, morning among the piers'),
+  arches_deck: shot(at(ARCH_BAY * 7 - 6), B.deck + 2.3, at(LEN), B.deck - 12, 0.7, 'The Hundred Arches, the end of the road'),
+  arches_reedbank: shot([-470, -300], 9, at(bay(7)), 34, 0.36, 'The Hundred Arches, from Reedbank'),
+  arches_ramp: shot(at(-60, 10), 6, at(bay(3.2)), 40, 0.33, "The Arches' Foot, the hill onto the road"),
 };

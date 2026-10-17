@@ -176,7 +176,7 @@ ACTIONS.openWorldMap = (ui) => {
   const region = mapRegionFor(G.player && G.player.pos, ui.game.inRift);
   const rift = region.rift;
   const here = (x, z) => inRegion(region, x, z);
-  const el = ui.openModal('map', `<div class="panel parchment-map"><h2>${region.title}</h2><canvas id="map-canvas" width="640" height="640"></canvas><div class="muted" style="text-align:center;margin-top:6px;font-size:14px">◆ quest · ▲ you · ⚓ harbor · <kbd>M</kbd> to close</div></div>`);
+  const el = ui.openModal('map', `<div class="panel parchment-map"><h2>${region.title}</h2><canvas id="map-canvas" width="640" height="640"></canvas><div class="muted" style="text-align:center;margin-top:6px;font-size:14px">◆ quest, ▲ you, ⚓ harbor, <kbd>M</kbd> to close</div></div>`);
   const cv = el.querySelector('#map-canvas');
   const ctx = cv.getContext('2d');
   const m = renderChart(region);

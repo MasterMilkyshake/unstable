@@ -104,9 +104,9 @@ export const LIFE_TIMING = {
   sounding: { every: [420, 540], near: 260 },
   skirmish: { every: [300, 420], near: 220 },
   hunters: { every: [240, 360], after: 180 },
-  cutter: { every: [180, 260] },
+  cutter: { every: [900, 1500] }, // only while the Enclave wants you; at most one per crossing
   seaConvoy: { every: [600, 900], near: 420 },
-  falseConvoy: { every: [900, 1500], near: 360 },
+  falseConvoy: { every: [2400, 3600], near: 360, chance: 0.35 }, // a rare Redwake ambush at sea; at most one per crossing
   beset: { every: [700, 1100] },
   drift: { every: [600, 1000] },
   captives: { every: [400, 700], near: 220, day: 900 },

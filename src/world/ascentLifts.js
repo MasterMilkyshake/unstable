@@ -504,6 +504,7 @@ function applyRide(lift, dt) {
         if (lift.y > lift.y0 + 0.3) keepInCage(a, lift);
         a.pos.y += dy;
         a.fallStart = a.pos.y;
+        a.liftRideUntil = (G.time || 0) + 1; // enemies don't pick a fight with a rider shut in the cage (Enemy.update)
         if (a.model) a.model.root.position.y += dy;
         if (a.ascentAmbush && a.home) a.home.y += dy;
       }

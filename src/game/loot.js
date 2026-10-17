@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { G } from '../core/globals.js';
 import { ACTIONS, BOOT_HOOKS, START_HOOKS, UPDATE_HOOKS } from './hooks.js';
-import { LOOT } from '../data/loot.js';
+import { LOOT, paid } from '../data/loot.js';
 import { RARITY_COLORS } from '../data/weapons.js';
 import { emptyContents, cleanContents, contentsEmpty, entriesOf, takeEntry, addContents, carried, takeFromInventory, deathShare, newUid } from '../core/contents.js';
 import { openPanel } from '../ui/panel.js';
@@ -44,7 +44,7 @@ export function openLoot(game, source) {
   const ui = game.ui;
   const render = () => {
     const c = source.contents();
-    const rows = entriesOf(c).map((e) => `<div class="shop-row loot-row"><div class="ico">${e.icon}</div><div style="flex:1"><div class="nm" ${e.rarity ? `style="color:${RARITY_COLORS[e.rarity]}"` : ''}>${escapeHtml(e.name)}${e.n > 1 && e.kind !== 'silver' ? ` <span class="muted">×${e.n}</span>` : ''}${e.kind === 'silver' ? ` <span class="gold">${e.n}</span>` : ''}</div>${e.desc ? `<div class="ds">${escapeHtml(e.desc)}</div>` : ''}</div>
+    const rows = entriesOf(c).map((e) => `<div class="shop-row loot-row"><div style="flex:1"><div class="nm" ${e.rarity ? `style="color:${RARITY_COLORS[e.rarity]}"` : ''}>${escapeHtml(e.name)}${e.n > 1 && e.kind !== 'silver' ? ` <span class="muted">×${e.n}</span>` : ''}${e.kind === 'silver' ? ` <span class="gold">${e.n}</span>` : ''}</div>${e.desc ? `<div class="ds">${escapeHtml(e.desc)}</div>` : ''}</div>
       ${e.n > 1 && e.kind === 'item' ? `<button class="btn small" data-take="${e.key}" data-n="1">Take 1</button>` : ''}<button class="btn small primary" data-take="${e.key}">Take${e.n > 1 && e.kind === 'item' ? ' all' : ''}</button></div>`).join('');
     return `<h2>${escapeHtml(source.title)}</h2>${source.note ? `<p class="muted" style="text-align:center;margin-top:0">${source.note}</p>` : ''}
       <div class="shop-list scroll">${rows || '<div class="muted" style="text-align:center">Nothing is left.</div>'}</div>
@@ -101,7 +101,7 @@ ACTIONS.openChestLoot = (chest) => {
     // the first opening rolls what is inside, once; it stays as you left it
     const loot = chest.def.loot || {};
     const c = emptyContents();
-    if (loot.silver) c.silver = Math.round(rand(loot.silver[0], loot.silver[1]) * game.player.derived.silverMul);
+    if (loot.silver) c.silver = paid(rand(loot.silver[0], loot.silver[1]) * game.player.derived.silverMul, 'chest');
     for (const [it, n] of loot.items || []) c.items[it] = (c.items[it] || 0) + n;
     if (loot.weapon) c.weapons.push({ uid: newUid('w'), id: loot.weapon, enchant: null });
     ch.chestLoot[id] = cleanContents(c);
@@ -385,7 +385,7 @@ ACTIONS.openDropPanel = (ui = G.ui) => {
     const rows = carried(ch).map((e) => {
       const n = picks.get(e.key) || 0;
       const qty = e.kind === 'item' || e.kind === 'silver';
-      return `<div class="shop-row loot-row ${e.keep ? 'kept' : ''}"><div class="ico">${e.icon}</div><div style="flex:1"><div class="nm" ${e.rarity ? `style="color:${RARITY_COLORS[e.rarity]}"` : ''}>${escapeHtml(e.name)} <span class="muted">${e.kind === 'silver' ? e.n : e.n > 1 ? '×' + e.n : ''}</span></div>${e.keep ? `<div class="ds">${escapeHtml(e.keep)}</div>` : ''}</div>
+      return `<div class="shop-row loot-row ${e.keep ? 'kept' : ''}"><div style="flex:1"><div class="nm" ${e.rarity ? `style="color:${RARITY_COLORS[e.rarity]}"` : ''}>${escapeHtml(e.name)} <span class="muted">${e.kind === 'silver' ? e.n : e.n > 1 ? '×' + e.n : ''}</span></div>${e.keep ? `<div class="ds">${escapeHtml(e.keep)}</div>` : ''}</div>
         ${e.keep ? '' : qty ? `<button class="btn small" data-less="${e.key}" ${n ? '' : 'disabled'}>−</button><span class="loot-n">${n}</span><button class="btn small" data-more="${e.key}" ${n < e.n ? '' : 'disabled'}>+</button><button class="btn small" data-all="${e.key}">All</button>` : `<button class="btn small ${n ? 'primary' : ''}" data-pick="${e.key}">${n ? '✓ Leave it' : 'Leave it'}</button>`}</div>`;
     }).join('');
     const total = [...picks.values()].filter(Boolean).length;

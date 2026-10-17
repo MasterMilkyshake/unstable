@@ -6,6 +6,7 @@
 // transforms are left untouched.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { unflush } from './kit.js';
 
 const _p = new THREE.Vector3();
 const KEEP = ['position', 'normal', 'uv'];
@@ -42,6 +43,7 @@ export function mergeStatic(scene, roots, cellSize = 320) {
       if (o.matrixWorld.determinant() < 0) return;
       o.getWorldPosition(_p);
       const cell = `${Math.floor(_p.x / cellSize)},${Math.floor(_p.z / cellSize)}`;
+      o.userData.mergeCell = cell;
       const pk = plainKey(m);
       const key = pk ? `${cell}|plain|${pk}|${o.castShadow ? 1 : 0}` : `${cell}|${m.uuid}|${o.castShadow ? 1 : 0}`;
       let b = buckets.get(key);
@@ -50,6 +52,8 @@ export function mergeStatic(scene, roots, cellSize = 320) {
     });
   }
   let removed = 0;
+  // kit boxes of every structure in a cell, in their merged buffers (see unflush in world/kit.js)
+  const cellBoxes = new Map();
   for (const b of buckets.values()) {
     // a lone plain mesh still joins the shared material (it costs nothing extra)
     if (b.meshes.length < 2 && !b.plain) continue;
@@ -75,6 +79,22 @@ export function mergeStatic(scene, roots, cellSize = 320) {
       b.geos.push(g);
     }
     const geo = mergeGeometries(b.geos, false);
+    if (geo) {
+      let at = 0;
+      const buf = { pos: geo.attributes.position.array };
+      for (let i = 0; i < b.geos.length; i++) {
+        const src = b.meshes[i].geometry;
+        // a plain one-segment box counts as one element, as a kit box does
+        const starts = src.userData.boxes || (src.type === 'BoxGeometry' && b.geos[i].attributes.position.count === 36 ? [0, 108] : null);
+        if (starts && b.meshes[i].matrixWorld.determinant() > 0) {
+          const cell = b.meshes[i].userData.mergeCell;
+          let L = cellBoxes.get(cell);
+          if (!L) cellBoxes.set(cell, (L = []));
+          for (let j = 0; j < starts.length; j += 2) L.push(buf, at + starts[j], starts[j + 1]);
+        }
+        at += b.geos[i].attributes.position.array.length;
+      }
+    }
     for (const g of b.geos) g.dispose();
     if (!geo) continue;
     geo.computeBoundingSphere();
@@ -89,5 +109,6 @@ export function mergeStatic(scene, roots, cellSize = 320) {
       removed++;
     }
   }
+  for (const L of cellBoxes.values()) unflush(L);
   return { merged: merged.length, removed };
 }

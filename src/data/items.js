@@ -142,7 +142,7 @@ export const ITEMS = {
   lost_satchel: { name: "Pell's Satchel", type: 'quest', price: 0, desc: 'A merchant\'s satchel, torn by talons.', icon: '👜' },
   fracture_core: { name: 'Fracture Core', type: 'quest', price: 0, desc: 'A pulsing heart of unstable power torn from a great foe.', icon: '💠' },
   ember_of_life: { name: 'Ember of Life', type: 'special', price: 0, desc: 'Consume to regain one lost life.', icon: '🔥' },
-  bounty_token: { name: 'Brigand Token', type: 'material', price: 0, sell: 8, desc: 'Red cloth tied to every brigand\'s arm.', icon: '🟥' },
+  bounty_token: { name: 'Brigand Token', type: 'material', price: 0, sell: 4, desc: 'Red cloth tied to every brigand\'s arm.', icon: '🟥' },
 
   // ---- fishing ----
   fishing_rod: { name: 'Fishing Rod', type: 'material', price: 40, sell: 12, desc: 'Ash pole, gut line, bone hook. Press E at docks and fishing spots to cast.', icon: '🎣' },

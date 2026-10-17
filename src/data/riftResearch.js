@@ -1,7 +1,7 @@
 // Rift-only research content: expeditions, mysteries, lore, quests, NPCs.
 // Pushes onto existing catalogs at import time so surface files stay untouched.
-import { NPCS, LOCATIONS, SPAWNERS, CHESTS, STRUCTURES } from './world.js';
-import { DIALOGUES, questHub, questOffer } from './npcs.js';
+import { NPCS, LOCATIONS, SPAWNERS, CHESTS } from './world.js';
+import { DIALOGUES, questHub } from './npcs.js';
 import { QUESTS } from './quests.js';
 import { ITEMS } from './items.js';
 import { LORE, LORE_BY_ID, BESTIARY_NOTES } from './lore.js';
@@ -369,21 +369,21 @@ const RESEARCH_CHRONICLE = [
 
 const RESEARCH_INVESTIGATIONS = [
   {
-    id: 'rift_research', title: 'Rift Research', tier: 'R · Occupied camps / failed descents',
+    id: 'rift_research', title: 'Rift Research', tier: 'R: Occupied camps / failed descents',
     evidence: ['charter_of_descent', 'quill_fieldbook', 'vesper_watch', 'year57_log', 'rope_last', 'scout_farewell', 'lira_pages', 'hollow_fieldnote'],
     question: 'What are the living doing in a place that unmakes names?',
     conclusion: 'They are staffing a wound. Cael, Quill, Vesper and Lira treat the Rift as a site of work: notes, stakes, counts, and the recovery of Year 57\'s unfinished survey. The progress of this account is the research itself. A place that is measured can be tended. A place that is only fled will keep taking people.',
     reward: { xp: 800, silver: 180, items: [['sanity_draught', 2]] },
   },
   {
-    id: 'impossible_rooms', title: 'Rooms that will not pick an up', tier: 'R · Glyphs, vault, folded court',
+    id: 'impossible_rooms', title: 'Rooms that will not pick an up', tier: 'R: Glyphs, vault, folded court',
     evidence: ['glyph_litany', 'vault_warning', 'folded_stair', 'prerift_station', 'sample_tag'],
     question: 'Who built chambers that disobey ordinary space?',
     conclusion: 'Pre-Rift crews. Station C-4, the folded service stair and the western knuckle are Compact works that lost a single orientation when the chain broke. The glyphs are a date, not a prayer. The stone that ticks is instruction, cooled. Impossible geometry is a damaged tool, not a miracle.',
     reward: { xp: 1000, silver: 200, items: [['mantra_spark', 1]] },
   },
   {
-    id: 'the_underside', title: 'What the shelf remembered', tier: 'R · The payoff',
+    id: 'the_underside', title: 'What the shelf remembered', tier: 'R: The payoff',
     evidence: ['vault_heart', 'whisper_archive', 'compact_underside'],
     requires: ['rift_research', 'impossible_rooms'],
     question: 'What is the Rift, and why did the islands shatter?',

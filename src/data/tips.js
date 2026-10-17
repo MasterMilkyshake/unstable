@@ -21,7 +21,7 @@ export const TIPS = {
   resonance: { title: 'A second voice', text: 'Sworn and at Power 15, you can be attuned to a Resonance at the Vowkeeper: a passive, and an ability on {resonance}.' },
   spark: { title: 'A Mantra Spark', text: 'Offer a Spark at a Mantra Altar to add a star and a modifier to a mantra you know.' },
   journal: { title: 'The Journal', text: 'What you read goes into your Journal ({journal}): its sources, the chronicle and investigations that pay when their records agree. The Guide there explains every system.' },
-  loot: { title: 'Take what you want', text: 'Take things one by one, or everything at once; what you leave stays where it is. To leave things for someone, open your backpack ({backpack}), and leave a pouch.' },
+  loot: { title: 'Take what you want', text: 'Take things one by one, or everything at once; what you leave stays where it is. To leave things for someone, open your backpack in the character menu ({menu}), and leave a pouch.' },
   lostPouch: { title: 'What you dropped', text: 'Dying left part of what you carried where you fell, in a pouch: half your silver and some of your goods. Go back for it before someone else does. What you keep in a Keepers\' strongbox is safe.' },
   bank: { title: 'The strongbox', text: 'Every inn\'s host keeps the same strongbox for you. What you put in it waits at any inn, and dying never touches it.' },
   worldEvents: { title: 'Something nearby', text: 'The world moves without you: Rift Breaches, falling stars and more. Follow the toast to the light; each pays when it\'s done.' },

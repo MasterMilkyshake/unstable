@@ -299,11 +299,24 @@ export class Mason {
         // timber frame on both faces: sole plate, wall plate, posts at the ends, beside every
         // opening and at most every 2.4 m between
         const frame = o.frame || 'timber';
+        // a horizontal member along the wall stops at every opening it would cross (a rail or a
+        // log course run straight across a doorway read as stripes over the door)
+        const along = (fx, yy, hh, dx, mat, extra) => {
+          const cut = [[-Infinity, 0]];
+          for (const op of ops) if (yy - y < op.y + op.h && yy - y + hh > op.y) cut.push([op.u - op.w / 2, op.u + op.w / 2]);
+          cut.push([len, Infinity]);
+          cut.sort((p, q) => p[0] - q[0]);
+          let u0 = 0;
+          for (const [a, b] of cut) {
+            if (a - u0 > 0.02) m.trim(fx, yy, -len / 2 + (u0 + Math.min(a, len)) / 2, dx, hh, Math.min(a, len) - u0, mat, extra);
+            u0 = Math.max(u0, b);
+          }
+        };
         for (const side of [-1, 1]) {
           const fx = side * (t / 2 + 0.04);
           if (style !== 'log') {
-            m.trim(fx, y, 0, 0.1, 0.24, len, frame);
-            m.trim(fx, y + h - 0.24, 0, 0.1, 0.24, len, frame);
+            along(fx, y, 0.24, 0.1, frame);
+            along(fx, y + h - 0.24, 0.24, 0.1, frame);
           }
           const posts = [0, len];
           for (const op of ops) posts.push(op.u - op.w / 2 - 0.08, op.u + op.w / 2 + 0.08);
@@ -321,8 +334,8 @@ export class Mason {
             if (inOpening) continue;
             m.trim(fx, y, -len / 2 + Math.max(0.1, Math.min(len - 0.1, u)), 0.12, h, 0.2, frame);
           }
-          if (style === 'log') for (let yy = 0.45; yy < h; yy += 0.45) m.trim(fx, y + yy - 0.05, 0, 0.06, 0.08, len, 'dark', { grad: 0 });
-          if (o.midRail !== false && style === 'plaster' && h > 2.6) m.trim(fx, y + Math.min(h - 0.5, 1.0), 0, 0.08, 0.16, len, frame);
+          if (style === 'log') for (let yy = 0.45; yy < h; yy += 0.45) along(fx, y + yy - 0.05, 0.08, 0.06, 'dark', { grad: 0 });
+          if (o.midRail !== false && style === 'plaster' && h > 2.6) along(fx, y + Math.min(h - 0.5, 1.0), 0.16, 0.08, frame);
         }
       } else if (style === 'brick') {
         // stone dressings: quoins at the ends and a string course under the eaves
@@ -457,10 +470,14 @@ export class Mason {
     if (o.solid !== false) {
       // the plate it stands on, then three nested layers from the plate up to their own
       // heights, so the roof rests on its walls with no gap between the steps of its slopes
-      this.solid(x, y - 0.2, z, W - ov * 0.8, 0.22, D - ov * 0.8, { ry });
+      // The plate runs out under the whole overhang, so the eaves stop the camera as they stop
+      // a body; a gable's layers keep its full length along the ridge (its ends are walls, not
+      // slopes) so its gable ends are solid to the camera too.
+      this.solid(x, y - 0.2, z, W, 0.22, D, { ry });
+      const gable = o.kind === 'gable';
       for (let i = 0; i < 3; i++) {
-        const f = (i + 0.5) / 3;
-        this.solid(x, y - 0.2, z, Math.max(0.8, W * (1 - f * 0.85)), rise * f * 0.8 + 0.3, Math.max(0.8, D * (1 - f * 0.85)), { ry });
+        const f = (i + 0.5) / 3, sw = Math.max(0.8, W * (1 - f * 0.85)), sd = Math.max(0.8, D * (1 - f * 0.85));
+        this.solid(x, y - 0.2, z, gable && long ? W - ov * 0.8 : sw, rise * f * 0.8 + 0.3, gable && !long ? D - ov * 0.8 : sd, { ry });
       }
     }
     return this;

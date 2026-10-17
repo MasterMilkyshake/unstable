@@ -31,11 +31,11 @@ export const ENEMIES = {
     drops: [{ id: 'meat_raw', chance: 0.4 }, { id: 'bounty_token', chance: 1 }, { id: 'woodcutter_axe', chance: 0.05, weapon: true }],
   },
   brigand_cutthroat: {
-    name: 'Brigand Cutthroat', model: 'humanoid', level: 4, hp: 88, posture: 60, speed: 6.3, aggro: 24, xp: 70, silver: [8, 16],
-    weapon: 'rusty_dagger', dmgMul: 0.9, critChance: 0.2, comboMax: 4,
-    defend: { block: 0.08, parry: 0.15, dodge: 0.3 }, knockable: true,
+    name: 'Brigand Cutthroat', model: 'humanoid', level: 4, hp: 80, posture: 55, speed: 5.6, aggro: 18, xp: 70, silver: [8, 16],
+    weapon: 'rusty_dagger', dmgMul: 0.75, critChance: 0.12, comboMax: 3,
+    defend: { block: 0.08, parry: 0.08, dodge: 0.18 }, knockable: true,
     look: { skin: '#d8a578', hair: '#3a2010', outfit: { main: '#3a2a2a', trim: '#7a2a20', pants: '#2a2020', boots: '#141010' }, bandana: '#a8281c' },
-    ranged: { id: 'knife', windup: 0.45, recovery: 0.45, range: 16, minRange: 6, dmg: 9, posture: 4, cd: 4, proj: { speed: 30, color: '#cfd6df', size: 0.18, rod: true } },
+    ranged: { id: 'knife', windup: 0.6, recovery: 0.5, range: 16, minRange: 6, dmg: 6, posture: 4, cd: 6.5, proj: { speed: 30, color: '#cfd6df', size: 0.18, rod: true } },
     drops: [{ id: 'bounty_token', chance: 1 }, { id: 'rusty_dagger', chance: 0.06, weapon: true }],
   },
   // A gloomowl hunts alone: three times a man's height at the tufts, one to a nest (its camps

@@ -29,7 +29,7 @@ export function updateMeridianLift(lift, dt, actors = []) {
   lift.ride.label = lift.y < (lift.y0 + lift.y1) / 2 ? 'Ride lift to Fort Meridian' : 'Ride lift to the Lower Works';
   if (dy) for (const actor of actors) {
     if (!actor.grounded || !onMeridianLift(actor, lift, before)) continue;
-    actor.pos.y += dy; actor.fallStart = actor.pos.y;
+    actor.pos.y += dy; actor.fallStart = actor.pos.y; actor.liftRideUntil = (G.time || 0) + 1;
     if (actor.model?.root) actor.model.root.position.y += dy;
   }
 }

@@ -245,5 +245,5 @@ export const QUESTS = {
   },
 };
 
-// The main storyline and faction paths live in data/story.js (staged quests).
+// The story threads and faction paths live in data/story.js (staged quests).
 Object.assign(QUESTS, STORY_QUESTS);

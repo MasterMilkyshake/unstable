@@ -12,11 +12,12 @@
 // to its home through Enemy.navTo (entities/enemy.js guardIdle), so a moving home is a march at
 // a guard's walking pace, and a fight stops it where it stands.
 import * as THREE from 'three';
+import { paid } from '../data/loot.js';
 import { G } from '../core/globals.js';
 import { UPDATE_HOOKS, START_HOOKS, BOOT_HOOKS, ACTIONS } from './hooks.js';
 import { Boat } from '../entities/boat.js';
 import { ROADS } from '../data/roads.js';
-import { FACTIONS, tierOf } from '../data/factions.js';
+import { FACTIONS } from '../data/factions.js';
 import { addRep, markWanted, atWar, fineFor, payFine, ensureStanding } from './factions.js';
 import {
   COLUMN_ROUTES, COLUMN_RANKS, CHECKPOINTS, CHECKPOINT_GUARDS, CONVOY_ROUTES, CONVOY_ESCORTS, CONVOY_LOOT,
@@ -123,7 +124,7 @@ function spawnSquad(game, types, x, z, yaw, opts = {}) {
   types.forEach((type, i) => {
     const [lx, lz] = opts.slots ? opts.slots[i] : slot(i, types.length);
     const px = x + lx * c + lz * s, pz = z - lx * s + lz * c;
-    const e = game.spawnEnemy(type, new THREE.Vector3(px, ground(px, pz) + 0.1, pz), { scaleTo: opts.scaleTo, face: yaw });
+    const e = game.spawnEnemy(type, new THREE.Vector3(px, ground(px, pz) + 0.1, pz), { face: yaw });
     e.lifeEvent = opts.ev || null;
     out.push(e);
   });
@@ -186,10 +187,12 @@ function applyReward(game, r) {
   if (!ch) return;
   for (const [f, n] of r.rep || []) addRep(ch, f, n);
   for (const [f, secs] of r.wanted || []) markWanted(ch, f, secs);
-  if (r.silver) G.player.addSilver(r.silver);
+  const silver = r.silver ? paid(r.silver, 'event') : 0;
+  if (silver) G.player.addSilver(silver);
   if (r.xp) G.player.addXp(r.xp);
   for (const [id, n] of r.items || []) game.giveItem(id, n);
-  if (r.toast) G.ui.toast(r.toast, r.kind || 'good');
+  // a toast that names the purse names what was paid
+  if (r.toast) G.ui.toast(silver ? r.toast.split(`${r.silver} silver`).join(`${silver} silver`) : r.toast, r.kind || 'good');
   if (r.stat) ch.stats[r.stat] = (ch.stats[r.stat] || 0) + 1;
   // what the deed was, for the contract boards (game/contracts.js)
   if (r.outcome) ACTIONS.lifeOutcome?.(r.outcome);
@@ -255,17 +258,27 @@ UPDATE_HOOKS.push((game, dt) => {
     }
   }
   if (game.inRift || game.inDungeon) return;
+  // A crossing lasts from boarding to stepping ashore; it sees at most one attack at sea.
+  if (!game.player?.boat) LIFE.crossingAttacked = false;
   for (const kind of Object.keys(KINDS)) {
     const k = KINDS[kind];
-    LIFE.timers[kind] = (LIFE.timers[kind] ?? rand(30, 90)) - dt;
+    const timing = LIFE_TIMING[kind];
+    // attacks at sea wait a whole interval after a start or a load, not the first minute's
+    LIFE.timers[kind] = (LIFE.timers[kind] ?? (k.seaAttack && timing?.every ? rand(timing.every[0], timing.every[1]) : rand(30, 90))) - dt;
     if (LIFE.timers[kind] > 0) continue;
     LIFE.timers[kind] = k.retry ?? 15;
     if (LIFE.active.filter((e) => e.kind === kind).length >= (k.max ?? 1)) continue;
+    if (k.seaAttack && (LIFE.crossingAttacked || !game.player?.boat)) continue;
+    // a rare event rolls once its interval is up; a miss waits a whole interval again
+    if (timing?.chance != null && timing.every && Math.random() > timing.chance) {
+      LIFE.timers[kind] = rand(timing.every[0], timing.every[1]);
+      continue;
+    }
     const ev = k.start(game);
     if (ev) {
       startEvent(game, kind, ev);
-      const every = LIFE_TIMING[kind]?.every;
-      LIFE.timers[kind] = every ? rand(every[0], every[1]) : k.retry ?? 15;
+      if (k.seaAttack) LIFE.crossingAttacked = true;
+      LIFE.timers[kind] = timing?.every ? rand(timing.every[0], timing.every[1]) : k.retry ?? 15;
     }
   }
   if (game.net && game.net.isHost && game.net.avatars.size) sendState(game, dt);
@@ -535,7 +548,7 @@ KINDS.convoy = {
       if (!ev.ambushed && ev.d >= ev.ambushAt && nearestD(game, c.x, c.z) < 90) {
         ev.ambushed = true;
         const a = routeAt(ev.route, ev.d + 24);
-        ev.foes = spawnSquad(game, ev.def.raiders, a.x, a.z, a.yaw + Math.PI, { scaleTo: Math.max(game.ch.level, 4) });
+        ev.foes = spawnSquad(game, ev.def.raiders, a.x, a.z, a.yaw + Math.PI);
         ev.foes.forEach((e, i) => e.setAggro(live[i % live.length]));
         G.ui.toast('Raiders on the road ahead of the convoy!', 'bad');
       }
@@ -672,7 +685,7 @@ KINDS.skirmish = {
     const yaw = Math.atan2(p.pos.x - x, p.pos.z - z);
     const ev = { def: near.def, side, members: [], foes: [], credit: new Map() };
     ev.members = spawnSquad(game, SKIRMISH_SIDES[side], x - Math.sin(yaw) * 5, z - Math.cos(yaw) * 5, yaw, { ev });
-    ev.foes = spawnSquad(game, s.kaelenDown ? ['brigand', 'brigand_cutthroat'] : ['brigand', 'brigand_cutthroat', 'brigand_brute'], x + Math.sin(yaw) * 5, z + Math.cos(yaw) * 5, yaw + Math.PI, { scaleTo: Math.max(game.ch.level, 4) });
+    ev.foes = spawnSquad(game, s.kaelenDown ? ['brigand', 'brigand_cutthroat'] : ['brigand', 'brigand_cutthroat', 'brigand_brute'], x + Math.sin(yaw) * 5, z + Math.cos(yaw) * 5, yaw + Math.PI);
     ev.foes.forEach((e, i) => e.setAggro(ev.members[i % ev.members.length]));
     for (const q of players(game)) if (Math.hypot(q.actor.pos.x - x, q.actor.pos.z - z) < 260) reward(game, q.actor, { toast: `Steel on ${near.def.name}: ${FACTIONS[side].short} and the Redwake are at it.`, kind: 'quest' });
     return ev;
@@ -788,6 +801,7 @@ KINDS.hunters = {
 
 // ---------------------------------------------------------------- Enclave cutters
 KINDS.cutter = {
+  seaAttack: true,
   start(game) {
     const p = game.player, b = p.boat, s = coastState(game.ch);
     if (!b || b.driver !== p || b.autopilot || s.ending === 'break' || s.ending === 'claim') return null;

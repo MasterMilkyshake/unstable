@@ -97,7 +97,10 @@ test('traders greet, trade, explain themselves and point the way to other places
     const trade = node.options.find((o) => o.do);
     trade.do(api);
     assert.equal(opened.at(-1), s.npc.shop);
-    assert.ok(node.options.some((o) => /^Ask about the (north|south|east|west|north-east|north-west|south-east|south-west)\.$/.test(o.label)), `${s.npc.name} has a rumour`);
+    const rumours = node.options.filter((o) => /^Ask about the (north|south|east|west|north-east|north-west|south-east|south-west)( \((close by|a fair walk|far off|nearer|farther|nearest|middle|farthest)\))?\.$/.test(o.label));
+    assert.ok(rumours.length > 0, `${s.npc.name} has a rumour`);
+    // two rumours the same way are told apart by distance, never two identical labels
+    assert.equal(new Set(rumours.map((o) => o.label)).size, rumours.length, `${s.npc.name}'s rumours read differently`);
     assert.ok(node.options.some((o) => o.label === 'Why camp here?'));
   }
   // +z is north and +x is WEST.

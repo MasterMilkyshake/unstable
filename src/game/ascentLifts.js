@@ -74,15 +74,18 @@ function maybeFinishRide(game, lift) {
   if (!lift.rideDir) return;
   const destId = lift.dest === lift.y1 ? lift.def.to : lift.def.from;
   if (onPad(game.player, lift, lift.y)) markDestination(game, lift, destId);
+  if (lift.ambushArmed && lift.dest === lift.y1) lift.ambushAt = (G.time || 0) + 1.5;
   lift.rideDir = 0;
   lift.ambushArmed = false;
 }
 
+// The first ride up is followed: once the cage has docked at the top (never during the ride,
+// when the rider is shut in the cage and can't fight back), something climbs out of the well
+// after it. maybeFinishRide arms `ambushAt`; it fires a moment after arrival.
 function maybeAmbush(game, lift) {
-  if (!lift.ambushArmed || lift.ambushed) return;
-  const span = lift.y1 - lift.y0;
-  const t = span > 0.1 ? (lift.y - lift.y0) / span : 0;
-  if (t < 0.45) return;
+  if (lift.ambushed || !(lift.ambushAt > 0) || (G.time || 0) < lift.ambushAt) return;
+  lift.ambushAt = 0;
+  if (!onPad(game.player, lift, lift.y) && game.player.pos.distanceTo(lift.pad.position) > 14) return; // left already: no ambush
   lift.ambushed = true;
   lift.ambushArmed = false;
   liftFlags(game)[`rift_lift_ambush_${lift.def.id}`] = true;
@@ -91,10 +94,10 @@ function maybeAmbush(game, lift) {
   pos.y += 0.1;
   pos.x += Math.sin(lift.ry) * 0.9;
   pos.z += Math.cos(lift.ry) * 0.9;
-  const e = game.spawnEnemy('riftling', pos, { scaleTo: game.player?.level || 0 });
+  const e = game.spawnEnemy('riftling', pos);
   e.ascentAmbush = true;
   e.setAggro?.(game.player);
-  toast('Something unhooks from the well and follows the cage.', 'bad');
+  toast('Something climbs out of the well after the cage.', 'bad');
   G.audio?.play('whisper', { pos });
 }
 
@@ -104,6 +107,7 @@ START_HOOKS.push((game) => {
   for (const lift of p?.lifts || []) {
     lift.rideDir = 0;
     lift.ambushArmed = false;
+    lift.ambushAt = 0;
     lift.ambushed = !!game.ch.flags[`rift_lift_ambush_${lift.def.id}`];
   }
   syncLiftInteracts(game);

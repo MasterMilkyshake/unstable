@@ -2,7 +2,7 @@
 // supplies, materials, quest items, and the mantras you know), filtered and searched. The pane
 // beside the grid shows the tile under the cursor, or the one selected, with what can be done
 // with it. Drag a supply or a mantra onto the hotbar strip below (or select it and click a key)
-// to put it on that key. Opened by the character menu's Backpack tab and by {backpack}.
+// to put it on that key. Opened by the character menu's Backpack tab.
 import { G } from '../core/globals.js';
 import { ATTRS, ELEMENTS, meetsReqs, reqsText } from '../data/stats.js';
 import { MANTRAS, MANTRA_TYPES } from '../data/mantras.js';
@@ -11,6 +11,7 @@ import { OUTFITS, ITEMS } from '../data/items.js';
 import { TRINKETS, TRINKET_SLOTS } from '../data/trinkets.js';
 import { modsText, trinketName, trinketLines, wearTrinket, takeOffTrinket } from '../game/gear.js';
 import { escapeHtml } from '../core/util.js';
+import { fitLabels } from './fitText.js';
 
 const { WEAPONS, WEAPON_CLASSES, ENCHANTS, RARITY_COLORS, weaponDisplayName } = Weapons;
 
@@ -86,7 +87,7 @@ const keyName = (i) => String((i + 1) % 10);
 
 function tile(e) {
   return `<div class="bp-tile ${view.sel === e.key ? 'sel' : ''} ${e.eq ? 'eq' : ''}" data-bp="${e.key}" title="${escapeHtml(e.name)}" ${e.hotEntry ? 'draggable="true"' : ''} style="--r:${e.color}">
-    <span class="bp-ico">${e.icon}</span>${e.n > 1 ? `<span class="bp-n">${e.n}</span>` : ''}${e.hot > 0 ? `<span class="bp-key">${keyName(e.hot)}</span>` : ''}${e.eq ? '<span class="bp-eq">E</span>' : ''}</div>`;
+    <span class="bp-lbl">${escapeHtml(e.name)}</span>${e.n > 1 ? `<span class="bp-n">${e.n}</span>` : ''}${e.hot > 0 ? `<span class="bp-key">${keyName(e.hot)}</span>` : ''}${e.eq ? '<span class="bp-eq">E</span>' : ''}</div>`;
 }
 
 export function gridHtml(p, ch) {
@@ -98,13 +99,13 @@ function weaponLines(ch, it) {
   const w = WEAPONS[it.id];
   const cls = WEAPON_CLASSES[w.cls];
   const en = it.enchant || w.enchant;
-  const lines = [`${cls.label} · ${w.damage} damage · ${w.posture} posture${it.temper ? ` · tempered +${it.temper}` : ''}`];
+  const lines = [`${cls.label}, ${w.damage} damage, ${w.posture} posture${it.temper ? `, tempered +${it.temper}` : ''}`];
   if (en && ENCHANTS[en]) lines.push(`<span style="color:${ENCHANTS[en].color}">${ENCHANTS[en].name}</span>`);
   // the systems session's handling line, when that build has it
   const feel = typeof Weapons.weaponFeelText === 'function' ? Weapons.weaponFeelText(w) : '';
   if (feel) lines.push(`<span class="muted">${escapeHtml(feel)}</span>`);
   if (w.reqs) lines.push(`<span class="${meetsReqs(w.reqs, ch.attrs) ? 'muted' : 'bad'}">Requires ${reqsText(w.reqs)}</span>`);
-  return { sub: `${cls.label} · ${w.rarity}`, desc: w.desc, lines };
+  return { sub: `${cls.label}, ${w.rarity}`, desc: w.desc, lines };
 }
 
 function itemNumbers(it) {
@@ -117,7 +118,7 @@ function itemNumbers(it) {
   if (it.sanity) n.push(`+${it.sanity} sanity`);
   if (it.ether) n.push(`+${it.ether} ether`);
   if (it.sell) n.push(`sells for ${it.sell}`);
-  return n.join(' · ');
+  return n.join(', ');
 }
 
 // The pane: what the tile is and what you can do with it.
@@ -137,14 +138,14 @@ export function detailHtml(p, ch, key = view.hover || view.sel) {
   } else if (kind === 'o') {
     const o = OUTFITS[id];
     const res = Object.entries(o.resist).map(([k, v]) => `${ELEMENTS[k].name} ${Math.round(v * 100)}%`).join(', ');
-    sub = `Outfit · ${o.rarity}`;
+    sub = `Outfit, ${o.rarity}`;
     desc = o.desc;
-    lines = [`${Math.round(o.armor * 100)}% armor${res ? ` · ${res}` : ''}`, o.mods ? modsText(o.mods) : '', o.reqs ? `<span class="${meetsReqs(o.reqs, ch.attrs) ? 'muted' : 'bad'}">Requires ${reqsText(o.reqs)}</span>` : ''].filter(Boolean);
+    lines = [`${Math.round(o.armor * 100)}% armor${res ? `, ${res}` : ''}`, o.mods ? modsText(o.mods) : '', o.reqs ? `<span class="${meetsReqs(o.reqs, ch.attrs) ? 'muted' : 'bad'}">Requires ${reqsText(o.reqs)}</span>` : ''].filter(Boolean);
     acts = e.eq ? '<span class="muted">Worn</span>' : `<button class="btn small primary" data-equip-o="${id}" ${meetsReqs(o.reqs, ch.attrs) ? '' : 'disabled title="Requirements not met"'}>Wear</button>`;
   } else if (kind === 't') {
     const t = ch.trinkets.find((x) => x.uid === id);
     const d = TRINKETS[t.id];
-    sub = `${TRINKET_SLOTS[d.slot].name} trinket · ${d.rarity}`;
+    sub = `${TRINKET_SLOTS[d.slot].name} trinket, ${d.rarity}`;
     desc = d.desc;
     lines = [...trinketLines(t), d.reqs ? `<span class="${meetsReqs(d.reqs, ch.attrs) ? 'muted' : 'bad'}">Requires ${reqsText(d.reqs)}</span>` : ''].filter(Boolean);
     acts = e.eq ? `<button class="btn small" data-bp-unwear="${d.slot}">Take off</button>` : `<button class="btn small primary" data-bp-wear="${t.uid}" ${meetsReqs(d.reqs, ch.attrs) ? '' : 'disabled title="Requirements not met"'}>Wear</button>`;
@@ -157,14 +158,14 @@ export function detailHtml(p, ch, key = view.hover || view.sel) {
   } else if (kind === 'm') {
     const m = MANTRAS[id];
     const el = ATTRS[m.el];
-    sub = `${el ? el.name : m.el === 'support' ? 'Support' : 'Physical'} · ${MANTRA_TYPES[m.type]}`;
+    sub = `${el ? el.name : m.el === 'support' ? 'Support' : 'Physical'}, ${MANTRA_TYPES[m.type]}`;
     desc = m.desc;
-    lines = [[`${m.ether} ether`, m.hpCost ? `${Math.round(m.hpCost * 100)}% health` : null, `${m.cd} s cooldown`].filter(Boolean).join(' · ')];
+    lines = [[`${m.ether} ether`, m.hpCost ? `${Math.round(m.hpCost * 100)}% health` : null, `${m.cd} s cooldown`].filter(Boolean).join(', ')];
   }
   const keys = e.hotEntry
     ? `<div class="bp-keys"><span class="muted">Hotbar</span>${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => `<button class="btn small ${e.hot === i ? 'primary' : ''}" data-bp-key="${i}">${keyName(i)}</button>`).join('')}${e.hot > 0 ? '<button class="btn small" data-bp-key="0" title="Take it off the hotbar">✕</button>' : ''}</div>`
     : '';
-  return `<div class="bp-head"><span class="bp-big" style="--r:${e.color}">${e.icon}</span><div><div class="bp-name" style="color:${e.color}">${escapeHtml(e.name)}${e.n > 1 ? ` <span class="muted">×${e.n}</span>` : ''}</div><div class="bp-sub">${escapeHtml(sub)}</div></div></div>
+  return `<div class="bp-head"><div><div class="bp-name" style="color:${e.color}">${escapeHtml(e.name)}${e.n > 1 ? ` <span class="muted">×${e.n}</span>` : ''}</div><div class="bp-sub">${escapeHtml(sub)}</div></div></div>
     ${desc ? `<div class="bp-desc">${escapeHtml(desc)}</div>` : ''}${lines.map((l) => `<div class="bp-line">${l}</div>`).join('')}
     <div class="bp-acts">${acts}</div>${keys}`;
 }
@@ -199,7 +200,7 @@ function stripHtml(ch) {
       icon = '✦';
       name = MANTRAS[h.id].name;
     }
-    return `<div class="bp-slot ${i === 0 ? 'fixed' : ''} ${name ? 'full' : ''}" data-bp-slot="${i}" title="${escapeHtml(name || 'Empty')}"><span class="k">${keyName(i)}</span><span class="bp-ico">${icon}</span>${name && i > 0 ? `<span class="bp-x" data-bp-clear="${i}">×</span>` : ''}</div>`;
+    return `<div class="bp-slot ${i === 0 ? 'fixed' : ''} ${name ? 'full' : ''}" data-bp-slot="${i}" title="${escapeHtml(name || 'Empty')}"><span class="k">${keyName(i)}</span><span class="bp-lbl">${escapeHtml(name)}</span>${name && i > 0 ? `<span class="bp-x" data-bp-clear="${i}">×</span>` : ''}</div>`;
   }).join('');
 }
 
@@ -294,6 +295,7 @@ export function bindBackpack(el) {
   const redraw = (part) => {
     const box = el.querySelector(part === 'grid' ? '.bp-grid' : '.bp-detail');
     if (box) box.innerHTML = part === 'grid' ? gridHtml(p(), p().ch) : detailHtml(p(), p().ch);
+    if (box && part === 'grid') fitLabels(box);
   };
   el.addEventListener('input', (e) => {
     if (!e.target.matches('[data-bp-search]')) return;
@@ -339,6 +341,7 @@ export function bindBackpack(el) {
       G.ui.refreshHotbar();
       const strip = el.querySelector('.bp-strip');
       if (strip) strip.innerHTML = stripHtml(ch);
+      if (strip) fitLabels(strip);
       redraw('grid');
       redraw('detail');
     }

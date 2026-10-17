@@ -23,6 +23,7 @@ const { CHESTS } = await load('data/world.js');
 const { INVESTIGATIONS } = await load('data/chronicle.js');
 const { TRIALS, MARK_SHOP } = await load('data/arena.js');
 const { BOATS } = await load('data/boats.js');
+const { INCOME } = await load('data/loot.js');
 const { xpForLevel, START_POINTS, POINTS_PER_LEVEL } = await load('data/stats.js');
 let ADV_SHOPS = {};
 try {
@@ -50,14 +51,14 @@ for (const q of Object.values(QUESTS)) {
     lvl = foes.length ? Math.round(foes.reduce((a, t) => a + ENEMIES[t].level, 0) / foes.length) : 8;
   }
   const b = questBand[Math.max(0, bandOf(Math.min(20, lvl)))];
-  b.silver += r.silver || 0;
+  b.silver += Math.round((r.silver || 0) * INCOME.quest);
   b.xp += r.xp || 0;
   b.n++;
 }
 const foesAt = (lvl) => Object.entries(ENEMIES).filter(([, e]) => !e.boss && e.level && Math.abs(e.level - lvl) <= 2 && e.xp > 0);
 const chestBand = BANDS.map(() => 0);
 for (const c of CHESTS) chestBand[0] += 0; // chests are spread over the world: counted in total below
-const chestSilver = CHESTS.reduce((a, c) => a + mean(c.loot && c.loot.silver), 0);
+const chestSilver = CHESTS.reduce((a, c) => a + mean(c.loot && c.loot.silver), 0) * INCOME.chest;
 const invSilver = INVESTIGATIONS.reduce((a, i) => a + (i.reward.silver || 0), 0);
 for (let i = 0; i < BANDS.length; i++) {
   const [a, b] = BANDS[i];

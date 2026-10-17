@@ -8,7 +8,7 @@
 export const REMEMBRANCE = {
   base: 5, // every name is remembered
   perPower: 2, // each Power above 1
-  perChapter: 6, // each chapter of the main story finished
+  perChapter: 6, // each story thread finished
   perGreatFoe: 8, // each great foe slain
   perHour: 4, // each full hour played...
   hourCap: 6, // ...up to this many

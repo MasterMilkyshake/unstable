@@ -54,10 +54,11 @@ const SETTING_RULES = {
   viewDistance: [1.0, 0.5, 1.5],
   cameraShake: [1.0, 0, 1.5],
   bounceLight: [false], // P6, the world-life session's: off until the user judges it
-  tips: [true], // first-time tips (game/tips.js)
+  tipPopups: [false], // first-time tip cards (game/tips.js): off unless chosen; the Journal's Guide keeps them all
   uiScale: [1.0, 0.85, 1.3], // the interface's size: menus, HUD and text
   reduceFlashing: [false], // dims screen flashes and lowers camera shake
   soundCues: [false], // captions for warning sounds, with their direction
+  logDepth: [true], // logarithmic depth buffer (core/logDepth.js): no distant z-fighting; read at start-up only
 };
 
 export const Save = {

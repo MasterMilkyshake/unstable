@@ -30,7 +30,7 @@ test('guardian history from before acceptance counts and completion consumes cor
   assert.equal(ch.quests.fracture.state, 'done');
   assert.equal(ch.inventory.items.fracture_core, 0);
   assert.equal(rewards.xp, 2500);
-  assert.equal(rewards.silver, 500);
+  assert.equal(rewards.silver, 225); // the quest's 500, paid at INCOME.quest (data/loot.js)
   assert.deepEqual(rewards.items, [['ember_of_life', 1]]);
 });
 
@@ -60,8 +60,11 @@ test("Hale offers the Watch's own path beside the brigand work, not only after i
   const labels = () => DIALOGUES.hale(api).options.map((o) => o.label);
   assert.ok(labels().includes('Any work for a blade?'));
   assert.ok(labels().includes('The Watch looks stretched.'), 'the Watch path is offered before Red Bandanas is taken');
+  // the open world: the Watch's own path does not wait on the Writ thread
   quests.writ.state = 'active';
-  assert.ok(!labels().includes('The Watch looks stretched.'), 'and not before the writ is answered');
+  assert.ok(labels().includes('The Watch looks stretched.'), 'still offered while the writ is open');
+  delete quests.writ;
+  assert.ok(labels().includes('The Watch looks stretched.'), 'and to someone who never took the writ');
 });
 
 test('each officer opens its faction\'s stores to the Trusted, not to the wanted or before', async () => {

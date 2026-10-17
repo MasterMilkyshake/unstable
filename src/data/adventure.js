@@ -287,16 +287,38 @@ const RUMOUR = {
   surveyors_camp: 'Ama\'s people are stringing lines through the trees. The Mossbound cut them. Odile ties them back up and keeps talking to both. Brave or daft.',
 };
 
+// how far off a rumoured place lies, in a traveller's words
+function farWord(d) {
+  return d < 260 ? 'close by' : d < 700 ? 'a fair walk' : 'far off';
+}
+
 function rumourOptions(api, npc, site) {
-  const out = [];
+  const picks = [];
   for (const id of npc.rumours) {
     const t = ADVENTURE_SITES.find((s) => s.id === id);
     if (!t || t === site || !RUMOUR[id]) continue;
-    const dir = compassWord(site.x, site.z, t.x, t.z);
-    out.push({ label: `Ask about the ${dir}.`, next: { text: RUMOUR[id], options: [{ label: 'Anything else?', next: () => dialogueFor(site)(api) }, { label: 'Farewell.' }] } });
-    if (out.length >= 3) break;
+    picks.push({ id, dir: compassWord(site.x, site.z, t.x, t.z), d: Math.hypot(t.x - site.x, t.z - site.z) });
+    if (picks.length >= 3) break;
   }
-  return out;
+  // two rumours the same way read alike ("Ask about the north-west." twice): say how far, and
+  // nearest first if that still doesn't tell them apart
+  const sameDir = (p) => picks.filter((q) => q.dir === p.dir);
+  const firstAt = (p) => picks.findIndex((q) => q.dir === p.dir);
+  picks.sort((a, b) => firstAt(a) - firstAt(b) || (a.dir === b.dir ? a.d - b.d : 0));
+  return picks.map((p) => {
+    let label = `Ask about the ${p.dir}.`;
+    const same = sameDir(p);
+    if (same.length > 1) {
+      const bands = same.map((q) => farWord(q.d));
+      if (new Set(bands).size === bands.length) label = `Ask about the ${p.dir} (${farWord(p.d)}).`;
+      else {
+        const rank = same.slice().sort((a, b) => a.d - b.d).indexOf(p);
+        const words = same.length === 2 ? ['nearer', 'farther'] : ['nearest', 'middle', 'farthest'];
+        label = `Ask about the ${p.dir} (${words[rank]}).`;
+      }
+    }
+    return { label, next: { text: RUMOUR[p.id], options: [{ label: 'Anything else?', next: () => dialogueFor(site)(api) }, { label: 'Farewell.' }] } };
+  });
 }
 
 function dialogueFor(site) {

@@ -30,7 +30,7 @@ export const ELEMENTS = {
   storm: { name: 'Lightning', color: '#ffe14d' },
   gale: { name: 'Wind', color: '#a6ffd2' },
   umbra: { name: 'Shadow', color: '#a274ff' },
-  blood: { name: 'Blood', color: '#e0243f' },
+  blood: { name: 'Bleed', color: '#e0243f' }, // bleeding: resisted, but not an attribute or an attunement
 };
 
 // What armour and resistance can hold off: the attunements' elements, and bleeding, which any

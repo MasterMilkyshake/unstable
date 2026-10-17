@@ -7,8 +7,9 @@
 //   realm {realm: 'rift' | 'surface'}             quest {quest}   level {level}
 //   any {of: [objective, ...]} — done when any one of them is
 // State lives in ch.quests[id] = { state, progress, stage, sp: [per-objective progress], talked: {} }.
-// Main-story quests carry `main: true` and chain into `next` when completed (data/story.js).
+// Story threads (data/story.js) are ordinary quests: offered by their NPCs, never started for you.
 import { G } from '../core/globals.js';
+import { paid } from '../data/loot.js';
 import { QUESTS } from '../data/quests.js';
 import { ITEMS } from '../data/items.js';
 import { WEAPONS } from '../data/weapons.js';
@@ -45,12 +46,10 @@ export class Quests {
     if (def.stages && def.stages[0].onEnter) this._enter(id, 0);
     this._check(id);
     G.audio.play('quest');
-    if (!quiet) {
-      if (def.main) {
-        G.ui.banner(def.chapter ? `CHAPTER ${def.chapter}` : 'THE UNSTABLE TIDE');
-        G.ui.toast(def.chapter ? `Chapter ${def.chapter}: ${def.name}` : def.name, 'quest');
-      } else G.ui.toast(`New quest: ${def.name}`, 'quest');
-    }
+    if (!quiet) G.ui.toast(`New quest: ${def.name}`, 'quest');
+    // the compass follows what you last took up, unless you are already following something
+    const tracked = this.ch.quests[this.ch.trackedQuest];
+    if (!quiet && (!tracked || tracked.state === 'done')) this.ch.trackedQuest = id;
     G.ui.refreshQuests();
     this.game.save();
   }
@@ -127,7 +126,7 @@ export class Quests {
     const q = this.ch.quests[id];
     q.stage ||= 0;
     // a pure travel step ("find Brigand Hold") is moot once the step after it is already done,
-    // e.g. its guardian fell before the chapter began; nothing else is ever skipped
+    // e.g. its guardian fell before the quest was taken up; nothing else is ever skipped
     const travelOnly = (k) => stageObjectives(def, k).every((o) => o.type === 'reach' || o.type === 'realm');
     const stateDone = (k) => stageObjectives(def, k).every((o, i) => ['boss', 'lore', 'collect', 'quest', 'level', 'any'].includes(o.type) && this._objDone(id, o, i));
     const skipTravel = () => {
@@ -212,8 +211,9 @@ export class Quests {
     q.state = 'done';
     const r = def.rewards || {};
     const p = G.player;
-    if (r.silver) {
-      p.addSilver(r.silver);
+    const silver = paid(r.silver, 'quest');
+    if (silver) {
+      p.addSilver(silver);
       G.audio.play('coin');
     }
     for (const [it, n] of r.items || []) this.game.giveItem(it, n);
@@ -222,8 +222,8 @@ export class Quests {
     for (const t of r.trinkets || []) act('giveTrinket', t);
     for (const [f, n] of Object.entries(r.rep || {})) if (ACTIONS.addRep) ACTIONS.addRep(f, n);
     for (const [k, v] of Object.entries(r.flags || {})) this.ch.flags[k] = v;
-    G.ui.banner(def.main ? 'CHAPTER COMPLETE' : 'QUEST COMPLETE');
-    G.ui.toast(`${def.main ? 'Chapter complete' : 'Quest complete'}: ${def.name}${r.silver ? `  ·  +${r.silver} silver` : ''}`, 'quest');
+    G.ui.banner('QUEST COMPLETE');
+    G.ui.toast(`Quest complete: ${def.name}${silver ? `, +${silver} silver` : ''}`, 'quest');
     if (r.xp) p.addXp(r.xp);
     if (def.onComplete) {
       try {
@@ -233,11 +233,6 @@ export class Quests {
       }
     }
     if (def.final) this.game.onFinalVictory();
-    // the story continues
-    if (def.next && QUESTS[def.next] && !this.ch.quests[def.next]) {
-      const nd = QUESTS[def.next];
-      if (!nd.minLevel || this.ch.level >= nd.minLevel) setTimeout(() => this.game.ch === this.ch && this.start(def.next), 3500);
-    }
     G.ui.refreshQuests();
     this.game.save();
   }
@@ -336,20 +331,20 @@ export class Quests {
           const objs = st.objectives || [st];
           if (st.objectives) {
             const left = objs.map((o, i) => [o, i]).filter(([o, i]) => !this._objDone(id, o, i)).map(([o, i]) => this.objectiveText(id, o, i));
-            text = `${st.text}${left.length ? ` — ${left.join(' · ')}` : ''}`;
+            text = `${st.text}${left.length ? ` — ${left.join(', ')}` : ''}`;
           } else text = this.objectiveText(id, objs[0], 0) || st.text;
         } else {
           const o = def.objectives[0];
           text = o.text;
           if (o.type === 'kill' || o.type === 'collect') text += ` (${Math.min(q.progress || 0, o.count)}/${o.count})`;
           const missing = (def.requiredBosses || []).filter((type) => !(this.ch.bossesDefeated || []).includes(type));
-          if (missing.length) text += ` · Still required: ${missing.map((type) => ENEMIES[type].name).join(', ')}`;
+          if (missing.length) text += `, Still required: ${missing.map((type) => ENEMIES[type].name).join(', ')}`;
         }
         if (q.state === 'ready') text = `Return to ${this.giverName(id)}`;
-        return { id, name: def.main && def.chapter ? `${def.chapter} · ${def.name}` : def.name, text, ready: q.state === 'ready', desc: def.desc, main: !!def.main, tracked: this.ch.trackedQuest === id };
+        return { id, name: def.name, text, ready: q.state === 'ready', desc: def.desc, tracked: this.ch.trackedQuest === id };
       });
-    // the tracked quest first, then the main story, then the rest
-    return list.sort((a, b) => (b.tracked - a.tracked) || (b.main - a.main));
+    // the tracked quest first
+    return list.sort((a, b) => b.tracked - a.tracked);
   }
 }
 

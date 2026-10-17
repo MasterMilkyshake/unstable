@@ -785,7 +785,10 @@ class Island {
     geo.setIndex(index);
     geo.computeVertexNormals();
     geo.computeBoundingSphere();
-    const mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0 });
+    // The ground is drawn a hair behind its true depth, so everything laid flush on it (lanes,
+    // paving, floors, plinths, footings cut to the grade) wins the depth test instead of
+    // flickering against it; something meant to be buried is buried deeper than this.
+    const mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.95, metalness: 0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 2 });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.receiveShadow = true;
     mesh.castShadow = false;

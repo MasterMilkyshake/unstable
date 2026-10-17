@@ -49,13 +49,13 @@ export function openCookMenu(ui) {
         .map(([id, n]) => {
           const def = PSEUDO[id] || ITEMS[id];
           const got = have(ch, id);
-          return `<span class="${got >= n ? 'good' : 'bad'}">${def.icon} ${escapeHtml(def.name)} ${got}/${n}</span>`;
+          return `<span class="${got >= n ? 'good' : 'bad'}">${escapeHtml(def.name)} ${got}/${n}</span>`;
         })
-        .join(' · ');
-      return `<div class="shop-row"><div class="ico">${it.icon}</div><div style="flex:1"><div class="nm">${escapeHtml(it.name)}</div><div class="ds">${escapeHtml(it.desc)}</div><div class="ds">${needs}</div></div><button class="btn small" data-cook="${r.id}" ${ok ? '' : 'disabled'}>Cook</button></div>`;
+        .join(', ');
+      return `<div class="shop-row"><div style="flex:1"><div class="nm">${escapeHtml(it.name)}</div><div class="ds">${escapeHtml(it.desc)}</div><div class="ds">${needs}</div></div><button class="btn small" data-cook="${r.id}" ${ok ? '' : 'disabled'}>Cook</button></div>`;
     }).join('');
     return `<h2>COOKING</h2>
-      <div class="shop-row"><div class="ico">🔥</div><div style="flex:1"><div class="nm">Grill raw food</div><div class="ds">Cook every raw fish and cut of meat you carry (${raw}).</div></div><button class="btn small primary" data-a="raw" ${raw ? '' : 'disabled'}>Cook all</button></div>
+      <div class="shop-row"><div style="flex:1"><div class="nm">Grill raw food</div><div class="ds">Cook every raw fish and cut of meat you carry (${raw}).</div></div><button class="btn small primary" data-a="raw" ${raw ? '' : 'disabled'}>Cook all</button></div>
       <h3>RECIPES</h3><div class="shop-list scroll">${rows}</div>
       <div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px">Meals grant a lasting buff. Ingredients: forage bushes, hives, lilies and peppers, or buy from grocers.</span><span class="space"></span><button class="btn" data-a="close">Done</button></div>`;
   };

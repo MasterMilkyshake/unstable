@@ -55,8 +55,7 @@ Each player needs their own browser profile or computer, because saves live in t
 | `1–0` | `1` raises or lowers your weapon (a new character wakes with its fists down); `2`–`0` cast a mantra or use an item. |
 | `B` | Grip (execute) a knocked enemy. |
 | `E` | Interact or talk. |
-| `Tab` | Character: attributes and investment, talents, mantras, the backpack, quests. |
-| `` ` `` | Backpack: everything you carry and the mantras you know, as tiles; drag supplies and mantras onto the hotbar. |
+| `Tab` | Character: attributes and investment, talents, mantras, the backpack (everything you carry; drag supplies and mantras onto the hotbar), quests. |
 | `M` | Map. |
 | `J` | Journal: the story, standing, the Atlas, sources, investigations, the Guide. |
 | `Z` | Resonance ability (from Power 15, once attuned at the Vowkeeper). |
@@ -75,7 +74,7 @@ Keys can't be rebound. **How to Play** in the menu lists the same controls.
   - Attunements: Emberweave, Rimebind, Stormcall, Galesong, Umbracast.
 - Power 1–20, gated by investment, as in Deepwoken: experience earns investment points one at a time; you invest them while sitting at a campfire (any town's, or one you lay from Sticks or Firewood), and the fifteenth since your last Power raises you to the next, with a full heal and a talent card and a mantra card to choose anywhere. An innkeeper's room sets where you wake.
 - 109 talent cards, including Vow talents, drawn from what your stats qualify for; many change how you fight, and some exclude each other.
-- A **backpack** (`` ` ``) in Deepwoken's manner: everything you carry, and the mantras you know, as tiles with filters and search; drag supplies and mantras onto the hotbar.
+- A **backpack** (in the character menu, `Tab`) in Deepwoken's manner: everything you carry, and the mantras you know, as tiles with filters and search; drag supplies and mantras onto the hotbar.
 - 9 Vows (oaths), sworn at the Vowkeeper's Perch at Power 5. Each grants unique talents and a mantra.
 
 **Combat**
@@ -169,7 +168,8 @@ Read the [complete world bible](docs/WORLD_BIBLE.md) for author-facing canon, ch
 - Mouse sensitivity, field of view, invert Y, camera shake; master, effects and music volume; view distance, shadows and damage numbers.
 - Quality **High** (bloom, light shafts, water reflections), **Medium** (the same at a lower resolution, no reflections) or **Low** (no post-processing).
 - **Interface Size** (85–130%) scales the HUD and every menu; **Reduce flashing and shake** dims screen flashes and holds shake low; **Sound cues** caption warning sounds with their direction; **Tips** explain each system the first time it matters (the Journal's Guide keeps them all).
-- Every setting applies at once and is kept for every slot. Keys can't be rebound.
+- **Precise depth** (on by default) uses a logarithmic depth buffer so distant walls and roofs don't flicker into each other; it costs a few percent of frame time. It applies on reload; `?logdepth=0` or `?logdepth=1` in the URL overrides it for one page load.
+- Every other setting applies at once; all are kept for every slot. Keys can't be rebound.
 
 ## Validation
 

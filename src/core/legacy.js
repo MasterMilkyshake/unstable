@@ -41,6 +41,8 @@ function cleanEntry(e) {
   return {
     id: str(e.id, 'l' + count(e.at)), name: str(e.name, 'Unnamed'), race: str(e.race), raceName: str(e.raceName),
     level: Math.max(1, count(e.level)), cause: str(e.cause), playtime: count(e.playtime), kills: count(e.kills),
+    // chapters/chapter: the stored names from when the story was one chain; they now hold the
+    // number of story threads taken up and the latest one's name
     chapters: count(e.chapters), chapter: str(e.chapter), foes: Array.isArray(e.foes) ? e.foes.filter((f) => typeof f === 'string') : [],
     earned: count(e.earned), at: count(e.at), slot: count(e.slot), heirloom: str(e.heirloom), claimedBy: str(e.claimedBy),
   };
@@ -61,7 +63,7 @@ export function sanitizeLegacy(raw) {
   return l;
 }
 
-// How far a character got: chapters of the main story reached and finished, the furthest one.
+// How far a character got: story threads taken up and finished, the last one in journal order.
 export function storyProgress(ch) {
   const quests = isObj(ch.quests) ? ch.quests : {};
   let reached = 0;
@@ -73,7 +75,7 @@ export function storyProgress(ch) {
     reached++;
     if (q.state === 'done') done++;
     const def = QUESTS[id];
-    if (def) furthest = `${def.chapter ? (/^[IVX]+$/.test(def.chapter) ? 'Act ' + def.chapter : def.chapter) + ' · ' : ''}${def.name}`;
+    if (def) furthest = def.name;
   }
   return { reached, done, furthest };
 }

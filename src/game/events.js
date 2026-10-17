@@ -117,7 +117,7 @@ function startBreach(game) {
     const z = pos.z + Math.sin(a) * 5;
     const p = new THREE.Vector3(x, game.world.groundAt(x, z, pos.y + 6) + 0.1, z);
     const type = tier.types[Math.floor(Math.random() * tier.types.length)];
-    const e = game.spawnEnemy(type, p, { scaleTo: Math.max(lvl, 6) });
+    const e = game.spawnEnemy(type, p);
     e.breach = true;
     e.home = pos.clone();
     ev.enemies.push(e);
@@ -137,7 +137,7 @@ function breachReward(game, ev) {
   if (Math.random() < 0.3) game.giveItem(['elixir', 'sanity_draught', 'iron_draught', 'ether_tonic'][randInt(0, 3)], 1);
   G.player.addXp(80 + lvl * 30);
   G.ui.banner('BREACH SEALED');
-  G.ui.toast(`+${silver} silver · the Rift's leavings are yours`, 'good');
+  G.ui.toast(`+${silver} silver, the Rift's leavings are yours`, 'good');
   G.audio.play('bell', { vol: 0.6 });
   G.vfx.burst(ev.pos.clone().add(new THREE.Vector3(0, 2, 0)), 'umbra', 60, { speed: 9, up: 6 });
   game.ch.stats.breaches = (game.ch.stats.breaches || 0) + 1;
@@ -252,7 +252,8 @@ UPDATE_HOOKS.push((game, dt) => {
   nextT -= dt;
   if (nextT > 0) return;
   nextT = 30; // retry soon if no spot found
-  if (p.inDanger || p.swimming) return;
+  // nor while riding a lift cage or a carrier line, shut in and unable to fight
+  if (p.inDanger || p.swimming || p.zip || p.liftRideUntil > (G.time || 0)) return;
   // What happens depends on where you are and when: the night has its own road.
   const night = game.world.sky.isNight();
   const table = [

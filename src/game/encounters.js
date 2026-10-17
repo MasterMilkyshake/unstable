@@ -37,7 +37,7 @@ export function startWashup(game, findSpot, endEvent) {
     const x = pos.x + Math.cos(a) * 4;
     const z = pos.z + Math.sin(a) * 4;
     const p = new THREE.Vector3(x, game.world.groundAt(x, z, pos.y + 6) + 0.1, z);
-    ev.enemies.push(game.spawnEnemy('mudlurker', p, { scaleTo: Math.max(game.ch.level, 3) }));
+    ev.enemies.push(game.spawnEnemy('mudlurker', p));
   }
   const it = {
     id: 'washup', kind: 'washup', pos: pos.clone().add(new THREE.Vector3(0, 0.6, 0)), radius: 3.2, label: 'Salvage the wash-up',
@@ -75,7 +75,7 @@ export function startPatrol(game, findSpot) {
     const z = pos.z + Math.sin(a) * 3.5;
     const p = new THREE.Vector3(x, game.world.groundAt(x, z, pos.y + 6) + 0.1, z);
     const type = types[Math.floor(Math.random() * types.length)];
-    const e = game.spawnEnemy(type, p, { scaleTo: Math.max(game.ch.level, 4) });
+    const e = game.spawnEnemy(type, p);
     e.home = pos.clone();
     ev.enemies.push(e);
   }
@@ -120,7 +120,7 @@ export function startAmbush(game, findSpot) {
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2;
     const x = pos.x + Math.cos(a) * 3, z = pos.z + Math.sin(a) * 3;
-    const e = game.spawnEnemy(table.types[i], new THREE.Vector3(x, game.world.groundAt(x, z, pos.y + 6) + 0.1, z), { scaleTo: Math.max(game.ch.level, 4) });
+    const e = game.spawnEnemy(table.types[i], new THREE.Vector3(x, game.world.groundAt(x, z, pos.y + 6) + 0.1, z));
     e.setAggro(p);
     ev.enemies.push(e);
   }
@@ -159,7 +159,7 @@ export function startBeset(game, findSpot, endEvent) {
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2 + 0.5;
     const x = pos.x + Math.cos(a) * 4, z = pos.z + Math.sin(a) * 4;
-    const e = game.spawnEnemy(types[i % types.length], new THREE.Vector3(x, game.world.groundAt(x, z, pos.y + 6) + 0.1, z), { scaleTo: Math.max(game.ch.level, 3) });
+    const e = game.spawnEnemy(types[i % types.length], new THREE.Vector3(x, game.world.groundAt(x, z, pos.y + 6) + 0.1, z));
     e.home = pos.clone();
     ev.enemies.push(e);
   }
@@ -208,7 +208,7 @@ export function startWanderer(game, findSpot) {
   if (!game.world.sky.isNight()) return null;
   const pos = findSpot(game, 70, 130);
   if (!pos) return null;
-  const e = game.spawnEnemy('night_watchman', pos.clone().add(new THREE.Vector3(0, 0.1, 0)), { scaleTo: Math.max(game.ch.level, 10) });
+  const e = game.spawnEnemy('night_watchman', pos.clone().add(new THREE.Vector3(0, 0.1, 0)));
   // lent by the world, which keeps the scene's light count fixed (see World.lendLight)
   const lamp = e.model && e.model.root ? game.world.lendLight(e.model.root, new THREE.Vector3(0.6, 1.6, 0.4), '#ffcf7a', 20, 1.5, 4) : null;
   const route = [];

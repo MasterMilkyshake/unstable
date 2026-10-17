@@ -92,7 +92,7 @@ test('Remembrance scales with how far the character got', () => {
   const v = veteran(game);
   const p = storyProgress(v);
   assert.deepEqual([p.reached, p.done], [5, 4]);
-  assert.match(p.furthest, /^Act II · /);
+  assert.equal(p.furthest, 'A Letter Sealed in Grey', 'the last thread taken up, by name');
   const r = REMEMBRANCE;
   assert.equal(remembranceFor(v), r.base + 9 * r.perPower + 4 * r.perChapter + 2 * r.perGreatFoe + 2 * r.perHour);
   v.stats.playtime = 40 * 3600;

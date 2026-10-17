@@ -331,8 +331,8 @@ ACTIONS.openBoatyard = (ui = G.ui, dockId) => {
       <p class="muted" style="text-align:center;margin-top:0">A rented boat waits at the end of the dock. Renting another returns the last one. Friends can board as passengers [E].</p>
       <div class="shop-list">${RENTABLE.map((t) => {
         const b = BOATS[t];
-        return `<div class="shop-row"><div style="flex:1"><div class="nm">${b.name}</div><div class="ds">${escapeHtml(b.desc)}</div><div class="ds">${b.seats.length} seats · ${b.speed}-${b.boost} knots</div></div><div class="pr">${price(t)} silver</div><button class="btn small primary" data-rent="${t}" ${game.ch.silver < price(t) ? 'disabled' : ''}>Rent</button></div>`;
-      }).join('')}</div><div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px">W/S throttle · A/D steer · Shift for speed · E to disembark</span><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`,
+        return `<div class="shop-row"><div style="flex:1"><div class="nm">${b.name}</div><div class="ds">${escapeHtml(b.desc)}</div><div class="ds">${b.seats.length} seats, ${b.speed}-${b.boost} knots</div></div><div class="pr">${price(t)} silver</div><button class="btn small primary" data-rent="${t}" ${game.ch.silver < price(t) ? 'disabled' : ''}>Rent</button></div>`;
+      }).join('')}</div><div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px">W/S throttle, A/D steer, Shift for speed, E to disembark</span><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`,
     onClick: (e) => {
       const b = e.target.closest('[data-rent]');
       if (!b) return;

@@ -29,6 +29,9 @@ const _move = new THREE.Vector3();
 const LATCH_LO = 1.2; // a top lower than this above the feet is jumped or stepped onto
 const LATCH_HI = 2.3; // the hands' reach above the feet
 const HANG = 1.95; // the feet hang this far below the edge
+const COYOTE = 0.12; // a jump pressed this soon after the feet left an edge (a tread, a kerb) still jumps
+const JUMP_BUFFER = 0.12; // a jump pressed this soon before landing jumps on touching down
+const GRAB_INTO = 0.5; // the hands catch an edge only when the input pushes into its wall (within 60 degrees)
 
 export class Player extends Actor {
   constructor(ch) {
@@ -63,7 +66,8 @@ export class Player extends Actor {
     this.hangY = 0; // the edge's height while hanging
     this.charging = false; // mana charging is gone; kept false for the LAN pose flag and the rig
     // keys pressed a moment before they can act still fire (combat/rules.js INPUT_BUFFER)
-    this.buf = { dodge: 0, crit: 0, chase: 0 };
+    this.buf = { dodge: 0, crit: 0, chase: 0, jump: 0 };
+    this.coyoteT = 0; // seconds a ground jump stays open after the feet left the ground
     this.lmbPress = 0; // counts LMB presses: a swing holds (flourish) only on the press that started it
     this.chaseWin = 0; // after an uppercut lands: seconds left to leap after the foe
     this.chaseTarget = null;
@@ -298,12 +302,25 @@ export class Player extends Actor {
     const ch = this.ch;
     const need = xpForLevel(ch.level);
     ch.xp += amount;
+    let lost = 0;
     if (ch.xp > need) {
       const cap = ch.level + 1 < MAX_LEVEL ? xpForLevel(ch.level + 1) : 0;
-      ch.xpBank = Math.min(cap, ch.xpBank + ch.xp - need);
+      const want = ch.xpBank + ch.xp - need;
+      ch.xpBank = Math.min(cap, want);
+      lost = want - ch.xpBank;
       ch.xp = need;
     }
     this.earnPoints();
+    // The bank holds one Power's worth: say so when XP spills past it, instead of losing it silently.
+    if (lost > 0) this.xpCapped(Math.round(lost));
+  }
+
+  xpCapped(lost) {
+    this.xpLost = (this.xpLost || 0) + lost;
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    if (this._capToastAt && now - this._capToastAt < 15000) return;
+    this._capToastAt = now;
+    G.ui && G.ui.toast && G.ui.toast(`XP capped: ${lost} XP lost. Rest at a campfire and invest your points to rise, then XP flows again.`, 'bad');
   }
 
   // Points due for the XP gathered toward the next Power, paid one at a time.
@@ -1125,12 +1142,47 @@ export class Player extends Actor {
     return top;
   }
 
+  // The outward normal of the collider wall straight ahead at chest height, from two rays either
+  // side of the body's centre line (their hit points give the face's run), or null. A terrain
+  // shelf has no collider face: its slope gives the normal.
+  wallNormal() {
+    const f = forwardFromYaw(this.yaw, _v);
+    const fx = f.x, fz = f.z, rx = -fz, rz = fx, y = this.pos.y + 1.1, far = this.radius + 0.9;
+    const cl = G.world.colliders;
+    const hits = [];
+    for (const o of [-0.22, 0.22]) {
+      const ox = this.pos.x + rx * o, oz = this.pos.z + rz * o;
+      const d = cl.raycast(ox, y, oz, fx, 0, fz, far);
+      if (d < far) hits.push([ox + fx * d, oz + fz * d]);
+    }
+    if (hits.length === 2) {
+      const tx = hits[1][0] - hits[0][0], tz = hits[1][1] - hits[0][1];
+      const tl = hypot(tx, tz);
+      if (tl > 1e-4) {
+        // the face's normal, the side facing the body
+        let nx = -tz / tl, nz = tx / tl;
+        if (nx * fx + nz * fz > 0) { nx = -nx; nz = -nz; }
+        return { x: nx, z: nz };
+      }
+    }
+    if (hits.length) return { x: -fx, z: -fz };
+    const T = G.world.terrain, e = 0.5;
+    const px = this.pos.x + fx * (this.radius + 0.45), pz = this.pos.z + fz * (this.radius + 0.45);
+    const gx = T.heightAt(px + e, pz) - T.heightAt(px - e, pz), gz = T.heightAt(px, pz + e) - T.heightAt(px, pz - e);
+    const gl = hypot(gx, gz);
+    return gl > 1e-3 ? { x: -gx / gl, z: -gz / gl } : { x: -fx, z: -fz };
+  }
+
   // Catch the ledge in front, unless the jump would carry the feet over it anyway. One too low to
-  // hang from (the feet would touch the ground) is pulled straight up and over.
-  tryLatch() {
+  // hang from (the feet would touch the ground) is pulled straight up and over. The input must
+  // push into the wall: running past a wall's top, or along it, catches nothing.
+  tryLatch(input) {
     if (this.climbing || this.latchCd > 0 || this.vel.y < -10 || this.latches >= this.derived.latches) return;
     const top = this.probeLedge();
     if (!(top > -Infinity)) return;
+    const n = this.wallNormal();
+    const il = input ? hypot(input.x, input.z) : 0;
+    if (input && il > 0.1 && -(input.x * n.x + input.z * n.z) / il < GRAB_INTO) return;
     const apex = this.pos.y + (this.vel.y > 0 ? (this.vel.y * this.vel.y) / (2 * GRAVITY) : 0);
     if (apex > top + 0.1) return;
     const { colliders: cl, terrain } = G.world;
@@ -1143,12 +1195,25 @@ export class Player extends Actor {
       G.audio.play('jump', { pos: this.pos, vol: 0.5 });
       return;
     }
+    // square to the wall, up against it, the hands on its edge: face the wall's normal, then
+    // close the gap along it, so a diagonal approach no longer hangs askew, half off the edge.
+    // If the edge is not there square on (a pillar's corner), nothing is caught.
+    const was = { x: this.pos.x, y: this.pos.y, z: this.pos.z, yaw: this.yaw };
+    this.pos.y = top - HANG;
+    this.yaw = Math.atan2(-n.x, -n.z);
+    const reach = this.radius + 1.2;
+    const gap = cl.raycast(this.pos.x, this.pos.y + HANG - 0.85, this.pos.z, -n.x, 0, -n.z, reach);
+    if (gap < reach) this.pos.addScaledVector(_v.set(-n.x, 0, -n.z), gap - this.radius - 0.05);
+    else if (this.ledgeWallD > this.radius + 0.05) this.pos.addScaledVector(forwardFromYaw(was.yaw, _v), this.ledgeWallD - this.radius - 0.05);
+    if (!(Math.abs(this.probeLedge() - top) < 0.3)) {
+      this.pos.set(was.x, was.y, was.z);
+      this.yaw = was.yaw;
+      this.latches--;
+      return;
+    }
     this.climbing = true;
     this.vaultT = 0;
     this.hangY = top;
-    this.pos.y = top - HANG;
-    // up against the wall, the hands on its edge
-    if (this.ledgeWallD > this.radius + 0.05) this.pos.addScaledVector(forwardFromYaw(this.yaw, _v), this.ledgeWallD - this.radius - 0.05);
     this.vel.set(0, 0, 0);
     this.fallStart = this.pos.y; // the catch breaks the fall
     this.cancelAttack();
@@ -1509,19 +1574,29 @@ export class Player extends Actor {
           I.consume('jump');
           this.startChase();
         }
-        // jump; in the air against a wall, a hop up it
-        if (I.consume('jump') && !busy) {
+        // jump; in the air against a wall, a hop up it. A press just after the feet left an edge
+        // still jumps from the ground (coyote time), and one just before landing jumps on
+        // touching down (it waits in buf.jump); a hop or a double jump only on the press itself.
+        const jumpPress = I.consume('jump');
+        if (jumpPress) this.buf.jump = JUMP_BUFFER;
+        if (this.buf.jump > 0 && !busy) {
           if (this.swimming) {
+            this.buf.jump = 0;
             this.vel.y = this.mods.seafarer ? 9.2 : 6.5; // Seafarer: out of the water as off the ground
             this.swimming = false;
-          } else if (this.grounded) {
+          } else if (this.grounded || (this.coyoteT > 0 && this.vel.y <= 0.01)) {
+            this.buf.jump = 0;
+            this.coyoteT = 0;
             this.vel.y = 9.2;
             this.grounded = false;
             this.jumps = 1;
             G.audio.play('jump', { pos: this.pos });
+          } else if (!jumpPress) {
+            // waiting for the ground
           } else if (this.wallHop()) {
-            // hopped up the wall in front
+            this.buf.jump = 0; // hopped up the wall in front
           } else if (this.mods.doubleJump && this.jumps < 2) {
+            this.buf.jump = 0;
             this.vel.y = 8.5;
             this.jumps = 2;
             G.vfx.ring(this.pos, 'phys', 1.5, 0.3, { color: '#c8e8ff' });
@@ -1572,7 +1647,7 @@ export class Player extends Actor {
     // in the air, moving into a wall: the hands catch its edge (mid-leap too, for the next one up),
     // but not on the chase's rising leap, which is aimed at a foe, not a wall
     const chaseLeap = this.chase && this.chase.t < this.chase.rise;
-    if (canAct && !this.grounded && !this.swimming && moving && !busy && this.dodgeT <= 0 && !chaseLeap) this.tryLatch();
+    if (canAct && !this.grounded && !this.swimming && moving && !busy && this.dodgeT <= 0 && !chaseLeap) this.tryLatch(input);
     this.noGravity = this.climbing || !!(this.chase && this.atk && this.atk.def.chaseHit && this.atk.phase !== 'recovery');
     const preVy = this.vel.y;
     this.physics(dt);
@@ -1588,6 +1663,7 @@ export class Player extends Actor {
     // a catch starts a new one, so kicking off a wall low in a long drop breaks the fall
     if (!this.grounded && (this.wasGrounded || this.vel.y >= 0)) this.fallStart = this.pos.y;
     this.wasGrounded = this.grounded;
+    this.coyoteT = this.grounded && !this.climbing ? COYOTE : Math.max(0, this.coyoteT - dt);
     this.speed = hypot(this.vel.x, this.vel.z);
 
     // footsteps

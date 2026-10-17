@@ -1,6 +1,6 @@
 // Character menu: attributes investment, talents, mantras + hotbar, the backpack (ui/backpack.js), quests, vow.
 import { G } from '../core/globals.js';
-import { ATTRS, BASE_ATTRS, WEAPON_ATTRS, ATTUNE_ATTRS, RESIST_ELEMENTS, ATTR_CAP, ATTUNE_TOTAL_CAP, MAX_LEVEL, POINTS_PER_LEVEL, meetsReqs, reqsText, ELEMENTS } from '../data/stats.js';
+import { ATTRS, BASE_ATTRS, WEAPON_ATTRS, ATTUNE_ATTRS, ATTR_CAP, ATTUNE_TOTAL_CAP, MAX_LEVEL, POINTS_PER_LEVEL, meetsReqs, reqsText, ELEMENTS } from '../data/stats.js';
 import { TALENTS, TALENT_CATS, talentExcluded } from '../data/talents.js';
 import { MANTRAS, MANTRA_TYPES, MAX_STARS } from '../data/mantras.js';
 import { WEAPONS } from '../data/weapons.js';
@@ -11,6 +11,7 @@ import { renderBackpack, backpackClick, bindBackpack } from './backpack.js';
 import { shuffle, escapeHtml } from '../core/util.js';
 import { ACTIONS } from '../game/hooks.js';
 import { traitFree, traitsHtml, assignTrait } from '../game/gear.js';
+import { fitLabels } from './fitText.js';
 
 const TABS = [
   ['attrs', 'Attributes'],
@@ -101,17 +102,21 @@ function eligibleMantras(ch) {
 function renderAll(ui, el) {
   const p = G.player;
   const ch = p.ch;
+  // The Attributes badge names both kinds of point the tab holds, as its header does
+  // ("27+2" = 27 investment points and 2 trait points), rather than a sum found nowhere inside.
+  const tf = traitFree(ch);
   const badges = {
-    attrs: ch.points + traitFree(ch),
+    attrs: ch.points > 0 && tf > 0 ? `${ch.points}+${tf}` : ch.points + tf,
     talents: ch.talentPicks,
     mantras: eligibleMantras(ch).length ? ch.mantraPicks : 0,
   };
   const tabs = [...TABS];
   if (ch.vow) tabs.push(['vow', 'Vow']);
-  el.querySelector('.tabs').innerHTML = tabs.map(([id, n]) => `<div class="tab ${state.tab === id ? 'on' : ''}" data-tab="${id}">${n.toUpperCase()}${badges[id] ? `<span class="badge">${badges[id]}</span>` : ''}</div>`).join('') + `<div class="tab" data-close="1" style="flex:0 0 60px">✕</div>`;
+  el.querySelector('.tabs').innerHTML = tabs.map(([id, n]) => `<div class="tab ${state.tab === id ? 'on' : ''}" data-tab="${id}">${n.toUpperCase()}${badges[id] ? `<span class="badge"${id === 'attrs' && tf > 0 ? ` title="${ch.points} investment point${ch.points === 1 ? '' : 's'}, ${tf} trait point${tf === 1 ? '' : 's'}"` : ''}>${badges[id]}</span>` : ''}</div>`).join('') + `<div class="tab" data-close="1" style="flex:0 0 60px">✕</div>`;
   const body = el.querySelector('.tab-body');
   const fn = { attrs: renderAttrs, talents: renderTalents, mantras: renderMantras, inventory: renderBackpack, quests: renderQuests, vow: renderVow }[state.tab];
   body.innerHTML = fn ? fn(p, ch) : '';
+  fitLabels(body);
 }
 
 // ------------------------------------------------------------ attributes
@@ -145,11 +150,10 @@ function renderAttrs(p, ch) {
   const race = RACE_BY_ID[ch.race];
   return `${ch.points > 0 || traitFree(ch) > 0 ? restNote(p) : ''}
     <div class="row-flex" style="margin-bottom:12px">
-      <div><span style="font-family:var(--display);font-size:22px;color:var(--gold-2)">${escapeHtml(ch.name)}</span>
-      <span class="muted"> · ${race.name} · Power ${ch.level}${ch.vow ? ' · ' + VOWS[ch.vow].name : ''}</span></div>
+      <div><span style="font-family:var(--display);font-size:22px;color:var(--gold-2)">${escapeHtml(ch.name)}</span><span class="muted">, ${race.name}, Power ${ch.level}${ch.vow ? ', ' + VOWS[ch.vow].name : ''}</span></div>
       <span class="space"></span>
       ${powerProgress(ch)}
-      <span style="font-family:var(--display)">INVESTMENT POINTS: <span class="gold" style="font-size:20px">${left}</span></span>
+      <span style="font-family:var(--display)">INVESTMENT POINTS: <span class="gold" style="font-size:20px">${left}</span>${traitFree(ch) > 0 ? `<span class="trait-points">TRAIT POINTS: <span class="gold" style="font-size:20px">${traitFree(ch)}</span></span>` : ''}</span>
       <button class="btn small" data-a="reset" ${pendingTotal() ? '' : 'disabled'}>Reset</button>
       <button class="btn primary small" data-a="confirm" ${pendingTotal() ? '' : 'disabled'}>Confirm</button>
     </div>
@@ -175,7 +179,7 @@ function renderAttrs(p, ch) {
         <h3>RESISTANCES</h3>
         <div class="stat-list">
           <span class="k">Physical</span><span>${res('phys')}</span>
-          ${RESIST_ELEMENTS.map((e) => `<span class="k" style="color:${ELEMENTS[e].color}">${ELEMENTS[e].name}</span><span>${res(e)}</span>`).join('')}
+          ${ATTUNE_ATTRS.map((e) => `<span class="k" style="color:${ELEMENTS[e].color}">${ELEMENTS[e].name}</span><span>${res(e)}</span>`).join('')}
         </div>
         <h3>RACIAL</h3><div style="font-size:14px"><span class="gold">${race.passive.name}.</span> ${race.passive.desc}</div>
       </div>
@@ -231,14 +235,14 @@ function mantraCard(ch, id, opts = {}) {
   const el = ATTRS[m.el] ? ATTRS[m.el] : null;
   const color = el ? el.color : m.el === 'support' ? '#ffd27a' : '#e9e4d8';
   const elName = el ? el.name : m.el === 'support' ? 'Support' : 'Physical';
-  const costs = [`${m.ether} ether`, m.hpCost ? `${Math.round(m.hpCost * 100)}% HP` : null, `${m.cd}s cd`].filter(Boolean).join(' · ');
+  const costs = [`${m.ether} ether`, m.hpCost ? `${Math.round(m.hpCost * 100)}% HP` : null, `${m.cd}s cd`].filter(Boolean).join(', ');
   let slots = '';
   if (opts.assign) {
     const cur = ch.hotbar.findIndex((e) => e && e.type === 'mantra' && e.id === id);
     slots = `<div class="slotsel">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => `<button class="btn ${cur === i ? 'on' : ''}" data-assign="${id}" data-slot="${i}">${(i + 1) % 10}</button>`).join('')}${cur > 0 ? `<button class="btn" data-unassign="${id}">✕</button>` : ''}</div>`;
   }
   return `<div class="card ${opts.cls || ''}" ${opts.attr || ''} style="border-left:3px solid ${color}">
-    <div class="cc" style="color:${color}">${elName.toUpperCase()} · ${MANTRA_TYPES[m.type].toUpperCase()}</div>
+    <div class="cc" style="color:${color}">${elName.toUpperCase()} ${MANTRA_TYPES[m.type].toUpperCase()}</div>
     <div class="cn">${m.name} ${st ? `<span class="stars">${'★'.repeat(st.stars)}${'☆'.repeat(MAX_STARS - st.stars)}</span>` : ''}</div>
     <div class="cd2">${m.desc}</div>
     <div class="req">${costs}</div>

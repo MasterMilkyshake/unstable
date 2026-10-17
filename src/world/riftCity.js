@@ -84,15 +84,23 @@ function cityStair(world, s, low) {
     k.slab(0, top - 2.2, zc, w, 2.2, run + 0.05, i % 2 ? 'stone' : 'stone2');
     const [x, z] = at(0, zc);
     world.colliders.addBox({ x, z, w, d: run + 0.05, y0: y0 + top - 2.2, y1: y0 + top, rot: yaw, tag: 'stair' });
-    for (const sx of [-1, 1]) k.slab(sx * (w / 2 + 0.28), top - 1.2, zc, 0.56, 2.1, run + 0.06, 'stone2');
+    for (const sx of [-1, 1]) {
+      k.slab(sx * (w / 2 + 0.28), top - 1.2, zc, 0.56, 2.1, run + 0.06, 'stone2');
+      // the cheek's collider steps with the drawn cheek, 0.9 m over its tread: one box the
+      // flight's whole length at the head's height stood an invisible wall up to the rise
+      // over the foot (7 m beside the Ascent lift), and nothing could be jumped over or onto
+      const [cx, cz] = at(sx * (w / 2 + 0.28), zc);
+      world.colliders.addBox({ x: cx, z: cz, w: 0.56, d: run + 0.06, y0: y0 + top - 1.2, y1: y0 + top + 0.9, rot: yaw, climbable: true, tag: 'stair' });
+    }
   }
   for (const sx of [-1, 1]) {
     const cx = sx * (w / 2 + 0.28);
-    const [ax, az] = at(cx, len / 2);
-    world.colliders.addBox({ x: ax, z: az, w: 0.56, d: len, y0: y0 - 1, y1: y0 + Math.max(0, rise) + 0.9, rot: yaw, climbable: true, tag: 'stair' });
     for (let i = 0; i <= 2; i++) {
       const tz = (len * i) / 2, ty = (rise * i) / 2;
       k.masonry(cx, ty - 1.2, tz, 0.8, 2.6, 0.8, { course: 0.5 });
+      // the newel is solid too: walked and looked through before (the camera parked in its lamp)
+      const [nx, nz] = at(cx, tz);
+      world.colliders.addBox({ x: nx, z: nz, w: 0.95, d: 0.95, y0: y0 + ty - 1.2, y1: y0 + ty + 1.6, rot: yaw, climbable: true, walkable: false, tag: 'stair' });
       k.slab(cx, ty + 1.4, tz, 0.95, 0.2, 0.95, 'edge');
       if (i === 1) continue;
       const flame = k.lantern(cx, ty + 1.6, tz, { post: 0.9, metal: 'metal', strength: 0.9 });

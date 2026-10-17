@@ -1,4 +1,4 @@
-// Dialogue for the main storyline: Maren and Hale in the Lantern City, the Enclave's envoy
+// Dialogue for the story threads: Maren and Hale in the Lantern City, the Enclave's envoy
 // and commander, the Ministry's clerk and minister. Registered into DIALOGUES (data/npcs.js).
 // The api comes from ui/interact.js plus game/realm.js (flags, standing, fines, items).
 import { DIALOGUES, questOffer, questTurnIn, questHub } from './npcs.js';
@@ -42,9 +42,9 @@ DIALOGUES.maren = (api) => {
   const iron = q('iron_tide');
   const bas = q('bastion');
   const sov = q('sovereign');
+  const notes = []; // what she says about threads already under way
   const more = { label: 'Tell me about the world.', next: { text: 'Ask, then. I will answer what I can and admit what I cannot.', options: [...LORE_MAREN, bye] } };
 
-  if (fl.state === 'active') return { text: 'Another one from the tide. Sit a moment. You are not the first, and you will not be the last.', options: [more, bye] };
   if (fl.state === 'ready') {
     return {
       text: 'Another one from the tide. Sit, child. Wren sends them all to me eventually. You will not remember your name, and I will not ask for the old one. Saltreach was built by people who washed up exactly as you did. We keep the lamp lit and the gates watched, and we take in whoever the sea gives back.',
@@ -59,7 +59,7 @@ DIALOGUES.maren = (api) => {
   }
   if (writ.state === 'active') {
     const hint = ['Hale first. He was on the wall when it anchored, and he will want to say something rude about it.', 'The writ is on the Sea Gate. Read it before you talk to its author.', 'The envoy waits by her pier in the harbor. Captain Crane. Hear her out; you need not agree with her.'][writ.stage || 0] || 'Go on.';
-    return { text: hint, options: [more, bye] };
+    notes.push(topic('About the writ...', hint));
   }
   if (writ.state === 'ready') {
     const papered = api.flag('registryPapers');
@@ -67,13 +67,12 @@ DIALOGUES.maren = (api) => {
       ? 'You gave them your name. I will not pretend I like it, and I will not hold it against you. A name was given to you once already by a stranger on a beach. Just remember who counts you, and why. There is a man on Thornwood the Enclave wants more than any of us: Kaelen the Red. He carries something that belongs under the sea.'
       : 'You told the crown no on our own docks. Brave, or foolish, or both; Saltreach was founded by people who were all three. Crane will not forget it. Neither will I. Now: the Enclave did not sail a century home for harbor dues. They want something Kaelen the Red carries on Thornwood.');
   }
-  if (tooth.state === 'active') return { text: tooth.stage >= 2 ? 'Kaelen holds the back of Brigand Hold, in the Thornwood forest. He carries a fragment of the old command chain. Bring it to me before the Enclave takes it off his body.' : 'Hale will tell you what the Watch knows of Kaelen. Then cross to Thornwood: rent a boat at the harbor and sail west to Rook\'s Landing.', options: [more, bye] };
+  if (tooth.state === 'active') notes.push(topic('About Kaelen...', tooth.stage >= 2 ? 'Kaelen holds the back of Brigand Hold, in the Thornwood forest. He carries a fragment of the old command chain. Bring it to me before the Enclave takes it off his body.' : 'Hale will tell you what the Watch knows of Kaelen. Then cross to Thornwood: rent a boat at the harbor and sail west to Rook\'s Landing.'));
   if (tooth.state === 'ready') return questTurnIn(api, 'red_tooth', 'So that is the tooth. It is warm. It should not be warm. Before the Fracture there were three regulators answering to the Keep under the sea, and this was torn out of the chain that bound them. Kaelen took it from a harbor vault in the year the ferries were seized. There is a clerk in grey who has been sitting under the Lantern Tree for three days asking for you. I suspect this is why.');
-  if (grey.state === 'active') return { text: 'The Ministry of Soundings wants you on the Hush. Go. Listen. Remember that people who measure everything rarely tell you all of what they measured.', options: [more, bye] };
-  if (fr.state === 'none' && grey.state === 'done') return { text: 'Grow stronger. The Warden and the Colossus are not Kaelen. When you are ready, come back to me.', options: [more, bye] };
+  if (grey.state === 'active') notes.push(topic('About the Ministry...', 'The Ministry of Soundings wants you on the Hush. Go. Listen. Remember that people who measure everything rarely tell you all of what they measured.'));
   if (fr.state === 'active') {
     const left = [['frost_warden', 'the Frost Warden in the White Hollow'], ['cinder_colossus', 'the Cinder Colossus in the Caldera'], ['warlord', 'Kaelen on Thornwood']].filter(([b]) => !api.bossDefeated(b)).map(([, t]) => t);
-    return { text: left.length ? `Command, cold and heat. Still to silence: ${left.join(', and ')}. Each will be guarding works nobody came back to tend. Bring three cores.` : 'All three guardians are down. Bring me three cores; the fragment counts as one.', options: [more, bye] };
+    notes.push(topic('About the three signatures...', left.length ? `Command, cold and heat. Still to silence: ${left.join(', and ')}. Each will be guarding works nobody came back to tend. Bring three cores.` : 'All three guardians are down. Bring me three cores; the fragment counts as one.'));
   }
   if (fr.state === 'ready') return questTurnIn(api, 'fracture', 'Command, cold and heat. Lay them side by side and they all lean the same way: down, toward the throne under the sea. The works they ran will need hands now; a guardian can be killed, a furnace still has to be fed. Take this ember. If the Rift takes a life from you, it will give one back.');
   if (iron.state === 'active') {
@@ -83,11 +82,11 @@ DIALOGUES.maren = (api) => {
         options: [topic('Will this mean war with the Enclave?', 'It already does. They made that choice on our docks. Their Peacekeepers will treat you as an enemy now, wherever you meet them, papers or no papers.'), more, bye],
       };
     }
-    return { text: 'The harbor. Break their hold on it, and the rest of the town will remember it can say no.', options: [more, bye] };
+    notes.push(topic('About the harbor...', 'The harbor. Break their hold on it, and the rest of the town will remember it can say no.'));
   }
   if (iron.state === 'ready') return questTurnIn(api, 'iron_tide', 'The harbor is ours again, and Crane is on a boat to Meridian with a message for her Grand Warden. Before she went she said something I believe: the Grand Warden means to take the Anchor\'s seat himself. Sit on the throne the Duke still grips, and make the broken chain answer to one will again. That is how the coast was lost the first time. Go to Meridian. Find him.');
-  if (bas.state === 'active') return { text: 'Fort Meridian sits on the far side of the western sea. The Enclave keeps its Vice Warden there, its Registry and its iron, and the Grand Warden came ashore there. Sail carefully; their ships watch the channels.', options: [more, bye] };
-  if (sov.state === 'active') return { text: sov.stage >= 4 ? 'The Duke is gone? Then the seat is empty. What happens to it is your choice now, not mine. I trust you more than I have trusted anyone in a long time, which is not the same as trusting you completely.' : 'The Grand Warden went down through the Crown Sluice. Follow him into the Rift and stop him before he reaches the throne. And the Duke... he was the last Anchor. Whatever is left of him has been holding that chain for a hundred and thirteen years.', options: [more, bye] };
+  if (bas.state === 'active') notes.push(topic('About Fort Meridian...', 'Fort Meridian sits on the far side of the western sea. The Enclave keeps its Vice Warden there, its Registry and its iron, and the Grand Warden came ashore there. Sail carefully; their ships watch the channels.'));
+  if (sov.state === 'active') notes.push(topic('About the throne...', sov.stage >= 4 ? 'The Duke is gone? Then the seat is empty. What happens to it is your choice now, not mine. I trust you more than I have trusted anyone in a long time, which is not the same as trusting you completely.' : 'The Grand Warden went down through the Crown Sluice. Follow him into the Rift and stop him before he reaches the throne. And the Duke... he was the last Anchor. Whatever is left of him has been holding that chain for a hundred and thirteen years.'));
   if (sov.state === 'ready') {
     const e = api.ending;
     const reply = e === 'break' ? 'You broke it. No throne, no Anchor, no one to blame and no one to obey. Just the works, and all of us. Gods help us. I have never been prouder of anyone.'
@@ -96,7 +95,19 @@ DIALOGUES.maren = (api) => {
           : 'You have come back from the bottom of everything. Sit. Tell me all of it.';
     return questTurnIn(api, 'sovereign', `${reply} The tide is quieter. Whatever comes now, the isles will remember who stood at that throne.`);
   }
-  return { text: 'The isles are quieter thanks to you. Never stable. Quieter. Go, live, keep your blade close, and come back for supper now and then.', options: [more, bye] };
+  // threads she can start you on, in any order; the later ones follow from what has happened
+  const offers = [];
+  const offer = (id, label, pitch, accept) => { if (q(id).state === 'none') offers.push({ label, next: () => questOffer(api, id, pitch, accept) }); };
+  offer('writ', 'What is that black ship in the harbor?', 'A warship flying a chain banner, the first crown colors anyone alive has seen. Its envoy, Captain Crane, nailed a writ to the Sea Gate before she asked my name. Talk to Captain Hale at the Watch yard, read the writ on the Sea Gate, then hear Crane out at her pier. Then come back and tell me what they want.', "I'll find out what they want.");
+  offer('red_tooth', 'Who is Kaelen the Red?', 'The Redwake chief on Thornwood, west across the water. He carries a fragment of the old command chain, a "tooth" torn from a regulator, and the Enclave wants it. Captain Hale knows where he holds out. Bring the fragment to me before the Enclave takes it off his body.', 'I will find him.');
+  offer('fracture', 'What is under the sea that everyone wants?', 'The command chain: three regulators that once answered to one throne. Three guardians still keep its pieces: Kaelen on Thornwood, the Frost Warden in the White Hollow on Frostmark, the Cinder Colossus in the Caldera of the Ashen Spire. Bring me three Fracture Cores and I will show you which way they lean.', 'I will bring the cores.');
+  if (fr.state === 'done') offer('iron_tide', 'You look worried.', 'The cores have brought the Enclave to our door. Crane is ashore with Peacekeepers and a writ that says the cores are crown property. They will try to take the harbor. Stand with the Watch when they do.', 'I will stand with you.');
+  if (iron.state === 'done' || api.atWar('enclave')) offer('bastion', 'Where is the Grand Warden?', 'Fort Meridian, on the far side of the western sea. The Enclave keeps its Vice Warden there, its Registry and its iron. Break the fort and find out where the Grand Warden went.', 'I will go to Meridian.');
+  if (bas.state === 'done' || api.bossDefeated('vice_warden')) offer('sovereign', 'Where did the Grand Warden go?', 'Down. Through the Crown Sluice under Meridian\'s drydock, into the Rift, toward the throne the Hollow Duke still grips. Whoever holds that throne holds what is left of the coast. Stop him.', 'I will follow him down.');
+  return {
+    text: offers.length || notes.length ? 'Saltreach keeps the lamp lit and takes in whoever the sea gives back. What do you need?' : 'The isles are quieter thanks to you. Never stable. Quieter. Go, live, keep your blade close, and come back for supper now and then.',
+    options: [...notes, ...offers, more, bye],
+  };
 };
 
 DIALOGUES.hale = (api) => {
@@ -114,7 +125,7 @@ DIALOGUES.hale = (api) => {
   ]));
   // the Watch's own path is a chain of its own, offered beside the brigand work rather than after it
   opts.push(...questHub(api, [
-    { id: 'watch_lamp', offer: 'The Watch looks stretched.', title: 'Lamp and Gate', when: (a) => a.quest('writ').state === 'done', pitch: 'Stretched thin as old rope. Lurkers and scuttlers creep up the coast road every night. Eight of them, and you\'ll have the Watch\'s thanks and my silver.', active: (q) => `Eight creatures. ${q.progress || 0} so far.`, done: 'The coast road is clear.' },
+    { id: 'watch_lamp', offer: 'The Watch looks stretched.', title: 'Lamp and Gate', pitch: 'Stretched thin as old rope. Lurkers and scuttlers creep up the coast road every night. Eight of them, and you\'ll have the Watch\'s thanks and my silver.', active: (q) => `Eight creatures. ${q.progress || 0} so far.`, done: 'The coast road is clear.' },
     { id: 'watch_scraps', offer: 'How can I hurt the Enclave?', title: 'Proof of Passage', when: (a) => a.atWar('enclave'), pitch: 'Every Peacekeeper carries a scrap of the writ that sent them, stamped with their ship. Bring me five. I want to know how many ships, and which.', active: (q) => `Five writ scraps. You have ${q.progress || 0}.`, done: 'Five writ scraps.' },
   ]));
   opts.push(topic('What does the Watch actually do?', 'Keeps the gates. Runs the ferry patrols. Puts out fires, breaks up fights, fishes drunks out of the harbor. Hits anyone who hits us first. We do not hit you unless you start it, and if you do, you\'ll find there are a lot of us.'), bye);
@@ -131,7 +142,6 @@ DIALOGUES.hale = (api) => {
 };
 
 DIALOGUES.envoy_crane = (api) => {
-  const writ = api.quest('writ');
   const lore = [
     topic('Who is the Grand Warden?', 'Aurek Vell, Grand Warden of the Enclave, heir of the Anchor\'s line. He was born at sea, like his father and his father\'s father. He has never set foot on land that his family once ruled, and he intends to. The Warden keeps the fleet at sea in his name; the Vice Warden holds Fort Meridian.'),
     topic('Why "Warden"?', 'The regulators had Wardens before the Anchorage had kings. The one in the White Hollow still keeps the cold. We took the old titles because we mean to keep the old works, tide-born. Somebody must.'),
@@ -139,7 +149,10 @@ DIALOGUES.envoy_crane = (api) => {
     topic('What is the Registry?', 'A count of the returned. Name, kindred, where the sea gave them back. The Enclave protects what it has counted. Out here, in the gaps between your towns, that is worth more than you think.'),
   ];
   if (api.flag('harbor_occupied') && !api.flag('harbor_freed')) return { text: 'Saltreach chose. So have you, I see. The cores are crown property; the works were crown works. I am only collecting what was always ours.', options: [...lore, bye] };
-  if (writ.state === 'active' && (writ.stage || 0) === 2 && !api.flag('writ_answered')) {
+  // papers from Commander Rell on Meridian are an answer too
+  if (api.flag('registryPapers') && !api.flag('writ_answered')) api.setFlag('writ_answered');
+  // the Registry is offered to every tide-born she meets, writ or no writ; answering is what the writ's last step asks
+  if (!api.flag('writ_answered') && !api.flag('registryPapers')) {
     return {
       text: 'You are tide-born. I can always tell: you look at the sea as if it owes you something. I am Captain Thessaly Crane, envoy of the Enclave. The Grand Warden has come home to the Anchorage, and he will protect every soul in it who is counted. I can enter your name today. Or you can stay uncounted, and belong to no one, and see how long that lasts out there.',
       options: [
@@ -149,7 +162,6 @@ DIALOGUES.envoy_crane = (api) => {
       ],
     };
   }
-  if (!writ.state || writ.state === 'none') return { text: 'The writ is on the Sea Gate. Read it. Then we can talk.', options: [bye] };
   if (api.flag('registryPapers')) return { text: 'Your papers are in order. If you are ever on Meridian, Commander Rell will have work for counted folk.', options: [...lore, bye] };
   return { text: 'The offer stands until it doesn\'t. Commander Rell keeps the Registry on Meridian, if you change your mind.', options: [...lore, bye] };
 };
@@ -158,14 +170,14 @@ DIALOGUES.grey_clerk = (api) => {
   const g = api.quest('grey_letter');
   const lore = [
     topic('What is the Ministry of Soundings?', 'The office that measured the shelf for the old Compact: how deep, how fast it moved, how much pressure the regulators held. After the Fracture we kept measuring. Now we mostly measure the passage. You came through it.'),
-    topic('Why were you waiting for me?', 'The bell in the Hush rang when Kaelen\'s fragment changed hands. It has not rung for anyone in twenty years. The Minister would like to know who rang it.'),
+    topic('Why were you waiting for me?', 'The bell on the Hush rings when a tide-born washes up who might matter. It has not rung for anyone in twenty years, and it rang for you. The Minister would like to know why.'),
   ];
   if (g.state === 'active' && (g.stage || 0) <= 1) {
     if (!api.flag('grey_letter_given')) api.setFlag('grey_letter_given');
     if (!api.hasItem('grey_letter')) api.giveItem('grey_letter', 1);
     return { text: 'There you are. Three days I have been sitting under this tree, and the pigeons have learned my name, which is more than most people bother with. This is for you. Grey wax, no crest. The Minister of Soundings asks you to come to the Hush. Rent a boat at the harbor and sail north-east into the fog; Hush Landing lies on Frosthollow\'s southern shore.', options: [...lore, bye] };
   }
-  if (!g.state || g.state === 'none') return { text: 'Not yet. When you are ready to listen, so are we.', options: [...lore, bye] };
+  if (!g.state || g.state === 'none') return { text: 'You. Yes, you. I have a letter from the Ministry of Soundings with no name on it, and I think it is meant for you.', options: [{ label: 'What letter?', next: () => questOffer(api, 'grey_letter', 'Grey wax, no crest. The Minister of Soundings asks you to come to the Hush: rent a boat at the harbor and sail north-east into the fog to Hush Landing, then climb to the Sounding House. She wants to talk about the command chain under the sea, and why everyone is suddenly after it.', 'I will take it.') }, ...lore, bye] };
   return { text: 'The Minister speaks well of you, which is to say she has written your name down twice.', options: [...lore, bye] };
 };
 
@@ -176,12 +188,11 @@ DIALOGUES.minister_quill = (api) => {
   if (fine) opts.push(fine);
   const stores = storesOption(api, 'ministry', 'ministry_stores');
   if (stores) opts.push(stores);
-  if (g.state === 'done') {
-    opts.push(...questHub(api, [
-      { id: 'ministry_soundings', offer: 'Is there work for me?', title: 'Soundings', pitch: 'Always. The passage runs closest under the sea at three deeps: the Gallows Channel, the Redwake Strait and the Pale Sound. Sail out over each and the instrument in your pack will do the rest. Do not swim.', active: 'Three deeps: the Gallows Channel, the Redwake Strait, the Pale Sound. Over them, not in them.', done: 'The soundings are taken.' },
-      { id: 'ministry_bell', offer: 'Something else troubles you.', title: 'The Drowned Bell', when: (a) => a.quest('ministry_soundings').state === 'done', pitch: 'The relief bell on our far shore has started ringing on its own, and riftlings come ashore when it does. Go and see. Kill what comes out of the surf.', active: 'The Drowned Bell, on the Hush\'s far shore. Riftlings gather when it rings.', done: 'The bell is quiet.' },
-    ]));
-  }
+  // the Ministry's own work is open to anyone who climbs up here
+  opts.push(...questHub(api, [
+    { id: 'ministry_soundings', offer: 'Is there work for me?', title: 'Soundings', pitch: 'Always. The passage runs closest under the sea at three deeps: the Gallows Channel, the Redwake Strait and the Pale Sound. Sail out over each and the instrument in your pack will do the rest. Do not swim.', active: 'Three deeps: the Gallows Channel, the Redwake Strait, the Pale Sound. Over them, not in them.', done: 'The soundings are taken.' },
+    { id: 'ministry_bell', offer: 'Something else troubles you.', title: 'The Drowned Bell', when: (a) => a.quest('ministry_soundings').state === 'done', pitch: 'The relief bell on our far shore has started ringing on its own, and riftlings come ashore when it does. Go and see. Kill what comes out of the surf.', active: 'The Drowned Bell, on the Hush\'s far shore. Riftlings gather when it rings.', done: 'The bell is quiet.' },
+  ]));
   opts.push(
     topic('Why seal the passage?', 'Because it is a wound and wounds should close. Every year the returns rise and the memory that returns with them falls. One day the sea will give back bodies with nothing in them at all. We would rather it gave back no one.'),
     topic('What do you know of the Enclave?', 'That their ships left harbor the night the Anchor withheld the release, and that the release was withheld so their ships could leave. They are the reason the coast drowned and the only people alive who still believe that was correct.'),
@@ -206,7 +217,7 @@ DIALOGUES.meridian_captain = (api) => {
   const stores = storesOption(api, 'enclave', 'enclave_stores');
   if (stores) opts.push(stores);
   if (!api.flag('registryPapers')) {
-    opts.push({ label: 'Enter my name in the Registry.', do: (a) => { a.setFlag('registryPapers'); a.giveItem('registry_papers', 1); a.addRep('enclave', 10); a.addRep('watch', -5); }, next: { text: 'Done. Papers. Keep them dry. You may walk the Ward and the fort; the Citadel opens to the counted.', options: [bye] } });
+    opts.push({ label: 'Enter my name in the Registry.', do: (a) => { a.setFlag('registryPapers'); a.setFlag('writ_answered'); a.giveItem('registry_papers', 1); a.addRep('enclave', 10); a.addRep('watch', -5); }, next: { text: 'Done. Papers. Keep them dry. You may walk the Ward and the fort; the Citadel opens to the counted.', options: [bye] } });
   } else {
     opts.push(...questHub(api, [
       { id: 'enclave_pirates', offer: 'Do you have work?', title: 'Pirate Hunter', pitch: 'The Redwake raid the Thornwood coast. Eight of them, and the Enclave pays well and remembers longer. Saltreach will call it the second seizure. Saltreach calls a great many things by unkind names.', active: (q) => `Eight brigands. ${q.progress || 0} so far.`, done: 'Eight Redwake down.' },

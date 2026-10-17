@@ -58,7 +58,7 @@ function end(game, result) {
     game.quests.onFlag(`crucible_${t.id}`);
     G.audio.play('bell');
     G.audio.play('crowd', { vol: 1.2 });
-    G.ui.banner('TRIAL CLEARED', `${t.name} · +${t.silver} silver · +${t.marks} Crucible Mark${t.marks > 1 ? 's' : ''}`);
+    G.ui.banner('TRIAL CLEARED', `${t.name}, +${t.silver} silver, +${t.marks} Crucible Mark${t.marks > 1 ? 's' : ''}`);
     game.save();
   } else if (result === 'fall') {
     // the healers drag you out without sending you to the Rift
@@ -85,7 +85,7 @@ function spawnWave(game) {
     const ang = G.world.arena.gap + Math.PI + (i - (list.length - 1) / 2) * 0.6;
     const pos = arenaPoint(ang, G.world.arena.r * 0.6);
     G.vfx.pillar(pos, 'phys', 1.2, 4, 0.5);
-    const e = game.spawnEnemy(type, pos, { scaleTo: r.trial.level });
+    const e = game.spawnEnemy(type, pos);
     e.arena = true;
     e.setAggro(game.player);
     r.alive.push(e);
@@ -165,8 +165,8 @@ ACTIONS.openCrucible = (ui = G.ui) => {
         const ok = ch.level >= t.power && ch.silver >= t.fee;
         const cleared = (ch.stats.crucible || {})[t.id] || 0;
         return `<div class="shop-row"><div class="ico" style="color:${t.color}">⚔</div><div style="flex:1"><div class="nm" style="color:${t.color}">${t.name}${cleared ? ` <span class="pill">cleared ×${cleared}</span>` : ''}</div>
-          <div class="ds">Power ${t.power}+ · foes at Power ${t.level} · reward ${t.silver} silver, ${t.marks} mark${t.marks > 1 ? 's' : ''}, ${t.xp} xp</div>
-          <div class="ds">${t.waves.map((w, i) => `${i + 1}: ${[...new Set(w)].map((x) => ENEMIES[x].name).join(', ')}`).join(' · ')}</div></div>
+          <div class="ds">Power ${t.power}+, foes at Power ${t.level}, reward ${t.silver} silver, ${t.marks} mark${t.marks > 1 ? 's' : ''}, ${t.xp} xp</div>
+          <div class="ds">${t.waves.map((w, i) => `${i + 1}: ${[...new Set(w)].map((x) => ENEMIES[x].name).join(', ')}`).join(', ')}</div></div>
           <div class="pr ${ch.silver < t.fee ? 'bad' : ''}">${t.fee} silver</div><button class="btn small primary" data-trial="${t.id}" ${ok ? '' : `disabled title="${ch.level < t.power ? `Needs Power ${t.power}` : 'Not enough silver for the fee'}"`}>${ch.level < t.power ? `Power ${t.power}` : 'Enter'}</button></div>`;
       }).join('')}</div><div class="divider"></div><div class="row-flex"><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`,
     onClick: (e) => {
@@ -180,7 +180,6 @@ ACTIONS.openMarkShop = (ui = G.ui) => {
   const game = ui.game;
   const ch = game.ch;
   const nameOf = (r) => (r.kind === 'trinket' ? TRINKETS[r.id].name : r.kind === 'weapon' ? WEAPONS[r.id].name : ITEMS[r.id].name);
-  const iconOf = (r) => (r.kind === 'trinket' ? '💍' : r.kind === 'weapon' ? '🗡️' : ITEMS[r.id].icon);
   const descOf = (r) => (r.kind === 'trinket' ? TRINKETS[r.id].desc : r.kind === 'weapon' ? WEAPONS[r.id].desc : ITEMS[r.id].desc);
   openPanel(ui, 'markshop', {
     width: 700,
@@ -189,7 +188,7 @@ ACTIONS.openMarkShop = (ui = G.ui) => {
       return `<h2>VORN'S PRIZES</h2><p class="muted" style="text-align:center;margin-top:0">You hold <b class="gold">${marks}</b> Crucible Mark${marks === 1 ? '' : 's'}.</p>
         <div class="shop-list scroll">${MARK_SHOP.map((r, i) => {
           const owned = r.kind === 'trinket' && (ch.trinkets || []).some((t) => t.id === r.id);
-          return `<div class="shop-row"><div class="ico">${iconOf(r)}</div><div style="flex:1"><div class="nm">${escapeHtml(nameOf(r))}</div><div class="ds">${escapeHtml(descOf(r))}</div></div><div class="pr ${!owned && marks < r.cost ? 'bad' : ''}">${r.cost} 🏅</div><button class="btn small" data-buy="${i}" ${owned ? 'disabled title="You own this already"' : marks < r.cost ? 'disabled title="Not enough Crucible Marks"' : ''}>${owned ? 'Owned' : 'Buy'}</button></div>`;
+          return `<div class="shop-row"><div style="flex:1"><div class="nm">${escapeHtml(nameOf(r))}</div><div class="ds">${escapeHtml(descOf(r))}</div></div><div class="pr ${!owned && marks < r.cost ? 'bad' : ''}">${r.cost} 🏅</div><button class="btn small" data-buy="${i}" ${owned ? 'disabled title="You own this already"' : marks < r.cost ? 'disabled title="Not enough Crucible Marks"' : ''}>${owned ? 'Owned' : 'Buy'}</button></div>`;
         }).join('')}</div><div class="divider"></div><div class="row-flex"><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`;
     },
     onClick: (e, rerender) => {

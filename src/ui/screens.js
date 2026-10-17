@@ -44,11 +44,10 @@ export function showMainMenu(ui) {
   mm.innerHTML = `
     <div class="title">UNSTABLE</div>
     <div class="menu-btns">
-      ${cont ? `<button class="btn primary" data-a="continue">Continue<span class="cont-info">${escapeHtml(cont.name)} · ${raceName(cont.race)} · Power ${cont.level}</span></button>` : ''}
-      ${filled ? `<button class="btn" data-a="load">Load<span class="cont-info">${filled} of ${SLOT_COUNT} slots</span></button>` : ''}
-      <button class="btn ${cont ? '' : 'primary'}" data-a="new">New Game</button>
-      ${legacy.lost.length ? `<button class="btn" data-a="register">Register of the Lost<span class="cont-info">${legacy.lost.length} ${legacy.lost.length === 1 ? 'name' : 'names'} · ${legacy.remembrance} Remembrance</span></button>` : ''}
-      <button class="btn" data-a="lan">LAN Co-op</button>
+      ${filled ? `<button class="btn primary" data-a="continue">Continue<span class="cont-info">${cont ? `${escapeHtml(cont.name)}, ${raceName(cont.race)}, Power ${cont.level}` : `${filled} of ${SLOT_COUNT} slots`}</span></button>` : ''}
+      <button class="btn ${filled ? '' : 'primary'}" data-a="new">New Game</button>
+      ${legacy.lost.length ? `<button class="btn" data-a="register">Register of the Lost<span class="cont-info">${legacy.lost.length} ${legacy.lost.length === 1 ? 'name' : 'names'}, ${legacy.remembrance} Remembrance</span></button>` : ''}
+      <button class="btn" data-a="lan">Multiplayer</button>
       <button class="btn" data-a="settings">Settings</button>
       <button class="btn" data-a="help">How to Play</button>
     </div>
@@ -59,11 +58,8 @@ export function showMainMenu(ui) {
     G.audio.init();
     G.audio.play('ui');
     switch (a.dataset.a) {
+      // Continue lists the saved characters; the last one played is marked
       case 'continue':
-        hideMainMenu(ui);
-        if (!ui.game.continueGame(last) && ui.game.state === 'menu' && !ui.modal) showMainMenu(ui);
-        break;
-      case 'load':
         openSlots(ui, 'load');
         break;
       case 'new':
@@ -106,7 +102,7 @@ export function openSlots(ui, mode) {
   hideMainMenu(ui);
   const net = ui.game.pendingNet;
   let confirmSlot = null;
-  const titles = { load: 'LOAD A CHARACTER', new: 'CHOOSE A SLOT', lan: 'BRING A CHARACTER' };
+  const titles = { load: 'CONTINUE', new: 'CHOOSE A SLOT', lan: 'BRING A CHARACTER' };
   const notes = {
     load: 'Each slot keeps its own character, backup and lives. Settings and the Register of the Lost are shared.',
     new: 'The new soul washes ashore in the slot you choose. Replacing a character erases its save and backup.',
@@ -120,9 +116,9 @@ export function openSlots(ui, mode) {
     }
     const verb = mode === 'new' ? 'Replace' : mode === 'lan' ? 'Bring' : 'Continue';
     return `<div class="slot-row"><div class="slot-n">${ROMAN[n]}</div><div class="slot-body">
-        <div class="slot-name">${escapeHtml(s.name)}</div>
-        <div class="slot-meta">${raceName(s.race)} · Power ${s.level}${s.place ? ` · ${escapeHtml(s.place)}` : ''}</div>
-        <div class="slot-meta">${fmtPlaytime(s.playtime)} played · ${s.lives} of ${s.maxLives} ${s.maxLives === 1 ? 'life' : 'lives'}${s.dangerQuit ? ' · <span class="bad">fled in danger: a life is owed</span>' : ''}</div>
+        <div class="slot-name">${escapeHtml(s.name)}${mode === 'load' && n === Save.lastSlot() ? ' <span class="muted" style="font-size:13px">(last played)</span>' : ''}</div>
+        <div class="slot-meta">${raceName(s.race)}, Power ${s.level}${s.place ? `, ${escapeHtml(s.place)}` : ''}</div>
+        <div class="slot-meta">${fmtPlaytime(s.playtime)} played, ${s.lives} of ${s.maxLives} ${s.maxLives === 1 ? 'life' : 'lives'}${s.dangerQuit ? ', <span class="bad">fled in danger: a life is owed</span>' : ''}</div>
       </div><button class="btn small ${mode === 'new' ? 'danger' : 'primary'}" data-slot="${n}">${verb}</button></div>`;
   };
   const render = () => {
@@ -186,8 +182,8 @@ export function openRegister(ui) {
   const l = Legacy.load();
   const entries = l.lost.slice().reverse().map((e) => `<div class="lost-row">
       <div class="row-flex"><span class="lost-name">${escapeHtml(e.name)}</span><span class="space"></span><span class="gold lost-earned">+${e.earned} Remembrance</span></div>
-      <div class="slot-meta">${escapeHtml(e.raceName || raceName(e.race))} · Power ${e.level} · <i>${escapeHtml(e.cause || 'Lost')}</i></div>
-      <div class="slot-meta">${fmtPlaytime(e.playtime)} played · ${e.kills} foes felled · ${e.chapters} ${e.chapters === 1 ? 'chapter' : 'chapters'} reached${e.chapter ? ` (${escapeHtml(e.chapter)})` : ''}</div>
+      <div class="slot-meta">${escapeHtml(e.raceName || raceName(e.race))}, Power ${e.level}, <i>${escapeHtml(e.cause || 'Lost')}</i></div>
+      <div class="slot-meta">${fmtPlaytime(e.playtime)} played, ${e.kills} foes felled, ${e.chapters} ${e.chapters === 1 ? 'story thread' : 'story threads'} taken up${e.chapter ? ` (${escapeHtml(e.chapter)})` : ''}</div>
       <div class="slot-meta">Great foes slain: ${e.foes.length ? e.foes.map(escapeHtml).join(', ') : 'none'}</div>
       ${e.heirloom ? `<div class="slot-meta">Left <span class="gold">${escapeHtml(e.heirloom)}</span> at the Wash${e.claimedBy ? `, taken up by ${escapeHtml(e.claimedBy)}` : ''}</div>` : ''}
     </div>`).join('');
@@ -250,11 +246,11 @@ export function openCreation(ui, slot = Save.firstEmptySlot() || Save.slot) {
     const boon = (id) => {
       const b = LEGACY_BOONS[id];
       const on = st.boons.has(id);
-      return `<button class="btn small ${on ? 'primary' : ''}" data-boon="${id}" title="${escapeHtml(on || left >= b.cost ? b.desc : `Not enough Remembrance: ${b.cost} needed`)}" ${on || left >= b.cost ? '' : 'disabled'}>${on ? '✓ ' : ''}${b.name} · ${b.cost}</button>`;
+      return `<button class="btn small ${on ? 'primary' : ''}" data-boon="${id}" title="${escapeHtml(on || left >= b.cost ? b.desc : `Not enough Remembrance: ${b.cost} needed`)}" ${on || left >= b.cost ? '' : 'disabled'}>${on ? '✓ ' : ''}${b.name}, ${b.cost}</button>`;
     };
-    return `<h3>REMEMBRANCE · <span class="gold">${left}</span></h3>
+    return `<h3>REMEMBRANCE: <span class="gold">${left}</span></h3>
       <div class="row-flex" style="flex-wrap:wrap;gap:8px">
-        <button class="btn small" data-a="buyreroll" title="${escapeHtml(st.bought >= rr.max ? `At most ${rr.max} for one soul` : left < rr.cost ? `Not enough Remembrance: ${rr.cost} needed` : rr.desc)}" ${st.bought < rr.max && left >= rr.cost ? '' : 'disabled'}>${rr.name} · ${rr.cost}${st.bought ? ` (${st.bought}/${rr.max})` : ''}</button>
+        <button class="btn small" data-a="buyreroll" title="${escapeHtml(st.bought >= rr.max ? `At most ${rr.max} for one soul` : left < rr.cost ? `Not enough Remembrance: ${rr.cost} needed` : rr.desc)}" ${st.bought < rr.max && left >= rr.cost ? '' : 'disabled'}>${rr.name}, ${rr.cost}${st.bought ? ` (${st.bought}/${rr.max})` : ''}</button>
         ${boon('bundle')}${boon('ember')}
       </div>
       <div class="muted" style="font-size:13px;margin-top:4px">${['bundle', 'ember'].map((id) => `<b>${LEGACY_BOONS[id].name}.</b> ${LEGACY_BOONS[id].desc}`).join(' ')}</div>
@@ -297,8 +293,8 @@ export function openCreation(ui, slot = Save.firstEmptySlot() || Save.slot) {
         <div><h3>HAIR</h3><div class="swatches">${sw(r.hair, 'hair')}</div></div>
         <div><h3>EYES</h3><div class="swatches">${sw(r.eyes, 'eyes')}</div></div>
       </div>
-      <h3>HAIR STYLE</h3><div class="row-flex">${['Short', 'Long', 'Spiked', 'Bald', 'Tied'].map((n, i) => `<button class="btn small ${st.hairStyle === i ? 'primary' : ''}" data-hs="${i}">${n}</button>`).join('')}</div>
-      <h3>BUILD</h3><input type="range" id="cr-h" min="0.92" max="1.08" step="0.01" value="${st.height}">
+      <div class="cr-style-build"><div><h3>HAIR STYLE</h3><div class="row-flex">${['Short', 'Long', 'Spiked', 'Bald', 'Tied'].map((n, i) => `<button class="btn small ${st.hairStyle === i ? 'primary' : ''}" data-hs="${i}">${n}</button>`).join('')}</div></div>
+      <div><h3>BUILD</h3><input type="range" id="cr-h" min="0.92" max="1.08" step="0.01" value="${st.height}"></div></div>
       <div class="cr-actions"><div class="divider"></div>
       <div class="row-flex"><button class="btn" data-a="back">Back</button><span class="space"></span><button class="btn primary" data-a="begin">Wake Up</button></div></div>
     `;
@@ -444,13 +440,13 @@ export function openPause(ui) {
     <button class="btn wide primary" data-a="resume">Resume</button>
     <button class="btn wide" data-a="char">Character <kbd>Tab</kbd></button>
     <button class="btn wide" data-a="map">Map <kbd>M</kbd></button>
-    <button class="btn wide" data-a="lan">LAN Co-op${G.net && G.net.active ? ` <span class="muted">· ${G.net.playerCount} players</span>` : ''}</button>
+    <button class="btn wide" data-a="lan">Multiplayer${G.net && G.net.active ? ` <span class="muted">(${G.net.playerCount} players)</span>` : ''}</button>
     <button class="btn wide" data-a="settings">Settings</button>
     <button class="btn wide" data-a="help">How to Play</button>
     <div class="divider"></div>
     <button class="btn wide" data-a="quit">Save & Quit to Menu</button>
     ${G.player && G.player.inDanger ? '<div class="bad" style="font-size:14px;text-align:center;margin-top:6px">Quitting or reloading in danger costs a life.</div>' : ''}
-    ${G.net && G.net.active ? '<div class="muted" style="font-size:13px;text-align:center;margin-top:6px">Co-op: the world keeps moving.</div>' : ''}
+    ${G.net && G.net.active ? '<div class="muted" style="font-size:13px;text-align:center;margin-top:6px">Multiplayer: the world keeps moving.</div>' : ''}
   </div>`, { pauses: true });
   const openedAt = performance.now();
   el.onclick = (e) => {
@@ -480,10 +476,14 @@ export function openPause(ui) {
       case 'quit':
         if (!a.dataset.armed) {
           a.dataset.armed = '1';
-          a.textContent = 'Click again to Save & Quit';
+          // fleeing a fight costs a life on the next Continue (game.js continueGame): say so here
+          const p = ui.game.player;
+          a.textContent = p && p.inDanger ? `In danger (${Math.ceil(p.dangerT || 0)}s): quitting now costs a life. Click again` : 'Click again to Save & Quit';
+          if (p && p.inDanger) a.classList.add('bad');
           setTimeout(() => {
             if (a.isConnected) {
               delete a.dataset.armed;
+              a.classList.remove('bad');
               a.textContent = 'Save & Quit to Menu';
             }
           }, 3000);
@@ -518,10 +518,11 @@ export function openSettings(ui, back) {
       <div class="muted settings-note">High: bloom, light shafts, water reflections. Medium: the same at a lower resolution, without reflections. Low: no post-processing, the fastest.</div>
       ${slider('viewDistance', 'View Distance', 0.5, 1.5, 0.05)}
       <div class="check-row">${check('shadows', 'Shadows')}${check('damageNumbers', 'Damage numbers')}</div>
+      <div class="check-row">${check('logDepth', 'Precise depth: no distant flicker (applies on reload)', 'A logarithmic depth buffer: stops far walls and roofs flickering into each other. Costs a few percent of frame time; turn it off if your frame rate suffers. Applies when the game is reloaded.')}</div>
       <div class="check-row">${check('bounceLight', 'Bounce light (experimental): lifts faces the sun misses', 'An experimental light from below that lifts the faces the sun misses. Off by default.')}</div>
       <h3>INTERFACE AND ACCESS</h3>
       ${slider('uiScale', 'Interface Size', 0.85, 1.3, 0.05)}
-      <div class="check-row">${check('reduceFlashing', 'Reduce flashing and shake', 'Dims the screen\'s flashes and holds camera shake low.')}${check('soundCues', 'Sound cues', 'Short captions, with their direction, for the sounds that warn: a swing out of view, a roar, whispers, your heartbeat.')}${check('tips', 'Tips', 'Short explanations the first time each system matters. The Journal\'s Guide keeps them all.')}</div>
+      <div class="check-row">${check('reduceFlashing', 'Reduce flashing and shake', 'Dims the screen\'s flashes and holds camera shake low.')}${check('soundCues', 'Sound cues', 'Short captions, with their direction, for the sounds that warn: a swing out of view, a roar, whispers, your heartbeat.')}${check('tipPopups', 'Tip pop-ups', 'Short explanations the first time each system matters. Off by default; the Journal\'s Guide keeps them all.')}</div>
     </div>
     <div class="divider"></div>
     <div class="row-flex"><span class="muted" style="font-size:13px">Changes apply at once and are kept for every slot. Keys can't be rebound.</span><span class="space"></span><button class="btn primary" data-a="back">Back</button></div>
@@ -620,7 +621,7 @@ export function showWipe(ui, info) {
   const level = entry ? entry.level : info ? info.level : 1;
   const cause = entry ? entry.cause : info ? info.cause : '';
   let pick = null;
-  const options = () => (pending ? pending.options.map((o, i) => `<button class="btn small ${pick === i ? 'primary' : ''}" data-pick="${i}">${pick === i ? '✓ ' : ''}${escapeHtml(o.name)}<span class="muted"> · ${o.kind}</span></button>`).join('') : '');
+  const options = () => (pending ? pending.options.map((o, i) => `<button class="btn small ${pick === i ? 'primary' : ''}" data-pick="${i}">${pick === i ? '✓ ' : ''}${escapeHtml(o.name)}<span class="muted">, ${o.kind}</span></button>`).join('') : '');
   const heirloomBlock = () => (pending ? `<h3>LEAVE AN HEIRLOOM</h3>
       <p class="muted" style="margin:0 0 8px;font-size:14px">Choose one thing to leave in the keepsake chest at the Wash. The next new character, in any slot, may claim it once.</p>
       ${l.heirloom ? `<p class="muted" style="margin:0 0 8px;font-size:14px"><span class="gold">${escapeHtml(l.heirloom.name)}</span>, left by ${escapeHtml(l.heirloom.from || 'another')}, still waits there: your choice takes its place.</p>` : ''}
@@ -628,13 +629,13 @@ export function showWipe(ui, info) {
   const stats = entry ? `<div class="stat-list" style="max-width:420px;margin:12px auto;text-align:left">
       <span class="k">Time played</span><span>${fmtPlaytime(entry.playtime)}</span>
       <span class="k">Foes felled</span><span>${entry.kills}</span>
-      <span class="k">Chapters reached</span><span>${entry.chapters}${entry.chapter ? ` · ${escapeHtml(entry.chapter)}` : ''}</span>
+      <span class="k">Story threads</span><span>${entry.chapters}${entry.chapter ? `, ${escapeHtml(entry.chapter)}` : ''}</span>
       <span class="k">Great foes slain</span><span>${entry.foes.length ? entry.foes.map(escapeHtml).join(', ') : 'none'}</span>
     </div>
-    <div class="gold" style="font-family:var(--display);letter-spacing:.08em">+${entry.earned} Remembrance <span class="muted">· ${l.remembrance} held</span></div>` : `<div class="muted">${info ? info.kills : 0} foes felled</div>`;
+    <div class="gold" style="font-family:var(--display);letter-spacing:.08em">+${entry.earned} Remembrance <span class="muted">(${l.remembrance} held)</span></div>` : `<div class="muted">${info ? info.kills : 0} foes felled</div>`;
   const html = () => `<div class="panel wipe-panel" style="text-align:center"><h2>YOUR JOURNEY ENDS</h2>
     <div style="font-family:var(--display);font-size:26px;color:var(--gold-2);letter-spacing:.1em">${escapeHtml(name)}</div>
-    <div class="muted">${escapeHtml(race)} · Power ${level}</div>
+    <div class="muted">${escapeHtml(race)}, Power ${level}</div>
     <div style="margin:10px 0;font-style:italic">${escapeHtml(cause || '')}</div>
     ${stats}
     <div style="text-align:left">${heirloomBlock()}</div>

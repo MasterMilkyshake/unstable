@@ -242,7 +242,11 @@ export class Boat {
       // and a little off it, so the hull doesn't stick
       mx += n.x * 0.6 * dt;
       mz += n.z * 0.6 * dt;
-      if (bow(this.pos.x + mx, this.pos.z + mz) && this.contact(this.pos.x + mx, this.pos.z + mz)) mx = mz = 0;
+      if (bow(this.pos.x + mx, this.pos.z + mz) && this.contact(this.pos.x + mx, this.pos.z + mz)) {
+        // wedged: no way on, so no speed (else the log, wake and knots go on while it sits still)
+        mx = mz = 0;
+        this.speed = damp(this.speed, 0, 10, dt);
+      }
     }
     this.pos.x += mx;
     this.pos.z += mz;
@@ -295,9 +299,10 @@ export class Boat {
         cols.resolve(_probe, 0.4, 1.8);
         if (_probe.distanceTo(before) > 0.05) continue;
       }
-      cands.push({ x, z, y: dry ? g : SWIM_Y, dry, d: Math.hypot(lx, lz) });
+      // above the waterline (a pier's deck, a beach) beats a shoal you'd wade on
+      cands.push({ x, z, y: dry ? g : SWIM_Y, dry, above: g > 0, d: Math.hypot(lx, lz) });
     }
-    cands.sort((a, b) => (b.dry - a.dry) || a.d - b.d);
+    cands.sort((a, b) => (b.above - a.above) || (b.dry - a.dry) || a.d - b.d);
     const best = cands[0];
     return best ? new THREE.Vector3(best.x, best.y, best.z) : null;
   }

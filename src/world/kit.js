@@ -120,6 +120,7 @@ export class Kit {
     this.gradient = opts.gradient ?? MATERIAL_RULES.gradient;
     this.shadow = opts.shadow ?? true;
     this.tris = 0;
+    this.boxes = []; // [layer, first float, float count] per element, in the order they were laid
   }
 
   get matrix() {
@@ -190,6 +191,9 @@ export class Kit {
     const grad = o.grad ?? (o.layer === 'glow' ? 0 : this.gradient);
     const r = _c.r * f, g = _c.g * f, b = _c.b * f;
     const v = new THREE.Vector3();
+    // every element but a rock is remembered so build() can part its flush faces (see unflush;
+    // a warp leaves a level face level, and a face it bends simply finds nothing flush with it)
+    if (unit !== ROCK) this.boxes.push(layer, layer.pos.length, unit.length);
     for (let i = 0; i < unit.length; i += 3) {
       const uy = this.flip ? 0.5 - unit[i + 1] : unit[i + 1] + 0.5;
       v.set(unit[i], unit[i + 1], unit[i + 2]).applyMatrix4(m);
@@ -670,6 +674,7 @@ export class Kit {
 
   // ------------------------------------------------------------ output
   build(name = 'kit') {
+    unflush(this.boxes);
     const g = new THREE.Group();
     g.name = name;
     for (const [key, layer] of Object.entries(this.layers)) {
@@ -679,14 +684,151 @@ export class Kit {
       geo.setAttribute('color', new THREE.Float32BufferAttribute(layer.col, 3));
       geo.computeVertexNormals();
       geo.computeBoundingSphere();
+      // where each straight element starts (and its length), so world/merge.js can part flush faces between structures
+      const starts = [];
+      for (let i = 0; i < this.boxes.length; i += 3) if (this.boxes[i] === layer) starts.push(this.boxes[i + 1], this.boxes[i + 2]);
+      if (starts.length) geo.userData.boxes = starts;
       const mesh = new THREE.Mesh(geo, KIT_MATERIALS[key]);
       mesh.name = `${name}_${key}`;
       mesh.castShadow = this.shadow && key !== 'glow';
       mesh.receiveShadow = key !== 'glow';
       g.add(mesh);
     }
+    this.boxes = [];
     return g;
   }
+}
+
+// Two elements whose faces share a plane and overlap (a floor laid on a plinth, a trim flush
+// with its wall, a cap on a footing) fight for the same depth and flicker as the camera
+// moves. The block laid later is the one meant to show, so its face is moved out along its
+// normal by 1.2 cm per block already under it (at most three steps): invisible at arm's length,
+// and enough for the depth buffer to tell the two apart across a town. Faces up to 11 mm
+// apart count as flush (they fight too, from further off); one laid just under another is
+// first lifted level with it.
+const UNFLUSH = 0.012;
+const UNFLUSH_STEPS = 3;
+const UNFLUSH_NEAR = 0.011;
+export function unflush(boxes) {
+  if (boxes.length < 6) return;
+  const faces = new Map();
+  const list = [];
+  for (let e = 0; e < boxes.length; e += 3) {
+    const pos = boxes[e].pos, s = boxes[e + 1], end = s + boxes[e + 2];
+    // the element's flat faces: its triangles grouped by plane
+    const own = new Map();
+    for (let o = s; o < end; o += 9) {
+      const ax = pos[o], ay = pos[o + 1], az = pos[o + 2];
+      const ux = pos[o + 3] - ax, uy = pos[o + 4] - ay, uz = pos[o + 5] - az;
+      const vx = pos[o + 6] - ax, vy = pos[o + 7] - ay, vz = pos[o + 8] - az;
+      let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz);
+      if (len < 1e-6) continue;
+      nx /= len; ny /= len; nz /= len;
+      const d = nx * ax + ny * ay + nz * az;
+      const key = `${Math.round(nx * 500)},${Math.round(ny * 500)},${Math.round(nz * 500)},`;
+      const bin = Math.round(d * 200); // 5 mm
+      let face = own.get(key + bin);
+      if (!face) {
+        face = { e, pos, s, end, tris: [], nx, ny, nz, d, rank: 0, poly: null };
+        own.set(key + bin, face);
+        for (const b of [bin - 2, bin - 1, bin, bin + 1, bin + 2]) {
+          const L = faces.get(key + b);
+          if (L) for (const other of L) list.push([other, face]);
+        }
+        let L = faces.get(key + bin);
+        if (!L) faces.set(key + bin, (L = []));
+        L.push(face);
+      }
+      face.tris.push(o);
+    }
+  }
+  if (!list.length) return;
+  // in the order the later face was laid, so the faces under it already have their places
+  list.sort((a, b) => a[1].e - b[1].e || a[1].tris[0] - b[1].tris[0] || a[0].e - b[0].e);
+  const moved = [];
+  for (let i = 0; i < list.length; ) {
+    const over = list[i][1];
+    const taken = new Set();
+    let lift = 0; // how far the face sits under the faces it overlaps, before it is parted
+    for (; i < list.length && list[i][1] === over; i++) {
+      const under = list[i][0];
+      if (under.e === over.e || Math.abs(under.d - over.d) > UNFLUSH_NEAR) continue;
+      if (overlapArea(facePoly(under), facePoly(over)) < 0.0025) continue;
+      taken.add(under.rank);
+      lift = Math.max(lift, under.d - over.d);
+    }
+    if (!taken.size) continue;
+    // one step above the highest face under it; a ring of blocks each over the last (an arena's
+    // tiers, a round tower's courses) would climb forever, so past the cap any free step will do
+    let r = Math.max(...taken) + 1;
+    if (r > UNFLUSH_STEPS) for (r = 0; taken.has(r); r++);
+    over.rank = r;
+    over.lift = lift;
+    if (r) moved.push(over);
+  }
+  for (const f of moved) {
+    const pos = f.pos;
+    const off = UNFLUSH * f.rank + f.lift;
+    for (let i = f.s; i < f.end; i += 3) {
+      if (Math.abs(pos[i] * f.nx + pos[i + 1] * f.ny + pos[i + 2] * f.nz - f.d) > 0.004) continue;
+      pos[i] += f.nx * off; pos[i + 1] += f.ny * off; pos[i + 2] += f.nz * off;
+    }
+  }
+}
+// A face's outline in its own plane: the convex hull of its triangles' corners.
+function facePoly(f) {
+  if (f.poly) return f.poly;
+  const ax = Math.abs(f.ny) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+  let ux = ax[1] * f.nz - ax[2] * f.ny, uy = ax[2] * f.nx - ax[0] * f.nz, uz = ax[0] * f.ny - ax[1] * f.nx;
+  const ul = Math.hypot(ux, uy, uz); ux /= ul; uy /= ul; uz /= ul;
+  const wx = f.ny * uz - f.nz * uy, wy = f.nz * ux - f.nx * uz, wz = f.nx * uy - f.ny * ux;
+  const pts = [];
+  for (const o of f.tris) {
+    for (let q = 0; q < 9; q += 3) {
+      const x = f.pos[o + q], y = f.pos[o + q + 1], z = f.pos[o + q + 2];
+      pts.push([x * ux + y * uy + z * uz, x * wx + y * wy + z * wz]);
+    }
+  }
+  pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [], upper = [];
+  for (const p of pts) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 1e-9) lower.pop();
+    lower.push(p);
+  }
+  for (let i = pts.length - 1; i >= 0; i--) {
+    const p = pts[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 1e-9) upper.pop();
+    upper.push(p);
+  }
+  lower.pop();
+  upper.pop();
+  return (f.poly = lower.concat(upper));
+}
+// Area shared by two convex polygons (Sutherland-Hodgman).
+function overlapArea(subject, clipper) {
+  let out = subject;
+  for (let i = 0; i < clipper.length && out.length; i++) {
+    const a = clipper[i], b = clipper[(i + 1) % clipper.length];
+    const side = (p) => (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+    const inp = out;
+    out = [];
+    for (let j = 0; j < inp.length; j++) {
+      const p = inp[j], q = inp[(j + 1) % inp.length], sp = side(p), sq = side(q);
+      if (sp >= 0) out.push(p);
+      if ((sp >= 0) !== (sq >= 0)) {
+        const t = sp / (sp - sq);
+        out.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]);
+      }
+    }
+  }
+  let s = 0;
+  for (let i = 0; i < out.length; i++) {
+    const a = out[i], b = out[(i + 1) % out.length];
+    s += a[0] * b[1] - b[0] * a[1];
+  }
+  return Math.abs(s) / 2;
 }
 
 // A structure's footprint in the world: local (x, z) metres around an origin turned by

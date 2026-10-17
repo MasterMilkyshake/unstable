@@ -129,7 +129,7 @@ ACTIONS.mapOverlay = (ctx, toPx, region, here) => {
   triangle(ctx, lx + 4, ly - 2, 4.5, TIER[4].fill, TIER[4].ink);
   triangle(ctx, lx + 18, ly - 2, 5.5, TIER[5].fill, TIER[5].ink);
   ctx.fillStyle = '#3a2e20';
-  ctx.fillText('a high climb · a crown', lx + 28, ly + 2);
+  ctx.fillText('a high climb, a crown', lx + 28, ly + 2);
   ctx.beginPath();
   ctx.moveTo(lx - 1, ly + 14);
   ctx.lineTo(lx + 22, ly + 14);

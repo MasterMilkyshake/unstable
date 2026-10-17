@@ -75,7 +75,7 @@ UPDATE_HOOKS.push((game, dt) => {
   hud.style.display = visible ? '' : 'none';
   if (visible) {
     const def = RESONANCES[r.id];
-    hud.innerHTML = r.cd > 0 ? `<span style="color:#8a8478">Z · ${def.name.toUpperCase()} ${Math.ceil(r.cd)}s</span>` : `<span style="color:${def.color}">Z · ${def.name.toUpperCase()}</span>`;
+    hud.innerHTML = r.cd > 0 ? `<span style="color:#8a8478">Z, ${def.name.toUpperCase()} ${Math.ceil(r.cd)}s</span>` : `<span style="color:${def.color}">Z, ${def.name.toUpperCase()}</span>`;
   }
 });
 

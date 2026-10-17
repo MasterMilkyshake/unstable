@@ -252,8 +252,8 @@ ACTIONS.openContracts = (f) => {
       const offers = closed ? [] : offersFor(ch, f);
       const held = s.held.map((h) => [h, CONTRACT[h.id]]);
       const row = (c, right) => `<div class="shop-row"><div class="ico" style="color:${fac.color}">✦</div><div style="flex:1"><div class="nm">${esc(c.title)}</div>
-        <div class="ds">${esc(c.text)}</div><div class="ds">${c.silver} silver · +${c.rep} standing${c.f !== f ? ` with ${FACTIONS[c.f].short}` : ''}</div></div>${right}</div>`;
-      return `<h2>${esc(fac.name.toUpperCase())} · CONTRACTS</h2>
+        <div class="ds">${esc(c.text)}</div><div class="ds">${c.silver} silver, +${c.rep} standing${c.f !== f ? ` with ${FACTIONS[c.f].short}` : ''}</div></div>${right}</div>`;
+      return `<h2>${esc(fac.name.toUpperCase())}, CONTRACTS</h2>
         <p class="muted" style="text-align:center;margin-top:0">Your standing: <b style="color:${tierOf(ch.rep[f]).color}">${tierOf(ch.rep[f]).name}</b>. New postings in ${Math.ceil(left / 60)} min. You may hold ${BOARD.held}.</p>
         ${closed ? `<p class="muted" style="text-align:center">${esc(closed)}</p>` : `<div class="shop-list">${offers.length ? offers.map((c) => row(c, `<button class="btn small primary" data-take="${c.id}" ${s.held.length >= BOARD.held ? 'disabled' : ''}>Take</button>`)).join('') : '<p class="muted" style="text-align:center">Nothing more posted today.</p>'}</div>`}
         ${held.length ? `<div class="divider"></div><h3>Yours</h3><div class="shop-list">${held.map(([h, c]) => row(c, `<div class="ds" style="width:150px">${esc(progressText(ch, h))}</div>${c.f === f && handInReady(ch, h) ? `<button class="btn small primary" data-in="${c.id}">${h.ready ? 'Collect' : 'Hand over'}</button>` : `<button class="btn small" data-drop="${c.id}">Give up</button>`}`)).join('')}</div>` : ''}

@@ -18,7 +18,7 @@ test('the Enclave and the Ministry pull against each other; the Watch sits betwe
   addRep(ch, 'enclave', 8);
   assert.deepEqual(ch.rep, { watch: -2, enclave: 8, ministry: -3 });
   assert.equal(toasts.length, 1, 'one toast for the change and its rivals');
-  assert.match(toasts[0][0], /The Enclave: \+8 standing · the Ministry −3 · the Watch −2/);
+  assert.match(toasts[0][0], /The Enclave: \+8 standing, the Ministry −3, the Watch −2/);
   addRep(ch, 'ministry', 9);
   assert.equal(ch.rep.enclave, 8 - 3);
   addRep(ch, 'watch', 10);

@@ -35,14 +35,15 @@ UPDATE_HOOKS.push((game, dt) => {
   scanT = 0.75;
   const ch = game.ch;
   ch.discovered ||= [];
-  const { x, z } = game.player.pos;
+  const { x, y, z } = game.player.pos;
   for (const l of LOCATIONS) {
+    if (l.maxY != null && y > l.maxY) continue; // a lower shelf isn't found from the height above it
     if (l.r > 150 || ch.discovered.includes(l.name)) continue; // whole islands are not "discovered"
     if (Math.hypot(x - l.x, z - l.z) > Math.min(l.r, 60)) continue;
     ch.discovered.push(l.name);
     const xp = 30 + ch.level * 8;
     game.player.addXp(xp);
-    G.ui.toast(`Discovered: ${l.name}  ·  +${xp} XP`, 'quest');
+    G.ui.toast(`Discovered: ${l.name}, +${xp} XP`, 'quest');
     G.audio.play('quest', { vol: 0.45 });
     game.save();
     break;

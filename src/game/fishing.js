@@ -61,7 +61,7 @@ export function startFishing(spot) {
     if (caught) {
       const it = ITEMS[s.fish.id];
       game.giveItem(s.fish.id, 1, true);
-      ui.toast(`You caught: ${it ? it.icon + ' ' + it.name : s.fish.id}!`, s.fish.tier >= 2 ? 'quest' : 'loot');
+      ui.toast(`You caught: ${it ? it.name : s.fish.id}!`, s.fish.tier >= 2 ? 'quest' : 'loot');
       G.audio.play(s.fish.tier >= 2 ? 'levelup' : 'coin', { vol: 0.6 });
       game.ch.stats.fishCaught = (game.ch.stats.fishCaught || 0) + 1;
       if (s.fish.tier >= 1) p.addXp(15 + s.fish.tier * 25);

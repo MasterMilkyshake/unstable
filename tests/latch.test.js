@@ -235,3 +235,48 @@ test("a thin wall's top is caught, not the floor of the room behind it", () => {
   step(1, () => (hung ||= player.climbing));
   assert.equal(hung, false, 'no hold on a floor behind the wall');
 });
+
+test('a diagonal approach hangs square to the wall, up against it, not askew off its edge', () => {
+  wall(3.2);
+  G.game.camYaw = 0.7; // 40 degrees off the wall's normal
+  input.down.add('KeyW');
+  step(0.5);
+  press('Space');
+  step(1);
+  assert.ok(player.climbing, 'caught the edge');
+  assert.ok(Math.abs(angleDiffLocal(player.yaw, 0)) < 0.02, `faces the wall square on (yaw ${player.yaw.toFixed(3)})`);
+  assert.ok(Math.abs(player.pos.z - (1 - player.radius - 0.05)) < 0.02, `up against the face (z ${player.pos.z.toFixed(2)})`);
+  input.down.delete('KeyW');
+  step(1);
+  assert.ok(player.climbing, 'the hang holds without forward held');
+});
+
+test('a jump pressed just after walking off an edge still jumps (coyote time)', () => {
+  colliders.addBox({ x: 0, z: -5, w: 8, d: 10, y0: 0, y1: 1 }); // a platform ending at z 0
+  player.pos.set(0, 1, -1);
+  input.down.add('KeyW');
+  let off = -1, jumped = false;
+  step(1.2, () => {
+    if (off < 0 && !player.grounded && player.pos.z > 0) off = 0;
+    else if (off >= 0) off++;
+    if (off === 1) press('Space'); // two frames (0.07 s) after the feet left the edge
+    if (off > 1 && player.vel.y > 5) jumped = true;
+  });
+  assert.ok(jumped, 'the late press jumped');
+});
+
+test('a jump pressed just before landing jumps on touching down', () => {
+  player.pos.set(0, 2, -3);
+  player.grounded = false;
+  let pressed = false, landed = -1, jumpedAfter = -1, frame = 0;
+  step(1.5, () => {
+    frame++;
+    if (!pressed && player.vel.y < 0 && player.pos.y < 0.45) { press('Space'); pressed = true; }
+    if (pressed && landed < 0 && player.grounded) landed = frame;
+    if (landed >= 0 && jumpedAfter < 0 && player.vel.y > 5) jumpedAfter = frame - landed;
+  });
+  assert.ok(pressed && landed >= 0, 'fell and landed');
+  assert.ok(jumpedAfter >= 0 && jumpedAfter <= 2, `jumped on landing (${jumpedAfter} frames after)`);
+});
+
+function angleDiffLocal(a, b) { return Math.atan2(Math.sin(a - b), Math.cos(a - b)); }

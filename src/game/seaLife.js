@@ -12,7 +12,7 @@ import { SEA_CONVOYS, FALSE_CONVOY, SEA_TROUBLE, LIFE_TIMING, CONVOY_LOOT } from
 import { KINDS, LIFE, reward, players, nearestPlayer, spawnSquad, alive, seatOf, coastState, applyReward } from './worldLife.js';
 import { seaCourse, FerryPilot } from './travel.js';
 import { waveHeight } from '../world/water.js';
-import { lifeProp, releaseLifeProp } from '../world/lifeProps.js';
+import { lifeProp } from '../world/lifeProps.js';
 import { rand, randInt } from '../core/util.js';
 
 const now = () => G.time || 0;
@@ -153,7 +153,7 @@ function arrive(game, ev) {
   const d = ev.to;
   if (nearestD(game, d.end.x, d.end.z) < 150 && Math.random() < 0.75) {
     const mid = d.start.clone().lerp(d.end, 0.4);
-    ev.foes = spawnSquad(game, ev.def.raiders, mid.x, mid.z, Math.atan2(d.dir.x, d.dir.z), { scaleTo: Math.max(game.ch.level || 1, 4) });
+    ev.foes = spawnSquad(game, ev.def.raiders, mid.x, mid.z, Math.atan2(d.dir.x, d.dir.z));
     for (const [i, e] of ev.foes.entries()) e.setAggro?.(alive(ev)[i % Math.max(1, alive(ev).length)] || null);
     for (const q of players(game)) if (Math.hypot(q.actor.pos.x - d.end.x, q.actor.pos.z - d.end.z) < 200) reward(game, q.actor, { toast: 'Raiders on the pier, waiting for the sloop!', kind: 'bad' });
   }
@@ -178,6 +178,7 @@ function openHold(game, ev, k, loot) {
 
 // ---------------------------------------------------------------- the false sloop
 KINDS.falseConvoy = {
+  seaAttack: true,
   start(game) {
     const q = players(game).find((o) => o.actor.boat);
     if (!q) return null;
@@ -245,7 +246,7 @@ KINDS.beset = {
     ev.boat.autopilot = { update: (b, dd) => { b.speed = 0; b.yaw += dd * 0.05; b.syncMesh(); } };
     for (let i = 0; i < SEA_TROUBLE.beset.sharks; i++) {
       const t = (i / SEA_TROUBLE.beset.sharks) * Math.PI * 2;
-      const e = game.spawnEnemy('gnashfin', new THREE.Vector3(x + Math.sin(t) * 8, -1.2, z + Math.cos(t) * 8), { scaleTo: Math.max(game.ch.level || 1, 3) });
+      const e = game.spawnEnemy('gnashfin', new THREE.Vector3(x + Math.sin(t) * 8, -1.2, z + Math.cos(t) * 8));
       e.lifeEvent = ev;
       e.home.set(x, -1.2, z);
       ev.foes.push(e);

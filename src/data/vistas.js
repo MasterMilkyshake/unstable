@@ -327,18 +327,18 @@ export const TIME_GRADE = {
 // Named camera setups for screenshots / ?vista= preview. Positions sit on
 // overlooks and look toward landmarks at a chosen hour.
 export const VISTA_SHOTS = {
-  wash_dusk: { x: 16, y: 14, z: -308, lx: -160, ly: 42, lz: -320, time: 0.78, title: 'Wash · purple dusk' },
-  wash_sunset: { x: 14, y: 18, z: -248, lx: 8, ly: 152, lz: 48, time: 0.74, title: 'Wash · sunset toward the Keystone' },
-  keystone_day: { x: 36, y: 154, z: -92, lx: 8, ly: 136, lz: 48, time: 0.42, title: 'Keystone · day' },
-  keystone_sunset: { x: -28, y: 108, z: -110, lx: 8, ly: 134, lz: 48, time: 0.745, title: 'Keystone · god-ray sunset' },
-  keystone_night: { x: 18, y: 72, z: 176, lx: 8, ly: 132, lz: 48, time: 0.9, title: 'Keystone · starry night' },
+  wash_dusk: { x: 16, y: 14, z: -308, lx: -160, ly: 42, lz: -320, time: 0.78, title: 'Wash, purple dusk' },
+  wash_sunset: { x: 14, y: 18, z: -248, lx: 8, ly: 152, lz: 48, time: 0.74, title: 'Wash, sunset toward the Keystone' },
+  keystone_day: { x: 36, y: 154, z: -92, lx: 8, ly: 136, lz: 48, time: 0.42, title: 'Keystone, day' },
+  keystone_sunset: { x: -28, y: 108, z: -110, lx: 8, ly: 134, lz: 48, time: 0.745, title: 'Keystone, god-ray sunset' },
+  keystone_night: { x: 18, y: 72, z: 176, lx: 8, ly: 132, lz: 48, time: 0.9, title: 'Keystone, starry night' },
   seamspire: { x: -90, y: 22, z: -290, lx: -160, ly: 26, lz: -320, time: 0.36, title: 'Seamspire Abbey' },
   widowneedles: { x: 1150, y: 14, z: -60, lx: 1215, ly: 45, lz: -122, time: 0.74, title: 'The Widowneedles' },
   nave_below: { x: -650, y: 9, z: -440, lx: -716, ly: 4, lz: -404, time: 0.28, title: 'The Nave Below' },
   stillkeep: { x: -908, y: 28, z: 1512, lx: -952, ly: 68, lz: 1568, time: 0.28, title: 'The Stillkeep' },
   ember_circlet: { x: 228, y: 16, z: -1312, lx: 340, ly: 64, lz: -1200, time: 0.73, title: 'The Ember Circlet' },
   green_needle: { x: 118, y: 66, z: 1335, lx: 82, ly: 58, lz: 1308, time: 0.4, title: 'The Green Needle' },
-  salt_vista: { x: 20, y: 16, z: -188, lx: 8, ly: 150, lz: 48, time: 0.77, title: 'Saltreach · dusk vista' },
+  salt_vista: { x: 20, y: 16, z: -188, lx: 8, ly: 150, lz: 48, time: 0.77, title: 'Saltreach, dusk vista' },
 };
 
 let registered = false;

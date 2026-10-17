@@ -479,7 +479,7 @@ export const STRUCTURES = [
   { type: 'shipwreck', x: 22, z: -370, rot: 0.6 },
   { type: 'campfire', id: 'cf_wash', x: 0, z: -320, name: 'The Wash' },
   { type: 'well', id: 'well_wash', x: -8, z: -328 },
-  { type: 'dummy', x: 10, z: -336 },
+  { type: 'dummy', x: 13.5, z: -336 }, // clear of the Rigging Tower's stair (x 9.1 to 10.6, z -345 to -334), which it stood under
   { type: 'crates', x: -8, z: -312 },
   // ---- Saltreach Town ----
   { type: 'well', id: 'well_salt', x: -11, z: 2 },
@@ -670,8 +670,9 @@ export const NPCS = [
   { id: 'wren', name: 'Old Wren', title: 'Beachcomber', x: 5, z: -316, look: { skin: '#c9a07a', hair: '#e8e4dc', outfit: { main: '#5a6a5a', trim: '#3a4a3a', pants: '#3a3a30', boots: '#2a2018' }, beard: '#e8e4dc' } },
   { id: 'maren', name: 'Elder Maren', title: 'Keeper of Saltreach', x: -61.6, z: 69.6, interior: true, floor: 1.8, yaw: Math.PI / 2, look: { skin: '#e0c0a0', hair: '#cfcfd8', outfit: { main: '#3a2a5a', trim: '#d4b04a', pants: '#2a2040', boots: '#1a1420' } } },
   { id: 'dorran', name: 'Dorran', title: 'Blacksmith', x: 24, z: 12, look: { skin: '#a87850', hair: '#1a1410', outfit: { main: '#4a3a2a', trim: '#2a2018', pants: '#2a2a2a', boots: '#1a1410' }, beard: '#1a1410', apron: true } },
-  { id: 'ysolde', name: 'Ysolde', title: 'Tailor', x: 14, z: -10, look: { skin: '#f0d0b8', hair: '#a8281c', outfit: { main: '#9a3a3a', trim: '#e8d4a0', pants: '#3a2a3a', boots: '#2a1a1a' } } },
-  { id: 'pell', name: 'Pell', title: 'Grocer', x: -14, z: -10, look: { skin: '#d8a880', hair: '#6a4a2a', outfit: { main: '#3a6a9a', trim: '#e8e4dc', pants: '#3a3a3a', boots: '#2a2018' } } },
+  // the market's sellers stand behind their own stalls' counters (world.js STRUCTURES 'stall'), facing the street
+  { id: 'ysolde', name: 'Ysolde', title: 'Tailor', x: 14, z: -14.15, yaw: 0, look: { skin: '#f0d0b8', hair: '#a8281c', outfit: { main: '#9a3a3a', trim: '#e8d4a0', pants: '#3a2a3a', boots: '#2a1a1a' } } },
+  { id: 'pell', name: 'Pell', title: 'Grocer', x: -14, z: -14.15, yaw: 0, look: { skin: '#d8a880', hair: '#6a4a2a', outfit: { main: '#3a6a9a', trim: '#e8e4dc', pants: '#3a3a3a', boots: '#2a2018' } } },
   { id: 'bess', name: 'Bess', title: 'Innkeeper', x: -34.5, z: 20, interior: true, yaw: Math.PI / 2, look: { skin: '#e8c0a0', hair: '#d4a040', outfit: { main: '#7a5a3a', trim: '#e8e4dc', pants: '#4a3a2a', boots: '#2a2018' }, apron: true } },
   { id: 'ilvar', name: 'Sage Ilvar', title: 'Attunement Trainer', x: 41, z: 37, look: { skin: '#c9b39b', hair: '#ebe4d8', outfit: { main: '#2a3a6a', trim: '#8fd8ff', pants: '#1a2040', boots: '#1a1a2a' }, horns: 'curled', beard: '#ebe4d8' } },
   { id: 'hale', name: 'Captain Hale', title: 'Commander of the Watch', x: -30, z: -32, yaw: Math.PI / 2, look: { skin: '#b88a60', hair: '#3a2a1a', outfit: { main: '#9aa3ad', trim: '#2a4a7a', pants: '#2a3a5a', boots: '#3a3a3a' }, armored: true } },
@@ -682,7 +683,7 @@ export const NPCS = [
   { id: 'ignis', name: 'Scholar Ignis', title: 'Volcanologist', x: 646, z: 756, look: { skin: '#8a6a54', hair: '#2a1a10', outfit: { main: '#5a4a40', trim: '#ff7a2f', pants: '#3a2a20', boots: '#1a1410' } } },
   { id: 'thorn_ferry', name: 'Rook', title: 'Ferryman', x: 764, z: 250, look: { skin: '#d8a880', hair: '#2a2a2a', outfit: { main: '#2a4a5a', trim: '#e8d4a0', pants: '#2a2a2a', boots: '#1a1a1a' } } },
   { id: 'vorn', name: 'Vorn', title: 'Pitmaster of the Crucible', x: 99.2, z: 12.6, look: { skin: '#a87850', hair: '#2a1a10', outfit: { main: '#6a2a1a', trim: '#d4b04a', pants: '#2a1a14', boots: '#1a1010' }, beard: '#2a1a10', armored: true } },
-  { id: 'corwin', name: 'Corwin', title: 'Jeweler', x: 24, z: -4, look: { skin: '#e8c8a8', hair: '#3a2a1a', outfit: { main: '#5a3a7a', trim: '#d4b04a', pants: '#2a2030', boots: '#1a1418' } } },
+  { id: 'corwin', name: 'Corwin', title: 'Jeweler', x: 24, z: -8.15, yaw: 0, look: { skin: '#e8c8a8', hair: '#3a2a1a', outfit: { main: '#5a3a7a', trim: '#d4b04a', pants: '#2a2030', boots: '#1a1418' } } },
   { id: 'gull', name: 'Gull', title: 'Lighthouse Keeper', x: -100, z: 70, look: { skin: '#d8b090', hair: '#9a9a9a', outfit: { main: '#3a4a5a', trim: '#d4b04a', pants: '#2a2a30', boots: '#1a1a1a' }, beard: '#bababa' } },
   { id: 'ama', name: 'Ama', title: 'Verdance Guide', x: 28, z: 880, look: { skin: '#8a5a3a', hair: '#1a1410', outfit: { main: '#4a6a3a', trim: '#c8a040', pants: '#3a3020', boots: '#2a2018' }, bandana: '#c8a040' } },
   { id: 'hollow_man', name: 'The Hollow Man', title: '???', x: 5992, z: 5842, look: { skin: '#3a3048', hair: '#0a0810', outfit: { main: '#1a1424', trim: '#a274ff', pants: '#120e1a', boots: '#08060c' }, hood: true, glowEyes: true, eyes: '#c48bff' } },

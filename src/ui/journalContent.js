@@ -13,29 +13,30 @@ const match = (query, ...texts) => texts.join(' ').toLocaleLowerCase().includes(
 const card = (title, subtitle, body, locked = false) => `<article class="lore-entry ${locked ? 'locked' : ''}"><h3 class="lt">${esc(title)}</h3><div class="lp">${esc(subtitle)}</div><div class="chronicle-text">${body}</div></article>`;
 
 export function rewardText(reward) {
-  return [reward.xp && `${reward.xp} XP`, reward.silver && `${reward.silver} silver`, ...(reward.items || []).map(([id, n]) => `${n} × ${ITEMS[id].name}`)].filter(Boolean).join(' · ');
+  return [reward.xp && `${reward.xp} XP`, reward.silver && `${reward.silver} silver`, ...(reward.items || []).map(([id, n]) => `${n} × ${ITEMS[id].name}`)].filter(Boolean).join(', ');
 }
 
 function evidenceList(ch, evidence) {
   return `<ul class="evidence-list">${evidence.map((id) => {
     const entry = LORE_BY_ID[id];
     const read = (ch.lore || []).includes(id);
-    return `<li class="${read ? 'found' : ''}"><span aria-label="${read ? 'Recovered' : 'Missing'}">${read ? '✓' : '◇'}</span> ${esc(read ? entry.title : 'Unrecovered record')} <span class="muted">· ${esc(entry.place)}</span></li>`;
+    return `<li class="${read ? 'found' : ''}"><span aria-label="${read ? 'Recovered' : 'Missing'}">${read ? '✓' : '◇'}</span> ${esc(read ? entry.title : 'Unrecovered record')}<span class="muted">, ${esc(entry.place)}</span></li>`;
   }).join('')}</ul>`;
 }
 
-// ---- the main story, faction paths and standing
+// ---- the story threads you have taken up, faction paths and standing
 function storyTab(ch, query) {
   const parts = [];
   const statusOf = (id) => ch.quests[id]?.state || 'none';
   for (const act of ACTS) {
-    const chapters = MAIN_CHAIN.filter((id) => QUESTS[id].act === act.id);
-    const rows = chapters.map((id) => {
+    const threads = MAIN_CHAIN.filter((id) => QUESTS[id].act === act.id);
+    const rows = threads.map((id) => {
       const def = QUESTS[id];
       const st = statusOf(id);
       const q = ch.quests[id] || {};
-      if (!match(query, def.name, act.title, ...(st !== 'none' ? [def.desc] : []))) return '';
-      const badge = st === 'done' ? '<span class="pill">Complete</span>' : st === 'ready' ? '<span class="pill gold">Return to turn in</span>' : st === 'active' ? '<span class="pill gold">Current</span>' : `<span class="pill">Locked${def.minLevel && ch.level < def.minLevel ? ` · reach Power ${def.minLevel}` : ''}</span>`;
+      // threads appear once someone has offered and you have taken them up; nothing is shown locked
+      if (st === 'none' || !match(query, def.name, act.subtitle, def.desc)) return '';
+      const badge = st === 'done' ? '<span class="pill">Complete</span>' : st === 'ready' ? '<span class="pill gold">Return to turn in</span>' : '<span class="pill gold">Under way</span>';
       let steps = '';
       if (def.stages && st !== 'none') {
         steps = `<ol class="story-steps">${def.stages.map((stage, i) => {
@@ -45,11 +46,11 @@ function storyTab(ch, query) {
         }).join('')}</ol>`;
       }
       const track = st === 'active' || st === 'ready' ? `<button class="btn small ${ch.trackedQuest === id ? 'primary' : ''}" data-track="${id}">${ch.trackedQuest === id ? 'Tracking' : 'Track'}</button>` : '';
-      return `<article class="lore-entry ${st === 'none' ? 'locked' : ''}"><h3 class="lt">${esc(def.chapter)} · ${esc(st === 'none' ? (statusOf(MAIN_CHAIN[MAIN_CHAIN.indexOf(id) - 1]) === 'done' ? def.name : 'An untold chapter') : def.name)} ${badge}</h3>
+      return `<article class="lore-entry"><h3 class="lt">${esc(def.name)} ${badge}</h3>
         <div class="lp">Suggested Power ${esc(def.power || '?')}</div>
         <div class="chronicle-text">${st !== 'none' ? `<p>${esc(def.desc)}</p>` : ''}${steps}${track}</div></article>`;
     }).join('');
-    if (rows) parts.push(`<h3 class="act-title">${esc(act.title)} — ${esc(act.subtitle)}</h3>${rows}`);
+    if (rows) parts.push(`<h3 class="act-title">${esc(act.subtitle)}</h3>${rows}`);
   }
   const paths = Object.entries(QUESTS).filter(([, d]) => d.path);
   const pathRows = paths.map(([id, def]) => {
@@ -70,8 +71,8 @@ function standingTab(ch) {
     const wanted = (ch.wanted?.[id] || 0) > 0;
     const war = !!(ch.flags && ch.flags[`war_${id}`]);
     const pct = Math.round(((v + 100) / 200) * 100);
-    const status = war ? '<span class="pill bad">At war</span>' : wanted ? `<span class="pill bad">Wanted · ${Math.ceil(ch.wanted[id])}s</span>` : '';
-    return `<article class="lore-entry"><h3 class="lt" style="color:${f.color}">${esc(f.name)} ${status}</h3><div class="lp">${esc(f.home)} · <span style="color:${tier.color}">${esc(tier.name)}</span> (${v > 0 ? '+' : ''}${v})</div>
+    const status = war ? '<span class="pill bad">At war</span>' : wanted ? `<span class="pill bad">Wanted for ${Math.ceil(ch.wanted[id])} s more</span>` : '';
+    return `<article class="lore-entry"><h3 class="lt" style="color:${f.color}">${esc(f.name)} ${status}</h3><div class="lp">${esc(f.home)}, <span style="color:${tier.color}">${esc(tier.name)}</span> (${v > 0 ? '+' : ''}${v})</div>
       <div class="standing-bar"><i style="width:${pct}%;background:${f.color}"></i></div>
       <div class="chronicle-text"><p>${esc(f.desc)}</p><p class="muted">Their guards fight anyone they hate (−50 or lower), anyone they have marked as wanted, and anyone at war with them. Striking a guard marks you; a fine paid to their officer clears it.</p></div></article>`;
   }).join('');
@@ -79,14 +80,14 @@ function standingTab(ch) {
 
 export function journalContent(ch, tab, query = '') {
   let entries = [];
-  if (tab === 'story') return storyTab(ch, query) || '<p class="journal-empty">Your story has not begun. Speak with Old Wren.</p>';
+  if (tab === 'story') return storyTab(ch, query) || '<p class="journal-empty">No threads yet. People around the coast will point you toward them; Old Wren, by the fire on the Wash, is a good place to ask.</p>';
   if (tab === 'standing') return standingTab(ch);
   if (tab === 'chronicle') {
     entries = CHRONICLE.map((entry) => {
       const unlocked = hasEvidence(ch, entry.evidence);
       // Never search unrevealed prose: even matching a secret can disclose it.
       if (!match(query, entry.title, entry.category, entry.subtitle, ...(unlocked ? entry.paragraphs : []))) return '';
-      return card(entry.title, `${entry.category} · ${entry.subtitle}`, unlocked
+      return card(entry.title, `${entry.category}, ${entry.subtitle}`, unlocked
         ? paragraphs(entry.paragraphs) + (entry.evidence.length ? `<details><summary>Sources</summary>${evidenceList(ch, entry.evidence)}</details>` : '')
         : `<p>Recover these sources to reconstruct this account.</p>${evidenceList(ch, entry.evidence)}`, !unlocked);
     });
@@ -96,19 +97,19 @@ export function journalContent(ch, tab, query = '') {
       const revealed = state.complete || state.status === 'recorded';
       if (!match(query, entry.title, entry.tier, entry.question, ...(revealed ? [entry.conclusion] : []))) return '';
       const status = { recorded: 'Recorded', ready: 'Ready to record', in_progress: 'In progress', undiscovered: 'Follow the evidence' }[state.status];
-      return card(entry.title, `${entry.tier} · ${status}`, `<p>${esc(entry.question)}</p>
+      return card(entry.title, `${entry.tier}, ${status}`, `<p>${esc(entry.question)}</p>
         <div class="investigation-progress"><span>${state.found.length} / ${entry.evidence.length} records recovered</span><progress aria-label="Evidence recovered" value="${state.found.length}" max="${entry.evidence.length}"></progress></div>
         ${evidenceList(ch, entry.evidence)}
         ${state.remaining.length ? `<p class="muted">Record first: ${state.remaining.map((id) => esc(INVESTIGATION_BY_ID[id].title)).join(', ')}.</p>` : ''}
         ${revealed ? `<div class="investigation-conclusion">${paragraphs([entry.conclusion])}</div>` : '<p class="muted">The conclusion will become available when every source and prerequisite is recovered.</p>'}
         <div class="investigation-reward">${esc(rewardText(entry.reward))}${entry.titleReward ? `<br>Title: ${esc(entry.titleReward)}` : ''}</div>
-        ${state.status === 'recorded' ? '<span class="pill">Account recorded · reward claimed</span>' : `<button class="btn small ${state.status === 'ready' ? 'primary' : ''}" data-record="${entry.id}" ${state.status === 'ready' ? '' : 'disabled'}>Record account & claim reward</button>`}`);
+        ${state.status === 'recorded' ? '<span class="pill">Account recorded and reward claimed</span>' : `<button class="btn small ${state.status === 'ready' ? 'primary' : ''}" data-record="${entry.id}" ${state.status === 'ready' ? '' : 'disabled'}>Record account & claim reward</button>`}`);
     });
   } else if (tab === 'atlas') {
     entries = ATLAS.map((entry) => {
       const visited = (ch.regions || []).includes(entry.id);
       if (!match(query, entry.title, entry.subtitle, ...(visited ? [entry.history, entry.life, entry.danger, entry.route] : []))) return '';
-      return card(entry.title, `${entry.subtitle} · Suggested Power ${entry.power}`, visited
+      return card(entry.title, `${entry.subtitle}, Suggested Power ${entry.power}`, visited
         ? `<p class="atlas-arrival">${esc(entry.arrival)}</p>${[['History', entry.history], ['Daily life', entry.life], ['Threats', entry.danger], ['Routes & leads', entry.route]].map(([title, text]) => `<h4>${title}</h4><p>${esc(text)}</p>`).join('')}`
         : '<p>Reach this island to add its field notes. Suggested Power describes danger, not an entry requirement.</p>', !visited);
     });
@@ -123,7 +124,7 @@ export function journalContent(ch, tab, query = '') {
       const n = ch.bestiary?.[type] || 0;
       const enemy = ENEMIES[type];
       if (!enemy || !match(query, ...(n ? [enemy.name, enemy.title || '', note] : ['Unknown creature']))) return '';
-      return card(n ? `${enemy.name}${enemy.title ? ` · ${enemy.title}` : ''}` : 'Unknown creature', n ? `${enemy.boss ? 'GREAT FOE' : `POWER ${enemy.level}`} · SLAIN ${n}` : enemy.boss ? 'GREAT FOE' : 'CREATURE', n ? paragraphs([note]) : '', !n);
+      return card(n ? `${enemy.name}${enemy.title ? `, ${enemy.title}` : ''}` : 'Unknown creature', n ? `${enemy.boss ? 'GREAT FOE, ' : ''}SLAIN ${n}` : enemy.boss ? 'GREAT FOE' : 'CREATURE', n ? paragraphs([note]) : '', !n);
     });
   } else {
     const st = ch.stats || {};

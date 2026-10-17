@@ -120,10 +120,10 @@ test('the Ascent posts its guards to their landings', async () => {
   }
 });
 
-test('a camp may raise its foes to its own level (a high tier\'s `level`); without one they keep their own', () => {
+test('a camp never raises its foes: every enemy of a type keeps its own table stats', () => {
   const opts = [];
   game.spawnEnemy = (type, pos, o) => (opts.push(o), { type, pos, aggro: false });
   new Spawner({ type: 'brigand', x: 0, z: 0, count: 1, radius: 2, respawn: 60, level: 9 }, game).spawn();
   new Spawner({ type: 'brigand', x: 0, z: 0, count: 1, radius: 2, respawn: 60 }, game).spawn();
-  assert.deepEqual(opts.map((o) => o.scaleTo), [9, 0]);
+  assert.deepEqual(opts.map((o) => o.scaleTo), [undefined, undefined]);
 });

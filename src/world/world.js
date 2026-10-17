@@ -242,11 +242,19 @@ export class World {
     return x > 3000;
   }
 
-  locationAt(x, z) {
+  // The smallest named place whose circle holds (x, z). A place with `maxY` (a lower shelf under
+  // a higher one) gives way, above that height, to the place named by its `above`.
+  locationAt(x, z, y) {
     let best = null;
+    let bestR = Infinity;
     for (const l of LOCATIONS) {
       const d = hypot(x - l.x, z - l.z);
-      if (d < l.r && (!best || l.r < best.r)) best = l;
+      if (d >= l.r || l.r >= bestR) continue;
+      let hit = l;
+      if (l.maxY != null && y != null && y > l.maxY) hit = l.above ? LOCATIONS.find((o) => o.name === l.above) : null;
+      if (!hit) continue;
+      best = hit;
+      bestR = l.r;
     }
     return best;
   }

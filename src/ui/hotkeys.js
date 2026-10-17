@@ -6,7 +6,6 @@ import { BIND } from '../core/input.js';
 // code -> { modal id, action name, label }; the keys come from BIND
 export const HOTKEYS = {};
 for (const code of BIND.journal) HOTKEYS[code] = { id: 'journal', action: 'openJournal', label: 'Journal' };
-for (const code of BIND.backpack) HOTKEYS[code] = { id: 'charmenu', action: 'openBackpack', label: 'Backpack' };
 ACTIONS.openBackpack = (ui = G.ui) => ui.openCharMenu('inventory');
 
 window.addEventListener('keydown', (e) => {

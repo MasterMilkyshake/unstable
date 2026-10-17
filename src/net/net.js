@@ -75,7 +75,7 @@ export class Net {
       ws = new WebSocket(url);
     } catch (e) {
       this.status = 'offline';
-      G.ui.toast("Couldn't open a LAN connection.", 'bad');
+      G.ui.toast("Couldn't open a multiplayer connection.", 'bad');
       return;
     }
     this.ws = ws;
@@ -113,7 +113,7 @@ export class Net {
         /* ignore */
       }
     }
-    if (!silent && this.active) G.ui.toast('Left the LAN game.');
+    if (!silent && this.active) G.ui.toast('Left the multiplayer game.');
     this.cleanup();
   }
 
@@ -121,8 +121,8 @@ export class Net {
     const was = this.status;
     this.ws = null;
     if (this.failReason) G.ui.toast(this.failReason, 'bad');
-    else if (was === 'connecting') G.ui.toast("Couldn't reach the LAN server. The host must start the game with `npm run lan`.", 'bad');
-    else if (was === 'online') G.ui.toast('Disconnected from the LAN game.', 'bad');
+    else if (was === 'connecting') G.ui.toast("Couldn't reach the multiplayer server. The host must start the game with `npm run lan`.", 'bad');
+    else if (was === 'online') G.ui.toast('Disconnected from the multiplayer game.', 'bad');
     this.cleanup();
   }
 
@@ -211,7 +211,7 @@ export class Net {
         } else {
           this.game.onEnterHostMode();
           G.ui.banner('CO-OP');
-          G.ui.toast('You are hosting. Friends on your network can join now.', 'good');
+          G.ui.toast(G.ui.lanExposed && !G.ui.lanExposed() ? 'You are hosting, on this computer only: restart with npm run lan so friends can join.' : 'You are hosting. Friends on your network can join now.', 'good');
         }
         this.sendHello();
         G.audio.play('bell', { vol: 0.5 });

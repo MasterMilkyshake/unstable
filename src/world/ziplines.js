@@ -128,15 +128,26 @@ export function buildStation(world, s, exclusions = []) {
         if (base - g > 0.8) m.solid(sx, g - 0.4, z, 1.2, base - g - 0.2, 0.28, { walkable: false });
       }
     }
+    // footing steps where the ground falls away from the foot: the first tread stood up to
+    // 0.6 m over a slope, more than a body steps up; one step down is laid wherever it stands
+    // more than three quarters of a rise over the grade
+    let fTop = lo + rise, fz = head - n * RUN, extra = 0;
+    for (; extra < 6; extra++) {
+      const g = m.ground(sx, fz - RUN / 2);
+      if (fTop - g <= RISE * 0.75) break;
+      fTop -= Math.min(RISE, (fTop - g) / 2);
+      fz -= RUN;
+      m.block(sx, g - 0.3, fz + RUN / 2, 1.5, fTop - g + 0.3, RUN + 0.04, 'wood', { climbable: false });
+    }
     // stringers along both sides, and a hand rope on the outside
     const len = n * RUN, sy = (lo + H) / 2, sz = head - len / 2, pitch = -Math.atan2(H - lo, len);
     for (const off of [-0.8, 0.8]) m.k.at({ x: sx + off, y: sy, z: sz, rx: pitch }, (k) => k.block(0, -0.2, 0, 0.12, 0.3, Math.hypot(len, H - lo), 'timber'));
     m.k.at({ x: sx + 0.82, y: sy + 1.0, z: sz, rx: pitch }, (k) => k.block(0, 0, 0, 0.05, 0.05, Math.hypot(len, H - lo), '#857456'));
     const c = Math.cos(s.yaw || 0), sn = Math.sin(s.yaw || 0);
     exclusions.push({ x: s.x + sx * c + sz * sn, z: s.z - sx * sn + sz * c, r: len / 2 + 3 });
-    foot = m.point(sx, lo, head - len - 0.6);
+    foot = m.point(sx, lo, fz - 0.6);
     // the way up, for whoever checks it: along the treads, then in across the platform
-    path = [m.point(sx, lo, head - len - 0.6), m.point(sx, H, head - 0.2), m.point(0, H, 0)];
+    path = [m.point(sx, lo, fz - 0.6), m.point(sx, H, head - 0.2), m.point(0, H, 0)];
   }
   if (s.banner) {
     // a flagpole off the platform's back corner, the cloth hung high enough to show over trees

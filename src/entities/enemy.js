@@ -21,18 +21,21 @@ import { ACTIONS } from '../game/hooks.js';
 const _v = new THREE.Vector3();
 const _w = new THREE.Vector3();
 // Where an actor stands: its feet, or the ground under it while it is in the air.
+// climbing after a target out of reach above (Enemy.chaseAbove)
+const CLIMB_MIN = 1.3; // higher than a step and a hop
+const CLIMB_MAX = 14; // m: as high as wall hops and ledge catches take a player
+const CLIMB_SPEED = 6; // m/s up a face
 const footY = (a) => (a.grounded || a.groundH == null ? a.pos.y : Math.min(a.pos.y, a.groundH));
 
 export class Enemy extends Actor {
   constructor(type, pos, opts = {}) {
     const s = ENEMIES[type];
     const scale = s.scale || 1;
-    let level = s.level;
-    let hp = s.hp;
-    if (opts.scaleTo && opts.scaleTo > level) {
-      hp *= 1 + (opts.scaleTo - level) * 0.09;
-      level = opts.scaleTo;
-    }
+    // Every enemy of a type is the same enemy: its table's health, damage and posture wherever
+    // it is met and whoever meets it. (opts.scaleTo, which raised a spawn to the player's Power,
+    // is no longer honoured.) `level` stays an internal rating from the table: it sets XP falloff.
+    const level = s.level;
+    const hp = s.hp;
     super({
       team: s.team || 'enemy', name: s.name, radius: s.radius ?? 0.42 * scale, height: s.height ?? 1.8 * scale,
       level, hp, posture: s.posture, resist: s.resist, flying: s.flying, aquatic: s.aquatic, hyperarmor: s.hyperarmor,
@@ -162,6 +165,7 @@ export class Enemy extends Actor {
   }
 
   dropAggro() {
+    if (this.evading) this.endEvade();
     this.aggro = false;
     this.target = null;
     this.ai.state = 'return';
@@ -558,7 +562,7 @@ export class Enemy extends Actor {
           p.y = G.world.groundAt(p.x, p.z, p.y + 5);
           G.vfx.pillar(p, 'umbra', 1.2, 5, 0.8);
           if (a.netProxy) continue; // the host spawns the real ones
-          const e = G.game.spawnEnemy(s.summons.type, p, { scaleTo: G.player.level });
+          const e = G.game.spawnEnemy(s.summons.type, p);
           e.setAggro(a.target || G.player);
         }
       },
@@ -1164,6 +1168,140 @@ export class Enemy extends Actor {
     nav.wz = this.pos.z;
   }
 
+  // ------------------------------------------------------------ out of reach above
+  // A target standing on something the walkers can't path onto (a roof reached by wall hops and
+  // ledge catches, a wall top, a cart) used to be safe from every melee foe. Now a foe that has
+  // pressed toward such a target for a moment walks to the wall under it and climbs up after it
+  // (Enemy.findClimb / startClimb, run as its own short move in update). A foe that finds no
+  // place to climb (or may not: spec.noClimb, a body too big for the ledge) stops taking damage and
+  // recovers until the target comes down, so the perch can't be used to whittle it down either.
+  canClimb() {
+    return !this.flying && !this.aquatic && !this.spec.noClimb && !this.dummy && this.spec.speed > 0;
+  }
+  findClimb(t) {
+    const W = G.world;
+    const cl = W.colliders;
+    const ty = footY(t);
+    const fy = footY(this);
+    const dx = t.pos.x - this.pos.x;
+    const dz = t.pos.z - this.pos.z;
+    const d = hypot(dx, dz);
+    if (d < 0.3) return null;
+    const ux = dx / d;
+    const uz = dz / d;
+    const room = (this.height || 1.8) + 0.1;
+    let px = this.pos.x;
+    let pz = this.pos.z;
+    for (let s = 0.25; s <= d + 0.01; s += 0.25) {
+      const x = this.pos.x + ux * s;
+      const z = this.pos.z + uz * s;
+      const top = W.groundAt(x, z, ty + 0.6);
+      if (top > fy + CLIMB_MIN && Math.abs(top - ty) < 0.8) {
+        // land a stride in from the lip, where the target's own floor carries on
+        const k = Math.min(0.6, d - s);
+        const lx = x + ux * k;
+        const lz = z + uz * k;
+        const ly = W.groundAt(lx, lz, ty + 0.6);
+        if (!(Math.abs(ly - top) < 0.4)) return null;
+        if (cl.raycast(lx, ly + 0.05, lz, 0, 1, 0, room) < room) return null; // no room to stand
+        if (ly - fy > CLIMB_MAX) return null;
+        // the face must be open above the foot of the climb (not a floor or an eave overhead)
+        const rise = ly - fy;
+        if (cl.raycast(px, fy + 0.6, pz, 0, 1, 0, rise) < rise - 0.1) return null;
+        return { wx: px, wz: pz, x: lx, y: ly, z: lz, wallD: s };
+      }
+      // anything solid at chest height short of the lip is the wall we climb; keep the last
+      // open point before it
+      if (cl.raycast(x, fy + 1.0, z, ux, 0, uz, 0.3) >= 0.3) {
+        px = x;
+        pz = z;
+      }
+    }
+    return null;
+  }
+  startClimb(c) {
+    const fy = this.pos.y;
+    const up = Math.max(0.45, (c.y - fy) / CLIMB_SPEED);
+    this.climb = { ax: this.pos.x, ay: fy, az: this.pos.z, ...c, t: 0, up, over: 0.3 };
+    this.vel.set(0, 0, 0);
+    this.blocking = false;
+    this.yaw = Math.atan2(c.x - this.pos.x, c.z - this.pos.z);
+    G.audio?.play('jump', { pos: this.pos, vol: 0.45 });
+  }
+  updateClimb(dt) {
+    const c = this.climb;
+    c.t += dt;
+    if (c.t < c.up) {
+      // up the face, pressed against it
+      const k = c.t / c.up;
+      this.pos.set(c.ax + (c.wx - c.ax) * Math.min(1, k * 3), c.ay + (c.y + 0.05 - c.ay) * k, c.az + (c.wz - c.az) * Math.min(1, k * 3));
+    } else {
+      // over the lip
+      const k = Math.min(1, (c.t - c.up) / c.over);
+      this.pos.set(c.wx + (c.x - c.wx) * k, c.y + 0.05, c.wz + (c.z - c.wz) * k);
+      if (k >= 1) {
+        this.climb = null;
+        this.vel.set(0, 0, 0);
+        this.fallStart = this.pos.y;
+        if (this.ai) this.ai.aboveT = 0;
+      }
+    }
+    if (this.model && this.model.root) this.model.root.position.copy(this.pos);
+    this.syncModel(dt, { speed: 0, grounded: false, vy: CLIMB_SPEED, flinch: 0, runSpeed: this.spec.speed * 1.2 });
+  }
+  // Called each step while chasing a target: true when the climb (or the wait for one) has the
+  // move this step.
+  chaseAbove(t, dt, tdist) {
+    const ai = this.ai;
+    const dy = footY(t) - footY(this);
+    const above = t.grounded && !t.climbing && !t.zip && dy > CLIMB_MIN && tdist < 12;
+    if (!above) {
+      ai.aboveT = 0;
+      ai.climbTo = null;
+      if (this.evading) this.endEvade();
+      return false;
+    }
+    ai.aboveT = (ai.aboveT || 0) + dt;
+    // stalled: no nearer for a while (a route round by a stair keeps closing in, so it is left be)
+    const gap = tdist + dy;
+    if (!(ai.aboveBest < Infinity) || ai.aboveT <= dt || gap < ai.aboveBest - 0.5) {
+      ai.aboveBest = gap;
+      ai.aboveStall = 0;
+    } else ai.aboveStall = (ai.aboveStall || 0) + dt;
+    if (ai.aboveStall < 1.2 && !ai.climbTo) return false;
+    if (this.canClimb()) {
+      if (!ai.climbTo || ai.climbCheck <= G.time) {
+        ai.climbTo = this.findClimb(t);
+        ai.climbCheck = G.time + 0.5;
+      }
+      const c = ai.climbTo;
+      if (c) {
+        if (this.evading) this.endEvade();
+        if (hypot(c.wx - this.pos.x, c.wz - this.pos.z) < 1.1 + this.radius) {
+          ai.climbTo = null;
+          this.startClimb(c);
+        } else this.navTo(c.wx, c.wz, NaN, this.spec.speed * this.speedMul, dt);
+        return true;
+      }
+    }
+    // nowhere to climb: wait it out below, untouchable and recovering
+    if (ai.aboveStall > 3 && !this.evading) this.startEvade();
+    return false;
+  }
+  startEvade() {
+    this.evading = true;
+    this.invuln = true;
+    if (this.target === G.player && G.ui && (!G.ui._evadeToastAt || G.time - G.ui._evadeToastAt > 30)) {
+      G.ui._evadeToastAt = G.time;
+      G.ui.toast(`The ${this.spec.name || 'foe'} can't reach you up there, and won't take wounds until you come down.`, 'bad');
+    }
+    if (G.vfx && G.vfx.ring) G.vfx.ring(this.pos, 'support', 1.6, 0.5, { color: '#cfd6e0' });
+  }
+  endEvade() {
+    this.evading = false;
+    this.invuln = false;
+  }
+
   update(dt) {
     if (this.netProxy) return this.proxyUpdate(dt);
     const s = this.spec;
@@ -1205,7 +1343,8 @@ export class Enemy extends Actor {
     if (this.boss && this.aggro && G.player && G.game.bossActive !== this && G.player.pos.distanceTo(this.pos) < 60) G.game.startBoss(this);
 
     // perception
-    if (!this.aggro && p && sameRealm && !p.dead && !p.knocked) {
+    // a rider in a moving lift cage (world/ascentLifts.js, meridianLift.js) is not noticed until it docks
+    if (!this.aggro && p && sameRealm && !p.dead && !p.knocked && !(p.liftRideUntil > (G.time || 0))) {
       let range = s.aggro * (1 - ((p.mods && p.mods.stealth) || 0));
       if (p.stealth > 0) range *= 0.15;
       if (G.world.sky.isNight() && p.team === 'player') range *= 0.8;
@@ -1218,6 +1357,16 @@ export class Enemy extends Actor {
       if (!p || p.dead || !sameRealm || dist > leash * 1.6 || (fromHome > leash && dist > 12) || (p.boat && !this.aquatic)) this.dropAggro();
     }
     this.target = this.aggro ? p : null;
+    if (this.climb) {
+      if (this.stunned || this.dead) this.climb = null;
+      else return this.updateClimb(dt);
+    }
+    if (this.evading) {
+      // untouchable below a perch it can't climb: recover while waiting
+      this.hp = Math.min(this.maxHp, this.hp + this.maxHp * 0.12 * dt);
+      this.posture = Math.max(0, this.posture - dt * 30);
+      if (!this.target) this.endEvade();
+    }
 
     let speed = 0;
     if (this.stunned) {
@@ -1268,6 +1417,12 @@ export class Enemy extends Actor {
         const reach = this.weaponDef ? this.weaponReach() : Math.max(...(s.attacks || [{ range: 2 }]).map((a) => a.range || a.radius || 2));
         const prefer = Math.max(this.weaponDef ? reach * 0.75 : Math.min(reach, 2.4) * 0.85, body);
         const role = s.role || 'melee';
+        // out of reach above: climb up after it, or wait untouchable (chaseAbove)
+        if (role !== 'ranged' && !this.atk && this.chaseAbove(t, dt, tdist)) {
+          this.physics(dt);
+          this.syncModel(dt, { speed: hypot(this.vel.x, this.vel.z), grounded: this.grounded, swimming: this.swimming, blocking: false, stunned: false, vy: this.vel.y, flinch: this.flinch, runSpeed: s.speed * 1.2 });
+          return;
+        }
         // badly hurt: fall back a moment and call the others in (entities/tactics.js)
         if (!ai.fled && fallsBack(this) && this.hp < this.maxHp * TACTICS.retreatAt) {
           ai.fled = true;

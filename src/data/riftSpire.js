@@ -85,7 +85,7 @@ const SPIRE_CHRONICLE = [
 ];
 
 const SPIRE_INVESTIGATION = {
-  id: 'the_ascent', title: 'The Ascent', tier: 'R · The only door',
+  id: 'the_ascent', title: 'The Ascent', tier: 'R: The only door',
   evidence: ['ascent_charter', 'ascent_year57', 'ascent_keep', 'ascent_thin_air', 'ascent_summit'],
   question: 'If the pale gates closed, how do the living leave the Rift?',
   conclusion: 'They rise. The hanging citadel is a command station run through with a spine, and against its keep the restorers hung a stone lift that carries the living from the courtyard to a summit wound that still opens onto the surface. Notes on the spine\'s landings are a survey of the old climb. The old east and west tears do not open.',

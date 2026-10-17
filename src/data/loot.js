@@ -1,4 +1,11 @@
 // Chests, pouches and the bank (game/loot.js, game/bank.js, core/contents.js).
+
+// Silver income, scaled where it is paid so the tables keep their relative sizes: quest
+// rewards, chests and world events paid a Power 6-10 character more than twice what the best
+// shop kit costs (tools/economy-report.mjs), so silver never felt scarce. Kills and contracts
+// keep their own (small) amounts.
+export const INCOME = { quest: 0.45, chest: 0.5, event: 0.6 };
+export const paid = (n, kind) => Math.max(n > 0 ? 1 : 0, Math.round((n || 0) * INCOME[kind]));
 export const LOOT = {
   // A pouch left on the ground, or where someone fell: searched with [E] from this close.
   pouchReach: 2.2,

@@ -124,7 +124,7 @@ export function giveTrinket(game, id, silent = false, pips = 0) {
   if (pips > 0) t.pips = rollPips(pips);
   ch.trinkets.push(t);
   if (!silent) {
-    G.ui.toast(keyText(`+ ${trinketName(t)}: wear it from your backpack {backpack}`), 'loot');
+    G.ui.toast(keyText(`+ ${trinketName(t)}: wear it from your backpack {menu}`), 'loot');
     G.audio.play('chest', { vol: 0.5 });
   }
   return t;
@@ -206,26 +206,26 @@ export function openJeweler(ui) {
         const d = TRINKETS[id];
         const pr = price(d);
         const ok = meetsReqs(d.reqs, ch.attrs);
-        rows += `<div class="shop-row"><div class="ico">${TRINKET_SLOTS[d.slot].icon}</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(d.name)} <span class="pill">${TRINKET_SLOTS[d.slot].name}</span></div><div class="ds">${modsText(d.mods)}${d.reqs ? ` · <span class="${ok ? '' : 'bad'}">req ${reqsText(d.reqs)}</span>` : ''}</div></div><div class="pr">${pr} silver</div><button class="btn small" data-buy="${id}" ${ch.silver < pr ? 'disabled' : ''}>Buy</button></div>`;
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(d.name)} <span class="pill">${TRINKET_SLOTS[d.slot].name}</span></div><div class="ds">${modsText(d.mods)}${d.reqs ? `, <span class="${ok ? '' : 'bad'}">req ${reqsText(d.reqs)}</span>` : ''}</div></div><div class="pr">${pr} silver</div><button class="btn small" data-buy="${id}" ${ch.silver < pr ? 'disabled' : ''}>Buy</button></div>`;
       }
       rows += '<h3>STARMETAL FORGE</h3>';
       for (const id of JEWELER_CRAFTS) {
         const d = TRINKETS[id];
         const owned = ch.trinkets.some((t) => t.id === id);
         const can = Object.entries(d.craft).every(([k, n]) => (ch.inventory.items[k] || 0) >= n);
-        const needs = Object.entries(d.craft).map(([k, n]) => `<span class="${(ch.inventory.items[k] || 0) >= n ? 'good' : 'bad'}">${ITEMS[k].icon} ${ITEMS[k].name} ${ch.inventory.items[k] || 0}/${n}</span>`).join(' · ');
-        rows += `<div class="shop-row"><div class="ico">${TRINKET_SLOTS[d.slot].icon}</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(d.name)} <span class="pill">${TRINKET_SLOTS[d.slot].name}</span></div><div class="ds">${modsText(d.mods)}</div><div class="ds">${needs}</div></div><button class="btn small" data-forge="${id}" ${can && !owned ? '' : 'disabled'}>${owned ? 'Owned' : 'Forge'}</button></div>`;
+        const needs = Object.entries(d.craft).map(([k, n]) => `<span class="${(ch.inventory.items[k] || 0) >= n ? 'good' : 'bad'}">${ITEMS[k].name} ${ch.inventory.items[k] || 0}/${n}</span>`).join(', ');
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(d.name)} <span class="pill">${TRINKET_SLOTS[d.slot].name}</span></div><div class="ds">${modsText(d.mods)}</div><div class="ds">${needs}</div></div><button class="btn small" data-forge="${id}" ${can && !owned ? '' : 'disabled'}>${owned ? 'Owned' : 'Forge'}</button></div>`;
       }
     } else {
       for (const t of ch.trinkets) {
         const d = TRINKETS[t.id];
         if (Object.values(ch.gear).includes(t.uid)) continue;
-        rows += `<div class="shop-row"><div class="ico">${TRINKET_SLOTS[d.slot].icon}</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(trinketName(t))}</div><div class="ds">${modsText(d.mods)}${t.pips && t.pips.length ? ` · <span class="gold">✦ ${modsText(pipMods(t))}</span>` : ''}</div></div><div class="pr">${sellPrice(d, t)} silver</div><button class="btn small" data-sell="${t.uid}">Sell</button></div>`;
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[d.rarity]}">${escapeHtml(trinketName(t))}</div><div class="ds">${modsText(d.mods)}${t.pips && t.pips.length ? `, <span class="gold">✦ ${modsText(pipMods(t))}</span>` : ''}</div></div><div class="pr">${sellPrice(d, t)} silver</div><button class="btn small" data-sell="${t.uid}">Sell</button></div>`;
       }
       if (!rows) rows = '<div class="muted">Nothing to sell. (Worn trinkets cannot be sold.)</div>';
     }
     return `<h2>CORWIN'S CURIOS</h2><div class="row-flex" style="margin-bottom:10px"><button class="btn small ${mode === 'buy' ? 'primary' : ''}" data-mode="buy">Buy</button><button class="btn small ${mode === 'sell' ? 'primary' : ''}" data-mode="sell">Sell</button><span class="space"></span><span style="font-family:var(--display)">${ch.silver} silver</span></div>
-      <div class="shop-list scroll">${rows}</div><div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px">${keyText('Wear trinkets from your backpack {backpack}.', (k) => `<kbd>${k}</kbd>`)}</span><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`;
+      <div class="shop-list scroll">${rows}</div><div class="divider"></div><div class="row-flex"><span class="muted" style="font-size:13px">${keyText('Wear trinkets from your backpack {menu}.', (k) => `<kbd>${k}</kbd>`)}</span><span class="space"></span><button class="btn" data-a="close">Leave</button></div>`;
   };
   openPanel(ui, 'jeweler', {
     width: 780,

@@ -3,16 +3,16 @@ import * as THREE from 'three';
 import { G } from '../core/globals.js';
 import { MANTRAS } from '../data/mantras.js';
 import { ITEMS } from '../data/items.js';
-import { WEAPONS, WEAPON_CLASSES } from '../data/weapons.js';
 import { QUESTS } from '../data/quests.js';
-import { NPCS, SPAWNERS, CHESTS } from '../data/world.js';
+import { NPCS, SPAWNERS } from '../data/world.js';
 import { placedPoint } from '../data/worldPlacement.js';
 import { xpForLevel } from '../data/stats.js';
+import { fitLabels } from './fitText.js';
 import { angleDiff, clamp, escapeHtml } from '../core/util.js';
 import * as Screens from './screens.js';
 import * as CharMenu from './charmenu.js';
 import * as Interact from './interact.js';
-import { openLan } from './lan.js';
+import { openLan, lanExposed } from './lan.js';
 import { ACTIONS } from '../game/hooks.js';
 import { bindLabel } from '../core/input.js';
 
@@ -91,7 +91,7 @@ export class UI {
   buildHUD() {
     this.hud.innerHTML = `
       <div id="crosshair"></div>
-      <div id="hud-tl"><div id="lives"></div><div id="danger" class="hidden">DANGER</div><div id="wanted" class="hidden"></div><div id="hud-time"></div><div id="lan-status" class="hidden"></div></div>
+      <div id="hud-tl"><div id="lives"></div><div id="danger" class="hidden">DANGER</div><div id="wanted" class="hidden"></div><div id="hud-time"></div></div>
       <div id="compass"></div><div id="area-small"></div>
       <div id="boss-bar" class="hidden"><div class="nm"></div><div class="tt"></div><div class="bar hp"><b></b><i></i></div><div class="bar posture"><i></i></div></div>
       <div id="quest-tracker"></div>
@@ -103,15 +103,16 @@ export class UI {
         <div class="bar ether" id="b-ether"><i></i><span></span></div>
         <div class="bar xp" id="b-xp" style="height:3px;opacity:.7"><i style="background:linear-gradient(90deg,#6a5a9a,#c8a8ff)"></i></div>
       </div>
-      <div id="crit-ind"><span id="ci-crit">${bindLabel('crit')} · CRIT</span><span id="ci-dodge">${bindLabel('dodge')} · DODGE</span></div>
+      <div id="rest-card" class="hidden"></div>
+      <div id="crit-ind"><span id="ci-crit" class="hidden"></span></div>
       <div id="tip" class="hidden"></div>
       <div id="captions" aria-live="polite"></div>
       <div id="hotbar"></div>
       <div id="hud-br">
         <div class="silver"></div>
-        <div class="row"><span class="ic">🍞</span><div class="bar hunger"><i></i></div></div>
-        <div class="row"><span class="ic">💧</span><div class="bar water"><i></i></div></div>
-        <div class="row" id="san-row"><span class="ic">👁</span><div class="bar sanity"><i></i></div></div>
+        <div class="row" title="Hunger"><div class="bar hunger"><i></i></div></div>
+        <div class="row" title="Thirst"><div class="bar water"><i></i></div></div>
+        <div class="row" id="san-row" title="Sanity"><div class="bar sanity"><i></i></div></div>
       </div>
       <div id="prompt" class="hidden"></div>
       <div id="toasts"></div>
@@ -121,7 +122,7 @@ export class UI {
     `;
     this.toastEl = $('#toasts');
     this.el = {
-      lives: $('#lives'), lan: $('#lan-status'), danger: $('#danger'), wanted: $('#wanted'), time: $('#hud-time'), compass: $('#compass'), area: $('#area-small'),
+      lives: $('#lives'), danger: $('#danger'), wanted: $('#wanted'), time: $('#hud-time'), compass: $('#compass'), area: $('#area-small'),
       boss: $('#boss-bar'), quests: $('#quest-tracker'),
       statuses: $('#statuses'), name: $('#hud-bl .who .nm'), power: $('#hud-bl .who .pw'),
       posture: $('#b-posture'), postureFill: $('#b-posture > i'),
@@ -129,7 +130,7 @@ export class UI {
       etherFill: $('#b-ether > i'), etherText: $('#b-ether > span'), xpFill: $('#b-xp > i'),
       hotbar: $('#hotbar'), silver: $('#hud-br .silver'), hunger: $('#hud-br .hunger > i'), water: $('#hud-br .water > i'),
       sanRow: $('#san-row'), sanity: $('#hud-br .sanity > i'), prompt: $('#prompt'), banner: $('#banner'), areaBanner: $('#area-banner'),
-      resume: $('#click-resume'), critInd: $('#ci-crit'), dodgeInd: $('#ci-dodge'),
+      resume: $('#click-resume'), critInd: $('#ci-crit'),
     };
     // compass ticks
     const ticks = [];
@@ -194,13 +195,14 @@ export class UI {
       } else if (e && e.type === 'item' && ITEMS[e.id]) {
         const it = ITEMS[e.id];
         const n = e.id === 'waterskin' ? ch.waterCharges || 0 : ch.inventory.items[e.id] || 0;
-        inner = `<span>${it.icon || '•'}</span><span class="n">${n}</span>`;
+        inner = `${slotLabel(it.name)}<span class="n">${n}</span>`;
         if (!n) cls += ' empty';
       }
       if (i > 0 && p.selected === i) cls += ' sel';
       html += `<div class="${cls}"><span class="k">${keys[i]}</span>${inner}</div>`;
     }
     this.el.hotbar.innerHTML = html;
+    fitLabels(this.el.hotbar);
     this._cdEls = [...this.el.hotbar.querySelectorAll('[data-cd]')];
     this.hotbarSel = p.selected;
     this.hotbarSig = this._hotbarSig();
@@ -220,7 +222,7 @@ export class UI {
   questTarget() {
     const ch = this.game.ch;
     if (!ch) return null;
-    // the story system marks the tracked chapter's current stage (and staged quests)
+    // the story system marks the tracked quest's current step
     const staged = ACTIONS.questMarker && ACTIONS.questMarker();
     if (staged) return staged;
     const p = G.player;
@@ -258,7 +260,21 @@ export class UI {
     return best;
   }
 
+  // By a fire the HUD goes quiet (style.css body.seated) and a small card says what the seat
+  // offers. It follows Player.sitting, so standing up by any means restores the HUD.
+  seatedHud() {
+    const p = G.player, seated = !!(p && p.sitting && !p.dead && !p.boat && G.game && G.game.state === 'playing');
+    if (seated === this._seated) return;
+    this._seated = seated;
+    document.body.classList.toggle('seated', seated);
+    const card = document.getElementById('rest-card');
+    if (!card) return;
+    card.classList.toggle('hidden', !seated);
+    if (seated) card.innerHTML = `<div class="rc-t">Resting by the fire</div><div class="rc-l">Health and sanity return while you sit. The game is kept.</div><div class="rc-k"><b>${escapeHtml(bindLabel('interact'))}</b> Cook &ensp; <b>${escapeHtml(bindLabel('menu'))}</b> Attributes &ensp; Move to stand</div>`;
+  }
+
   update(dt) {
+    this.seatedHud();
     // overlays timers
     this.dmgT = Math.max(0, this.dmgT - dt * 2.5);
     // Settings → Reduce flashing dims the screen's flashes to a third
@@ -296,6 +312,16 @@ export class UI {
     setStyle(this.el.postureFill, 'width', pf * 100 + '%');
     this.el.posture.classList.toggle('broken', !!p.guardBroken);
     setStyle(this.el.xpFill, 'width', (ch.level >= 20 ? 100 : (ch.xp / xpForLevel(ch.level)) * 100) + '%');
+    // banked XP full (Player.gainXp): the bar glows so the cap is seen before XP is lost
+    const xpFull = ch.level + 1 < 20 && ch.xpBank >= xpForLevel(ch.level + 1);
+    if (this._xpFull !== xpFull) {
+      this._xpFull = xpFull;
+      const bar = this.el.xpFill && this.el.xpFill.parentElement;
+      if (bar) {
+        bar.classList.toggle('capped', xpFull);
+        bar.title = xpFull ? 'XP full: invest your points at a campfire to rise, or further XP is lost.' : '';
+      }
+    }
 
     // statuses & buffs
     const st = [];
@@ -312,11 +338,10 @@ export class UI {
       this._stHtml = sh;
     }
 
-    // crit/dodge indicators
+    // no standing crit/dodge hints; only a broken foe's critical window is called out
     const broken = p.brokenTarget();
-    setClass(this.el.critInd, broken ? 'ready window' : p.critCd <= 0 ? 'ready' : '');
-    setText(this.el.critInd, broken ? 'R · BROKEN — CRITICAL!' : p.critCd > 0 ? `R · ${p.critCd.toFixed(1)}` : 'R · CRIT');
-    setClass(this.el.dodgeInd, p.dodgeCd <= 0 ? 'ready' : '');
+    setClass(this.el.critInd, broken ? 'ready window' : 'hidden');
+    if (broken) setText(this.el.critInd, `BROKEN: ${bindLabel('crit')} FOR A CRITICAL`);
 
     // hotbar
     if (this._hotbarSig() !== this.hotbarSig) this.refreshHotbar();
@@ -349,7 +374,6 @@ export class UI {
     const wanted = ACTIONS.wantedText ? ACTIONS.wantedText() : null;
     this.el.wanted.classList.toggle('hidden', !wanted);
     if (wanted && this.el.wanted.textContent !== wanted) this.el.wanted.textContent = wanted;
-    this.refreshLanHud();
     if (p.inDanger) setText(this.el.danger, `DANGER ${Math.ceil(p.dangerT)}`);
     const tod = this.game.world.sky.time;
     const hh = Math.floor(tod * 24);
@@ -452,7 +476,7 @@ export class UI {
         if (a.isRemote) b.nm.innerHTML = a.knocked ? `${escapeHtml(a.name)} — <span class="lv">KNOCKED</span>` : '';
         else if (a.knocked) b.nm.innerHTML = `${escapeHtml(a.name)} — <span class="lv">KNOCKED [B]</span>`;
         else if (a.guardBroken) b.nm.innerHTML = `${escapeHtml(a.name)} — <span class="broken">BROKEN</span>`;
-        else b.nm.innerHTML = `${escapeHtml(a.name)} <span class="lv">${a.dummy ? '' : 'Lv ' + a.level}</span>`;
+        else b.nm.innerHTML = escapeHtml(a.name);
         b.el.classList.toggle('knocked', !!a.knocked);
         b.el.classList.toggle('ally', !!a.isRemote);
       }
@@ -717,19 +741,11 @@ export class UI {
   openRegister() {
     Screens.openRegister(this);
   }
+  // The session's state shows in the Multiplayer panel only; the HUD keeps no corner text for it.
+  lanExposed() {
+    return lanExposed();
+  }
   refreshLan() {
     if (this.modal && this.modal.id === 'lan' && this._lanRerender) this._lanRerender();
-    this.refreshLanHud();
-  }
-  refreshLanHud() {
-    const el = this.el && this.el.lan;
-    if (!el) return;
-    const net = G.net;
-    if (!net || net.status === 'offline') {
-      el.classList.add('hidden');
-      return;
-    }
-    el.classList.remove('hidden');
-    setText(el, net.status === 'connecting' ? 'LAN · CONNECTING…' : `LAN · ${net.isHost ? 'HOSTING' : 'JOINED'} · ${net.playerCount} PLAYER${net.playerCount > 1 ? 'S' : ''}`);
   }
 }

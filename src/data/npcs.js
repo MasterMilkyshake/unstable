@@ -30,6 +30,8 @@ export const SHOPS = {
   enclave_stores: { name: 'The Enclave Quartermaster', weapons: ['duelist_rapier', 'tourney_lance', 'iron_greatsword', 'warden_mace'], items: ['elixir', 'iron_draught', 'ether_tonic', 'fireproof_salve'], outfits: ['guard_plate', 'knight_plate'] },
   ministry_stores: { name: 'The Ministry Stores', weapons: ['wavecutter_kris'], items: ['sanity_draught', 'ether_tonic', 'cleansing_salts', 'frost_salve', 'mantra_spark'], outfits: ['mystic', 'fen_cloak'] },
 };
+// Torren keeps the Fort Meridian forge on Dorran's stock list; the sign over it is his own
+SHOPS.torren = { ...SHOPS.dorran, name: "Torren's Forge" };
 
 const bye = { label: 'Farewell.' };
 
@@ -70,38 +72,33 @@ export function questHub(api, entries) {
 
 // Maren, Hale and the storyline's new arrivals live in data/storyDialogue.js.
 export const DIALOGUES = {
+  // The opening: who you are, and a few ways to go. Nothing here has to be done first.
   wren(api) {
     const aw = api.quest('awakening');
     const fl = api.quest('first_light');
-    if (aw.state === 'none') {
+    if (aw.state === 'ready') return questTurnIn(api, 'awakening', "Ha! Not bad for a drowned rat. Here - an old bronze sword from a wreck. Press 1 to raise whatever's in your hand. Keep it sharp.");
+    const ways = () => {
+      const opts = [];
+      if (aw.state === 'none') opts.push({ label: 'I will clear the beach.', do: (a) => a.startQuest('awakening') });
+      if (fl.state === 'none') opts.push({ label: "I'll head for Saltreach.", do: (a) => a.startQuest('first_light') });
+      opts.push({ label: 'Sit by the fire.', do: (a) => a.sitByFire('cf_wash') }, bye);
       return {
-        text: "Easy, easy. You've swallowed half the sea. Don't remember your name, do you? None of you ever do. The tide's been spitting folk onto this beach since the sky cracked.",
-        options: [
-          {
-            label: 'Where am I?',
-            next: {
-              text: "The Wash. The southern beach of the Saltreach Coast. Mudlurkers crawl up from the shallows at night - and you'll want to be able to deal with them before you go anywhere.",
-              options: [{ label: 'I can fight.', next: () => questOffer(api, 'awakening', "Prove it. Clear three of the slimy things off the beach. Left click to strike, hold F to block - tap F right as they hit to parry. Q to dodge. You'll learn.") }],
-            },
-          },
-          { label: 'What do you mean, "the sky cracked"?', next: { text: "Ask the Elder in Saltreach - she has the long version. The short one: the world's unstable now. Islands burn, freeze, sink. Things crawl out of the Rift. And people like you keep washing up.", options: [{ label: 'I see.', next: () => questOffer(api, 'awakening', "First things first. Clear three mudlurkers off the beach and I'll find you something sharper than your fists.") }] } },
-        ],
+        text: "Any way you like. North up the coast trail is Saltreach, the Lantern City: Elder Maren takes in the tide-born, Captain Hale of the Watch pays blades to fight the Thornwood brigands, and an Enclave warship has just anchored in the harbor. East along the shore, Moss at Moss's Landing pays to have the lurkers cleared out of the fen. Oskar rents boats at the Saltreach harbor: Thornwood lies west, the Verdance north, the Hush and Frostmark north-east, the Ashen Spire south. And right here, mudlurkers crawl up the beach. Clear three and I'll give you a bronze sword from a wreck.",
+        options: opts,
       };
-    }
-    if (aw.state === 'active') return { text: "Still breathing? Good. Three of them. Then we'll talk.", options: [bye] };
-    if (aw.state === 'ready') return questTurnIn(api, 'awakening', "Ha! Not bad for a drowned rat. Here - an old bronze sword from a wreck. Press 1 to draw whatever's in your hand. Keep it sharp.");
-    if (fl.state === 'none') {
-      return {
-        text: "You'll want to get to Saltreach. Elder Maren knows more about the tide-born than anyone. Follow the coastal trail north, around the eastern bluff, and through the sea gate. Walk it - you'll learn more of the coast on foot than you ever would from a boat.",
-        options: [
-          { label: "I'll head for Saltreach.", do: (a) => a.startQuest('first_light') },
-          { label: 'How do people get between the islands?', next: { text: "By boat, same as always. Rent a skiff at any dock and sail it yourself - nobody runs passenger ferries anymore. Mind the deep water. Things with teeth live out there.", options: [{ label: "I'll head for Saltreach.", do: (a) => a.startQuest('first_light') }] } },
-        ],
-      };
-    }
+    };
     return {
-      text: 'The coast trail leads straight to Saltreach - north, around the bluff, through the sea gate. The fire is yours whenever you need it.',
-      options: [{ label: 'Sit by the fire.', do: (a) => a.sitByFire('cf_wash') }, bye],
+      text: aw.state === 'active'
+        ? "Still breathing? Good. Three mudlurkers, down by the water, and the sword is yours. Or go on and come back for it; it'll keep."
+        : aw.state === 'none' && fl.state === 'none'
+        ? "Easy, easy. You've swallowed half the sea. Don't remember your name, do you? None of you ever do. You're tide-born: the sea gives people back on this beach, and nobody owns the ones it returns. Where you go now is up to you."
+        : 'The fire is yours whenever you need it. Where to next?',
+      options: [
+        { label: 'Where can I go from here?', next: ways },
+        { label: 'Where am I?', next: { text: "The Wash, the southern beach of the Saltreach Coast. A hundred years ago the coast broke and the sky split; since then islands burn, freeze and sink, things crawl out of the Rift under the sea, and people like you keep washing up. Die out here and you wake down there.", options: [{ label: 'Where can I go from here?', next: ways }, bye] } },
+        { label: 'Sit by the fire.', do: (a) => a.sitByFire('cf_wash') },
+        bye,
+      ],
     };
   },
 
@@ -111,11 +108,11 @@ export const DIALOGUES = {
     if (!api.manaUnlocked()) {
       if (api.level() < 2) return { text: 'Your mind is still waterlogged, tide-born. Return when you have grown stronger - Power 2 at least - and I will open it to mana.', options: [bye] };
       return {
-        text: 'Ah. There is a spark in you now. Mana is everywhere - in the salt, the stone, the air. Most cannot hold it. Let me show you how. Afterwards, you may invest in the attunements: flame, frost, storm, gale... and shadow, for the patient.',
+        text: 'Ah. There is a spark in you now. Mana is everywhere - in the salt, the stone, the air. Most cannot hold it. Let me show you how. Afterwards, sit by any fire, open your attributes [Tab] and put a point into an attunement: Emberweave for flame, Rimebind for frost, Stormcall, Galesong for wind... and Umbracast, shadow, for the patient.',
         options: [{ label: 'Teach me.', do: (a) => { a.unlockMana(); a.startQuest('attunement'); } }, { label: 'Another time.' }],
       };
     }
-    if (q.state === 'active') return { text: 'Mana without a shape runs straight through you. Choose an attunement - flame, frost, storm, gale or shadow - and invest in it by a fire [Tab]. Then come back.', options: [bye] };
+    if (q.state === 'active') return { text: 'Mana without a shape runs straight through you. Give it a shape. Sit by any fire, open your attributes [Tab] and put a point into one attunement: Emberweave, Rimebind, Stormcall, Galesong or Umbracast. Then come back to me.', options: [bye] };
     if (q.state === 'ready') return questTurnIn(api, 'attunement', 'Good. Feel it settle into that shape? Keep investing and you will learn its mantras as you grow. Mantras are cast from your hotbar: press the key to cast, and they draw on your ether.');
     return {
       text: 'Mana is a river. Do not try to hold all of it at once. Is there anything else?',
@@ -415,8 +412,8 @@ export const DIALOGUES = {
         active: (q) => `Twelve shards. You carry ${q.progress || 0}. Everything down here bleeds them.`, done: 'I have your shards.',
       },
       {
-        id: 'into_the_abyss', offer: 'Is the Duke the last of them?', title: 'The Last Crossing', when: (a) => a.quest('sovereign').state === 'done' || act('bossDefeated', 'hollow_duke'),
-        pitch: "I thought the Duke was the bottom of everything. He wasn't. There is one who carried us all down here - the Lanternless. He took my name across the dark and never gave it back. He waits by his boat on the north-east lip, at the landing his crossings never reached. If you see a small light in his hand... break it.",
+        id: 'into_the_abyss', offer: 'Who brought us all down here?', title: 'The Last Crossing',
+        pitch: "Everyone thinks the Hollow Duke on his throne is the bottom of everything. He isn't. There is one who carried us all down here - the Lanternless. He took my name across the dark and never gave it back. He waits by his boat on the north-east lip, at the landing his crossings never reached. If you see a small light in his hand... break it.",
         accept: 'I will find him.',
         active: 'The Landing That Never Came, on the north-east lip past the Garrison Steps. The Lanternless keeps it with his hounds. Bring draughts - the mind frays near him.', done: 'The Lanternless is gone.',
       },
@@ -449,4 +446,4 @@ for (const host of SETTLEMENT_HOSTS) {
   });
 }
 DIALOGUES.meridian_ferry = api => DIALOGUES.ferry(api, 'dock_meridian');
-DIALOGUES.meridian_smith = () => ({ text: 'The garrison keeps me busy. Bring damaged steel to the forge; buy what you need before you sail.', options: [{ label: 'Show me your stock.', do: a => a.openShop('dorran') }, bye] });
+DIALOGUES.meridian_smith = () => ({ text: 'The garrison keeps me busy. Bring damaged steel to the forge; buy what you need before you sail.', options: [{ label: 'Show me your stock.', do: a => a.openShop('torren') }, bye] });

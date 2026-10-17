@@ -146,19 +146,19 @@ export function openShop(ui, id) {
         const w = WEAPONS[wid];
         const pr = price(w.price, wid);
         const cls = WEAPON_CLASSES[w.cls];
-        rows += `<div class="shop-row"><div class="ico">🗡️</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[w.rarity]}">${w.name}</div><div class="ds">${cls.label} · ${w.damage} dmg · ${w.desc}${w.reqs ? ` · <span class="${meetsReqs(w.reqs, ch.attrs) ? '' : 'bad'}">req ${reqsText(w.reqs)}</span>` : ''}</div><div class="ds muted feel" style="font-size:12px">${escapeHtml(weaponFeelText(w))}</div></div><div class="pr ${wallet() < pr ? 'bad' : ''}">${pr} ${curName}</div><button class="btn small" data-buy-w="${wid}" ${wallet() < pr ? `disabled title="Not enough ${curName}"` : ''}>Buy</button></div>`;
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[w.rarity]}">${w.name}</div><div class="ds">${cls.label}, ${w.damage} dmg, ${w.desc}${w.reqs ? `, <span class="${meetsReqs(w.reqs, ch.attrs) ? '' : 'bad'}">req ${reqsText(w.reqs)}</span>` : ''}</div><div class="ds muted feel" style="font-size:12px">${escapeHtml(weaponFeelText(w))}</div></div><div class="pr ${wallet() < pr ? 'bad' : ''}">${pr} ${curName}</div><button class="btn small" data-buy-w="${wid}" ${wallet() < pr ? `disabled title="Not enough ${curName}"` : ''}>Buy</button></div>`;
       }
       for (const oid of shop.outfits || []) {
         const o = OUTFITS[oid];
         const pr = price(o.price, oid);
         const owned = ch.inventory.outfits.includes(oid);
         const res = Object.entries(o.resist).map(([k, v]) => `${ELEMENTS[k].name} ${Math.round(v * 100)}%`).join(', ');
-        rows += `<div class="shop-row"><div class="ico">🧥</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[o.rarity]}">${o.name}</div><div class="ds">${Math.round(o.armor * 100)}% armor${res ? ' · ' + res : ''} · ${o.desc}${o.reqs ? ` · req ${reqsText(o.reqs)}` : ''}</div></div><div class="pr ${!owned && wallet() < pr ? 'bad' : ''}">${owned ? '—' : pr + ' ' + curName}</div><button class="btn small" data-buy-o="${oid}" ${owned ? 'disabled title="You own this already"' : wallet() < pr ? `disabled title="Not enough ${curName}"` : ''}>${owned ? 'Owned' : 'Buy'}</button></div>`;
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[o.rarity]}">${o.name}</div><div class="ds">${Math.round(o.armor * 100)}% armor${res ? ', ' + res : ''}, ${o.desc}${o.reqs ? `, req ${reqsText(o.reqs)}` : ''}</div></div><div class="pr ${!owned && wallet() < pr ? 'bad' : ''}">${owned ? '—' : pr + ' ' + curName}</div><button class="btn small" data-buy-o="${oid}" ${owned ? 'disabled title="You own this already"' : wallet() < pr ? `disabled title="Not enough ${curName}"` : ''}>${owned ? 'Owned' : 'Buy'}</button></div>`;
       }
       for (const iid of shop.items || []) {
         const it = ITEMS[iid];
         const pr = price(it.price, iid);
-        rows += `<div class="shop-row"><div class="ico">${it.icon}</div><div style="flex:1"><div class="nm">${it.name}</div><div class="ds">${it.desc}</div></div><div class="pr ${wallet() < pr ? 'bad' : ''}">${pr} ${curName}</div><button class="btn small" data-buy-i="${iid}" ${wallet() < pr ? `disabled title="Not enough ${curName}"` : ''}>Buy</button></div>`;
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm">${it.name}</div><div class="ds">${it.desc}</div></div><div class="pr ${wallet() < pr ? 'bad' : ''}">${pr} ${curName}</div><button class="btn small" data-buy-i="${iid}" ${wallet() < pr ? `disabled title="Not enough ${curName}"` : ''}>Buy</button></div>`;
       }
     } else {
       for (const [iid, n] of Object.entries(ch.inventory.items)) {
@@ -166,13 +166,13 @@ export function openShop(ui, id) {
         if (!it || it.type === 'quest' || iid === 'rift_shard' && shardMode) continue;
         const pr = Math.max(1, Math.round((it.sell ?? it.price * 0.5) * (shardMode ? 0 : 1) * (it.sell ? 1 : p.derived.sellMul * 2)));
         if (shardMode) continue;
-        rows += `<div class="shop-row"><div class="ico">${it.icon}</div><div style="flex:1"><div class="nm">${it.name} <span class="muted">×${n}</span></div><div class="ds">${it.desc}</div></div><div class="pr">${pr} silver</div><button class="btn small" data-sell-i="${iid}">Sell</button></div>`;
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm">${it.name} <span class="muted">×${n}</span></div><div class="ds">${it.desc}</div></div><div class="pr">${pr} silver</div><button class="btn small" data-sell-i="${iid}">Sell</button></div>`;
       }
       for (const w of ch.inventory.weapons) {
         if (w.uid === ch.equipped.weapon || shardMode) continue;
         const def = WEAPONS[w.id];
         const pr = Math.max(1, Math.round(def.price * p.derived.sellMul));
-        rows += `<div class="shop-row"><div class="ico">🗡️</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[def.rarity]}">${escapeHtml(weaponDisplayName(w))}</div><div class="ds">${WEAPON_CLASSES[def.cls].label} · ${def.damage} dmg</div></div><div class="pr">${pr} silver</div><button class="btn small" data-sell-w="${w.uid}">Sell</button></div>`;
+        rows += `<div class="shop-row"><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[def.rarity]}">${escapeHtml(weaponDisplayName(w))}</div><div class="ds">${WEAPON_CLASSES[def.cls].label}, ${def.damage} dmg</div></div><div class="pr">${pr} silver</div><button class="btn small" data-sell-w="${w.uid}">Sell</button></div>`;
       }
       if (!rows) rows = `<div class="muted">${shardMode ? 'The Hollow Man does not buy. He only takes.' : 'Nothing to sell.'}</div>`;
     }
@@ -257,7 +257,7 @@ export function openEnchant(ui) {
   if (!it) msg = 'Bare fists cannot hold an enchantment.';
   else if (WEAPONS[it.id].enchant) msg = `${WEAPONS[it.id].name} already carries an enchantment that cannot be reforged.`;
   const el = ui.openModal('enchant', `<div class="panel" style="width:520px;text-align:center"><h2>REFORGE</h2>
-    ${msg ? `<p>${msg}</p>` : `<p>Reforge <b class="gold">${escapeHtml(weaponDisplayName(it))}</b> with a random enchantment for <b>${cost} silver</b>?</p><p class="muted" style="font-size:14px">${Object.values(ENCHANTS).map((e) => `<span style="color:${e.color}">${e.name}</span>`).join(' · ')}</p>`}
+    ${msg ? `<p>${msg}</p>` : `<p>Reforge <b class="gold">${escapeHtml(weaponDisplayName(it))}</b> with a random enchantment for <b>${cost} silver</b>?</p><p class="muted" style="font-size:14px">${Object.values(ENCHANTS).map((e) => `<span style="color:${e.color}">${e.name}</span>`).join(', ')}</p>`}
     <div class="divider"></div><div class="row-flex"><span class="space"></span><button class="btn" data-a="close">Leave</button>${msg ? '' : `<button class="btn primary" data-a="go" ${ch.silver < cost ? 'disabled' : ''}>Reforge</button>`}</div></div>`);
   el.addEventListener('click', (e) => {
     const a = e.target.closest('[data-a]');
@@ -296,9 +296,19 @@ export function openCampfire(ui, it) {
     openCookMenu(ui);
     return;
   }
+  // no rest mid-fight (Deepwoken's rule): the seat heals and saves, so danger has to lapse first
+  if (p.inDanger) {
+    ui.toast(`You can't rest while in danger (${Math.ceil(p.dangerT || 0)}s).`, 'bad');
+    return;
+  }
+  // Sitting down: face the flames, keep the game (a seat by a fire is a safe place to stop),
+  // and the HUD steps back while the rest card (ui.js, body.seated) lists what a seat offers.
+  // Moving or leaving the ground stands you up (Player.update).
   p.sitting = true;
-  ui.toast('You sit by the fire. [E] cook · walk away to leave.', 'good');
-  growthAtRest(ui);
+  if (it && it.pos) p.yaw = Math.atan2(it.pos.x - p.pos.x, it.pos.z - p.pos.z);
+  p.restFire = it && it.pos ? { x: it.pos.x, y: it.pos.y, z: it.pos.z } : null; // the camera frames rester and fire (game.js)
+  if (ui.game && ui.game.save) ui.game.save();
+  if (!growthAtRest(ui)) ui.toast('You sit by the fire.', 'good');
 }
 
 // Sitting by a fire is where you invest your points and assign trait points, as in Deepwoken (the systems session's
@@ -500,7 +510,7 @@ export function openMap(ui) {
   const region = mapRegionFor(G.player && G.player.pos, ui.game.inRift);
   const rift = region.rift;
   const here = (x, z) => inRegion(region, x, z);
-  const el = ui.openModal('map', `<div class="panel"><h2>${region.title}</h2><canvas id="map-canvas" width="640" height="640"></canvas><div class="muted" style="text-align:center;margin-top:6px;font-size:14px">◆ quest · ▲ you · ⚓ harbor · <kbd>M</kbd> to close</div></div>`);
+  const el = ui.openModal('map', `<div class="panel"><h2>${region.title}</h2><canvas id="map-canvas" width="640" height="640"></canvas><div class="muted" style="text-align:center;margin-top:6px;font-size:14px">◆ quest, ▲ you, ⚓ harbor, <kbd>M</kbd> to close</div></div>`);
   const cv = $('#map-canvas', el);
   const ctx = cv.getContext('2d');
   const m = renderMapImage(region);

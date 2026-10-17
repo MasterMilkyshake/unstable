@@ -863,7 +863,7 @@ function bedInv(w) {
 const LEDGE = { snow: '#e4ebf2', tundra: '#d3dbd7', volcanic: '#554c46', ashfield: '#554c46', hush: '#aab1b6', rock: '#7c7d64', beach: '#7d8a52', dunes: '#7d8a52' };
 let groundMat = null;
 function groundMaterial() {
-  return (groundMat ||= Object.assign(new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: false, roughness: 0.95, metalness: 0 }), { name: 'terrain_ground' }));
+  return (groundMat ||= Object.assign(new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: false, roughness: 0.95, metalness: 0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 2 }), { name: 'terrain_ground' }));
 }
 const wallMaterials = new Map();
 function wallMaterial(biome) {

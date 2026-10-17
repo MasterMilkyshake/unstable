@@ -130,8 +130,8 @@ export const SALTREACH_SPAWNERS = [
   { type: 'watch_pikeman', x: 5, z: 113.5, count: 1, radius: 0, respawn: 150, face: 0 },
   { type: 'watch_guard', x: -5, z: 113.5, count: 1, radius: 0, respawn: 150, face: 0 },
   // the Lantern Palace's own wardens: the gate, the hall and the Keepers' Chair
-  { type: 'watch_guard', x: -24.5, z: 68.6, count: 1, radius: 0, respawn: 150, face: Math.PI / 2 },
-  { type: 'watch_pikeman', x: -24.5, z: 75.4, count: 1, radius: 0, respawn: 150, face: Math.PI / 2 },
+  { type: 'watch_guard', x: -24.5, z: 70.4, count: 1, radius: 0, respawn: 150, face: Math.PI / 2 },
+  { type: 'watch_pikeman', x: -24.5, z: 73.6, count: 1, radius: 0, respawn: 150, face: Math.PI / 2 },
   { type: 'watch_guard', x: -48, z: 66.2, count: 1, radius: 0, respawn: 150, face: Math.PI / 2 },
   { type: 'watch_guard', x: -48, z: 77.8, count: 1, radius: 0, respawn: 150, face: Math.PI / 2 },
   { type: 'watch_pikeman', x: -60, z: 66.5, count: 1, radius: 0, respawn: 150, face: Math.PI / 2 },
@@ -156,7 +156,6 @@ export const SALTREACH_NPCS = [
   {
     id: 'grey_clerk', name: 'The Grey Clerk', title: 'Ministry of Soundings', x: -8, z: 15,
     look: { skin: '#c8b8a8', hair: '#5a5a60', outfit: { main: '#5a5a66', trim: '#a8acc0', pants: '#3a3a44', boots: '#202026' }, hood: true },
-    when: (ch) => ch.quests && (ch.quests.red_tooth?.state === 'done' || !!ch.quests.grey_letter),
   },
 ];
 // The Enclave's harbor occupation during "Iron on the Water".

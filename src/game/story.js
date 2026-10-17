@@ -1,5 +1,5 @@
-// The story runtime: quest markers for every step, polled objectives, chapters that wait for
-// the player's Power, and the choice at the Anchor's Seat.
+// The story runtime: quest markers for every step, polled objectives, and the choice at the
+// Anchor's Seat. The story threads are optional; nothing here starts one for the player.
 import * as THREE from 'three';
 import { G } from '../core/globals.js';
 import { START_HOOKS, UPDATE_HOOKS, ACTIONS } from './hooks.js';
@@ -103,13 +103,10 @@ function riftExit() {
   return { x: 6000, z: 5988, label: 'The Ascent' };
 }
 
-// The quest whose step the compass follows: the one you track, else the current chapter.
+// The quest whose step the compass follows: the one you track. There is no main story to fall
+// back on; with nothing tracked, the compass shows no quest marker.
 export function focusQuest(ch) {
   if (ch.trackedQuest && ch.quests[ch.trackedQuest] && ch.quests[ch.trackedQuest].state !== 'done') return ch.trackedQuest;
-  for (const id of MAIN_CHAIN) {
-    const q = ch.quests[id];
-    if (q && q.state !== 'done') return id;
-  }
   return null;
 }
 
@@ -147,24 +144,6 @@ ACTIONS.trackQuest = (id) => {
   G.ui.refreshQuests();
 };
 
-// ---------------------------------------------------------------- the chain moves on
-// Chapters that wait for a minimum Power start once the player grows into them.
-function advanceChain(game) {
-  const ch = game.ch;
-  for (let i = 1; i < MAIN_CHAIN.length; i++) {
-    const id = MAIN_CHAIN[i];
-    const prev = MAIN_CHAIN[i - 1];
-    if (ch.quests[id] || ch.quests[prev]?.state !== 'done') continue;
-    // a veteran who finished the old storyline replays the new chapters in order, one at a time
-    if (MAIN_CHAIN.slice(0, i).some((p) => ch.quests[p]?.state !== 'done')) continue;
-    const def = QUESTS[id];
-    if (QUESTS[prev].next !== id) continue;
-    if (def.minLevel && ch.level < def.minLevel) continue;
-    game.quests.start(id);
-    return;
-  }
-}
-
 let pollT = 0;
 UPDATE_HOOKS.push((game, dt) => {
   if (!game.ch || !game.player || game.transitioning) return;
@@ -172,13 +151,24 @@ UPDATE_HOOKS.push((game, dt) => {
   if (pollT > 0) return;
   pollT = 0.5;
   game.quests.onPosition(game.player.pos);
-  advanceChain(game);
 });
 
 START_HOOKS.push((game, ch) => {
   ch.flags ||= {};
+  migrateThreads(ch);
   ensureSeat(game);
 });
+
+// Saves from when the story was one chain: the compass used to follow the current chapter
+// without being asked. Keep following it once, as a tracked quest, so nobody loads in lost.
+export function migrateThreads(ch) {
+  if (ch.flags.threads) return;
+  ch.flags.threads = true;
+  const tracked = ch.quests && ch.quests[ch.trackedQuest];
+  if (tracked && tracked.state !== 'done') return;
+  const open = MAIN_CHAIN.find((id) => ch.quests && ch.quests[id] && ch.quests[id].state !== 'done');
+  ch.trackedQuest = open || null;
+}
 
 // ---------------------------------------------------------------- the Anchor's Seat
 let seatAdded = false;

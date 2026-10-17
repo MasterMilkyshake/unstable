@@ -1,4 +1,6 @@
-// THE UNSTABLE TIDE — the main storyline of the Anchorage, chapter by chapter.
+// THE UNSTABLE TIDE — the story threads of the Anchorage. There is no main quest: each thread is
+// offered by the people involved (Wren, Maren, Hale, Crane, the Grey Clerk, Quill, the Hollow Man)
+// and can be taken up, left or finished in any order. Nothing in the world waits on them.
 //
 // A century ago the last First Anchor withheld the emergency release so the crown ships could
 // escape; the regulators broke, the coast sank and the Rift opened. Those crown ships became
@@ -44,20 +46,20 @@ export const STORY_BOSSES = {
 };
 Object.assign(ENEMIES, STORY_BOSSES);
 
-// ---------------------------------------------------------------- the chapters
-// chapter: label shown on banners; act: grouping for the Story tab; power: suggested Power.
+// ---------------------------------------------------------------- the threads
+// act: grouping for the journal's Story tab; power: the suggested Power shown there.
 export const STORY_QUESTS = {
   // ======================== PROLOGUE — SALT IN THE LUNGS
   awakening: {
-    main: true, act: 'prologue', chapter: 'Prologue', power: '1',
-    name: 'Washed Ashore', giver: 'wren', turnIn: 'wren', next: 'first_light',
+    act: 'prologue', power: '1',
+    name: 'Washed Ashore', giver: 'wren', turnIn: 'wren',
     desc: 'Old Wren found you half-drowned on the Wash. Prove you can still fight by clearing the mudlurkers from the shore.',
     objectives: [{ type: 'kill', target: ['mudlurker'], count: 3, text: 'Slay mudlurkers on The Wash' }],
     rewards: { xp: 90, silver: 25, weapons: ['bronze_sword'], items: [['bread', 2]] },
   },
   first_light: {
-    main: true, act: 'prologue', chapter: 'Prologue', power: '1–2',
-    name: 'The Keeper of Saltreach', giver: 'wren', turnIn: 'maren', next: 'writ',
+    act: 'prologue', power: '1–2',
+    name: 'The Keeper of Saltreach', giver: 'wren', turnIn: 'maren',
     desc: 'Wren says Elder Maren of Saltreach knows more about the tide-born than anyone. Walk the coast trail north to the Lantern City.',
     stages: [
       { type: 'reach', loc: 'Saltreach Town', r: 70, text: 'Follow the coast trail north to Saltreach' },
@@ -67,8 +69,8 @@ export const STORY_QUESTS = {
 
   // ======================== ACT I — THE LAMP AND THE WRIT
   writ: {
-    main: true, act: 'one', chapter: 'I', power: '2–5',
-    name: 'The Writ of Reclamation', giver: 'maren', turnIn: 'maren', next: 'red_tooth',
+    act: 'one', power: '2–5',
+    name: 'The Writ of Reclamation', giver: 'maren', turnIn: 'maren',
     desc: 'A black-hulled warship flying a chain banner anchored off Saltreach at dawn, and its envoy has nailed a writ to the Sea Gate. Maren wants to know what the Enclave is before she answers it.',
     stages: [
       { type: 'talk', npc: 'hale', text: 'Ask Captain Hale about the black ship in the harbor' },
@@ -78,8 +80,8 @@ export const STORY_QUESTS = {
     rewards: { xp: 240, silver: 60, rep: { watch: 5 } },
   },
   red_tooth: {
-    main: true, act: 'one', chapter: 'I', power: '4–8', minLevel: 3,
-    name: 'The Stolen Tooth', giver: 'maren', turnIn: 'maren', next: 'grey_letter',
+    act: 'one', power: '4–8',
+    name: 'The Stolen Tooth', giver: 'maren', turnIn: 'maren',
     desc: 'Kaelen the Red carries a fragment of the old command chain, a "tooth" torn from a regulator. The Enclave wants it. Maren wants it first, and Captain Hale wants the Redwake raids ended.',
     stages: [
       { type: 'talk', npc: 'hale', text: 'Learn what the Watch knows of Kaelen the Red' },
@@ -92,9 +94,9 @@ export const STORY_QUESTS = {
 
   // ======================== ACT II — THREE SIGNATURES
   grey_letter: {
-    main: true, act: 'two', chapter: 'II', power: '6–10', minLevel: 5,
-    name: 'A Letter Sealed in Grey', giver: 'grey_clerk', turnIn: 'minister_quill', next: 'fracture',
-    desc: 'A clerk in grey has been waiting under the Lantern Tree for three days. They say the bell on the Hush rang for you, and that the Ministry of Soundings would like a word about what Kaelen carried.',
+    act: 'two', power: '6–10',
+    name: 'A Letter Sealed in Grey', giver: 'grey_clerk', turnIn: 'minister_quill',
+    desc: 'A clerk in grey waits under the Lantern Tree in Saltreach with a sealed letter. The Ministry of Soundings, in the fog on the Hush to the north-east, wants to talk to a tide-born about the command chain under the sea.',
     stages: [
       { type: 'talk', npc: 'grey_clerk', text: 'Meet the clerk in grey beneath the Lantern Tree' },
       { type: 'reach', loc: 'Hush Landing', r: 40, text: 'Sail to Hush Landing' },
@@ -105,8 +107,8 @@ export const STORY_QUESTS = {
     rewards: { xp: 800, items: [['sanity_draught', 2]], rep: { ministry: 15 } },
   },
   fracture: {
-    main: true, act: 'two', chapter: 'II', power: '8–16', minLevel: 7,
-    name: 'The Three Signatures', giver: 'maren', turnIn: 'maren', next: 'iron_tide',
+    act: 'two', power: '8–16',
+    name: 'The Three Signatures', giver: 'maren', turnIn: 'maren',
     requiredBosses: ['warlord', 'frost_warden', 'cinder_colossus'],
     desc: 'Command, cold and heat: three signatures to trace the broken chain. Kaelen\'s fragment is one. The Frost Warden in the White Hollow and the Cinder Colossus in the Caldera hold the others, each still guarding works nobody came back to tend.',
     stages: [
@@ -125,8 +127,8 @@ export const STORY_QUESTS = {
 
   // ======================== ACT III — IRON ON THE WATER
   iron_tide: {
-    main: true, act: 'three', chapter: 'III', power: '13–16', minLevel: 12,
-    name: 'Iron on the Water', giver: 'maren', turnIn: 'maren', next: 'bastion',
+    act: 'three', power: '13–16',
+    name: 'Iron on the Water', giver: 'maren', turnIn: 'maren',
     desc: 'Captain Crane came for the cores with Peacekeepers at her back. The Enclave holds Saltreach harbor, and Maren has hidden the cores somewhere even Hale does not know.',
     stages: [
       { type: 'talk', npc: 'maren', text: 'Maren has news from the harbor', onEnter: (game) => { game.ch.flags.harbor_occupied = true; } },
@@ -140,8 +142,8 @@ export const STORY_QUESTS = {
     rewards: { xp: 3200, silver: 420, rep: { watch: 20 }, flags: { harbor_freed: true } },
   },
   bastion: {
-    main: true, act: 'three', chapter: 'III', power: '14–18', minLevel: 13,
-    name: 'The Bastion of the Chain', giver: 'maren', turnIn: 'maren', next: 'sovereign',
+    act: 'three', power: '14–18',
+    name: 'The Bastion of the Chain', giver: 'maren', turnIn: 'maren',
     desc: 'Crane said the Grand Warden would take the Anchor\'s seat himself. Maren believes her. Fort Meridian is where the Enclave keeps its Vice Warden, its Registry and its iron, and where the Grand Warden came ashore.',
     stages: [
       { type: 'reach', loc: 'Fort Meridian', r: 55, text: 'Sail to Meridian and breach Fort Meridian' },
@@ -155,8 +157,8 @@ export const STORY_QUESTS = {
 
   // ======================== ACT IV — THE SOVEREIGN BENEATH
   sovereign: {
-    main: true, act: 'four', chapter: 'IV', power: '16–20', minLevel: 14,
-    name: 'The Sovereign Beneath', giver: 'maren', turnIn: 'maren', next: 'into_the_abyss', final: true,
+    act: 'four', power: '16–20',
+    name: 'The Sovereign Beneath', giver: 'maren', turnIn: 'maren', final: true,
     desc: 'The Grand Warden dived through the Crown Sluice with the Anchor\'s seal. Below the sea the Hollow Duke still grips the command chain. Whoever holds the throne holds what is left of the coast.',
     stages: [
       { type: 'realm', realm: 'rift', text: 'Go down through the Crown Sluice into the Rift' },
@@ -170,9 +172,9 @@ export const STORY_QUESTS = {
 
   // ======================== EPILOGUE — THE LAST CROSSING
   into_the_abyss: {
-    main: true, act: 'epilogue', chapter: 'Epilogue', power: '18–20', minLevel: 16,
+    act: 'epilogue', power: '18–20',
     name: 'The Last Crossing', giver: 'hollow_man', turnIn: 'hollow_man',
-    desc: 'With the Duke gone, the Hollow Man says the one who ferried every drowned soul down here, his own included, still keeps his landing on the Rift\'s north-east lip.',
+    desc: 'The Hollow Man says the one who ferried every drowned soul down here, his own included, still keeps his landing on the Rift\'s north-east lip. Nobody who went to look has come back.',
     objectives: [{ type: 'kill', target: ['lanternless'], count: 1, text: 'Find the Ferryman at the Landing That Never Came and defeat the Lanternless' }],
     rewards: { xp: 9000, items: [['mantra_spark', 2], ['sanity_draught', 3]] },
   },
@@ -223,7 +225,7 @@ export const STORY_QUESTS = {
   },
 };
 
-// Story tab order and act titles.
+// Journal grouping for the threads (no order is implied: any thread can be taken up at any time).
 export const ACTS = [
   { id: 'prologue', title: 'Prologue', subtitle: 'Salt in the Lungs' },
   { id: 'one', title: 'Act I', subtitle: 'The Lamp and the Writ' },
@@ -232,6 +234,7 @@ export const ACTS = [
   { id: 'four', title: 'Act IV', subtitle: 'The Sovereign Beneath' },
   { id: 'epilogue', title: 'Epilogue', subtitle: 'The Last Crossing' },
 ];
+// The story threads, in the order the journal lists them (name kept for old saves and tools).
 export const MAIN_CHAIN = ['awakening', 'first_light', 'writ', 'red_tooth', 'grey_letter', 'fracture', 'iron_tide', 'bastion', 'sovereign', 'into_the_abyss'];
 
 // The Anchor's Seat: what the player does with the claim once the Duke falls.

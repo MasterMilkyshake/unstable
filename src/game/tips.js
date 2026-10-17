@@ -48,7 +48,7 @@ function card() {
   if (!el) el = document.getElementById('tip');
   return el;
 }
-const on = () => G.settings && G.settings.tips !== false;
+const on = () => !!(G.settings && G.settings.tipPopups);
 
 // Queue a tip unless it has been seen; `fields` fill its {name} slots.
 export function tip(id, fields = {}) {

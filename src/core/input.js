@@ -14,7 +14,6 @@ export const BIND = {
   grip: ['KeyB'],
   slide: ['KeyC', 'ControlLeft'],
   menu: ['Tab'],
-  backpack: ['Backquote'],
   map: ['KeyM'],
   journal: ['KeyJ'],
   resonance: ['KeyZ'],
@@ -22,7 +21,7 @@ export const BIND = {
 };
 
 // How a key reads on screen.
-const NAMES = { Backquote: '`', Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', Escape: 'Esc', Tab: 'Tab', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
+const NAMES = { Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', Escape: 'Esc', Tab: 'Tab', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
 export function keyLabel(code) {
   if (NAMES[code]) return NAMES[code];
   if (/^Key[A-Z]$/.test(code)) return code.slice(3);
@@ -56,8 +55,7 @@ export const CONTROLS = [
   { keys: ['hotbar'], text: '{hotbar:1} raises or lowers your weapon (a new character wakes with its fists down); {hotbar:2}–{hotbar:0} cast a mantra or use an item.' },
   { keys: ['grip'], text: 'Grip (execute) a knocked enemy.' },
   { keys: ['interact'], text: 'Interact or talk.' },
-  { keys: ['menu'], text: 'Character: attributes and investment, talents, mantras, the backpack, quests.' },
-  { keys: ['backpack'], text: 'Backpack: everything you carry and the mantras you know, as tiles; drag supplies and mantras onto the hotbar.' },
+  { keys: ['menu'], text: 'Character: attributes and investment, talents, mantras, the backpack (everything you carry; drag supplies and mantras onto the hotbar), quests.' },
   { keys: ['map'], text: 'Map.' },
   { keys: ['journal'], text: 'Journal: the story, standing, the Atlas, sources, investigations, the Guide.' },
   { keys: ['resonance'], text: 'Resonance ability (from Power 15, once attuned at the Vowkeeper).' },

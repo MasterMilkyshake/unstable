@@ -96,7 +96,7 @@ button { font-family: var(--display); }
 .slot { position: relative; width: 48px; height: 48px; background: rgba(8, 9, 12, 0.78); border: 1px solid rgba(255, 255, 255, 0.14); display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
 .slot .k { position: absolute; left: 3px; top: 1px; font-size: 10px; color: var(--muted); font-family: var(--display); }
 .slot .n { position: absolute; right: 3px; bottom: 1px; font-size: 11px; color: #fff; font-family: var(--display); text-shadow: 0 1px 2px #000; }
-.slot .lbl { font-size: 9px; line-height: 10px; text-align: center; padding: 0 2px; font-family: var(--display); color: #ddd; overflow-wrap: anywhere; }
+.slot .lbl { font-size: 9px; line-height: 10px; text-align: center; padding: 0 2px; font-family: var(--display); color: #ddd; overflow-wrap: normal; max-width: 100%; box-sizing: border-box; }
 .slot .lbl.long { font-size: 6.5px; letter-spacing: -0.03em; padding: 0 1px; }
 .slot .cd { position: absolute; inset: 0; background: conic-gradient(rgba(0, 0, 0, 0.72) var(--p), transparent 0); }
 .slot .cdt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-family: var(--display); color: #fff; text-shadow: 0 1px 3px #000; }
@@ -246,7 +246,7 @@ kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1p
 /* the choices scroll; Wake Up stays in view at any height */
 #cr-right { overflow-y: auto; max-height: calc(calc(94 * var(--sh)) - 52px); padding-right: 6px; min-width: 0; }
 #cr-right .cr-actions { position: sticky; bottom: 0; background: #0f1015; padding-bottom: 2px; }
-@media (max-height: 820px) { #cr-right h3 { margin: 9px 0 5px; } #cr-right .sw { width: 24px; height: 24px; } .race-card { padding: 10px 14px; } }
+@media (max-height: 820px) { #cr-right h3 { margin: 6px 0 4px; } .cr-attune-note { min-height: 0; margin-top: 3px; } #cr-right .sw { width: 24px; height: 24px; } .race-card { padding: 10px 14px; } }
 @media (max-width: 900px) { #creation .panel { grid-template-columns: 1fr; } #preview-canvas { height: 220px; margin: 0 auto; } }
 .race-card { border: 1px solid var(--line-strong); padding: 14px 16px; background: rgba(0, 0, 0, 0.3); }
 .race-card .nm { font-family: var(--display); font-size: 28px; letter-spacing: 0.15em; color: var(--gold-2); }
@@ -258,6 +258,10 @@ kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1p
 .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
 .cr-looks { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 0 26px; }
 .cr-attune { flex-wrap: wrap; gap: 5px; }
+/* hair style and build share a row, so the build slider shows at 720p without scrolling */
+.cr-style-build { display: grid; grid-template-columns: auto 1fr; gap: 0 26px; align-items: start; }
+.cr-style-build input[type='range'] { width: 100%; margin-top: 8px; }
+@media (max-width: 900px) { .cr-style-build { grid-template-columns: 1fr; } }
 .cr-attune .btn { padding-left: 7px; padding-right: 7px; letter-spacing: 0.04em; }
 .cr-attune-note { font-size: 13px; margin-top: 5px; min-height: 2.6em; }
 .sw { width: 28px; height: 28px; border: 2px solid rgba(255, 255, 255, 0.15); cursor: pointer; }
@@ -366,6 +370,11 @@ input[type=range] { width: 100%; accent-color: #d6c496; }
   #quest-tracker { width: 220px; }
   #compass { width: 400px; }
 }
+/* below ~1000px the hotbar no longer fits between the vitals and the needs: it rides above them */
+@media (max-width: 1000px) {
+  #hotbar { bottom: 140px; }
+  #prompt { bottom: 200px; }
+}
 @media (max-width: 900px) {
   .title { font-size: 60px; }
   #creation .panel { grid-template-columns: 1fr; }
@@ -376,7 +385,6 @@ input[type=range] { width: 100%; accent-color: #d6c496; }
 .modal-x { position: absolute; top: 8px; right: 10px; width: 30px; height: 30px; padding: 0; font-size: 15px; line-height: 28px; text-align: center; color: var(--muted); background: transparent; border: 1px solid transparent; cursor: pointer; z-index: 2; }
 .modal-x:hover { color: #fff; border-color: var(--line-strong); }
 
-#lan-status { margin-top: 6px; color: #9fe0ff; font-size: 11px; letter-spacing: 0.18em; text-shadow: 0 1px 3px #000; }
 #compass .tick.ally { color: #9fe0ff; font-size: 11px; top: 6px; white-space: nowrap; }
 .ebar.ally .hp > i { background: linear-gradient(#6fe08a, #2f8a46); }
 .ebar.ally .po { display: none; }
@@ -400,7 +408,7 @@ input[type=range] { width: 100%; accent-color: #d6c496; }
 .bp-tile:hover { border-color: var(--r); }
 .bp-tile.sel { outline: 2px solid var(--gold-2); outline-offset: -2px; }
 .bp-tile.eq { box-shadow: inset 0 0 0 1px var(--gold); }
-.bp-ico { font-size: 28px; line-height: 1; pointer-events: none; }
+.bp-lbl { font-family: var(--display); font-size: 9.5px; line-height: 11px; text-align: center; padding: 0 3px; color: #e2ddd0; overflow-wrap: normal; max-width: 100%; box-sizing: border-box; pointer-events: none; }
 .bp-n, .bp-key, .bp-eq { position: absolute; font-family: var(--display); text-shadow: 0 1px 2px #000; pointer-events: none; }
 .bp-n { right: 4px; bottom: 2px; font-size: 12px; color: #fff; }
 .bp-key { right: 4px; top: 2px; font-size: 10px; color: var(--gold-2); }
@@ -425,7 +433,24 @@ input[type=range] { width: 100%; accent-color: #d6c496; }
 .bp-slot.fixed { opacity: 0.6; cursor: default; }
 .bp-slot.over { border-color: var(--gold-2); background: rgba(214, 196, 150, 0.14); }
 .bp-slot .k { position: absolute; left: 4px; top: 2px; font-size: 10px; color: var(--muted); font-family: var(--display); }
-.bp-slot .bp-ico { font-size: 22px; }
+.bp-slot .bp-lbl { font-size: 9px; line-height: 10px; }
 .bp-x { position: absolute; right: 4px; top: 0; font-size: 14px; color: var(--muted); cursor: pointer; }
 .bp-x:hover { color: #ff7a6a; }
 @media (max-width: 900px) { .bp-main { grid-template-columns: 1fr; } }
+
+/* Seated by a fire: the HUD steps back and the rest card says what the seat offers (ui.js seatedHud) */
+#rest-card { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); text-align: center; font-family: var(--display); color: #e8dcc0; text-shadow: 0 1px 3px #000, 0 0 2px #000; pointer-events: none; }
+#rest-card .rc-t { font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-2); }
+#rest-card .rc-l { font-size: 12px; margin-top: 4px; color: #c8c2b4; }
+#rest-card .rc-k { font-size: 11px; margin-top: 8px; letter-spacing: 0.06em; }
+#rest-card .rc-k b { color: var(--gold-2); font-weight: normal; }
+body.seated #hud-tl, body.seated #compass, body.seated #quest-tracker, body.seated #hotbar, body.seated #hud-br, body.seated #crosshair, body.seated #crit-ind, body.seated #area-small { opacity: 0; transition: opacity 0.6s, transform 0.08s ease-out; }
+body.seated #hud-bl { opacity: 0.55; transition: opacity 0.6s; }
+#hud-tl, #compass, #quest-tracker, #hotbar, #hud-br, #hud-bl, #area-small { transition: opacity 0.35s; }
+
+/* round 3: the trait points sit beside the investment points in the Attributes header */
+.trait-points{margin-left:14px}
+#b-xp.capped > i{background:linear-gradient(90deg,#c9a24a,#ffe9a3);animation:xpcap 1.6s ease-in-out infinite}
+@keyframes xpcap{50%{filter:brightness(1.5)}}
+/* ui/fitText.js: a word that still overflows at the smallest size may break */
+.bp-lbl.fit-break, .slot .lbl.fit-break { overflow-wrap: anywhere; }

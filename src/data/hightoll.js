@@ -138,12 +138,12 @@ export const HIGHTOLL_REGISTER = src('hightoll_crack_register', 'Crack Register,
 // Named cameras for ?vista= previews (merged into VISTA_SHOTS by world/hightoll.js).
 const shot = (from, y, to, ly, time, title) => ({ x: from[0], y, z: from[1], lx: to[0], ly, lz: to[1], time, title });
 export const HIGHTOLL_SHOTS = {
-  hightoll_wash: shot([-4, -346], 15.6, at(14, 0), 84, 0.36, 'Hightoll · from the Wash, where the drowned wake'),
-  hightoll_dusk: shot([-4, -346], 15.6, at(-40, -160), 52, 0.74, 'Hightoll and the Hundred Arches · dusk from the Wash'),
-  hightoll_gate: shot(at(0, -12), HIGHTOLL.top + 2.2, at(0, -160), HIGHTOLL.top - 16, 0.42, 'The Bridge Court · through the Bridge Gate'),
+  hightoll_wash: shot([-4, -346], 15.6, at(14, 0), 84, 0.36, 'Hightoll, from the Wash, where the drowned wake'),
+  hightoll_dusk: shot([-4, -346], 15.6, at(-40, -160), 52, 0.74, 'Hightoll and the Hundred Arches, dusk from the Wash'),
+  hightoll_gate: shot(at(0, -12), HIGHTOLL.top + 2.2, at(0, -160), HIGHTOLL.top - 16, 0.42, 'The Bridge Court, through the Bridge Gate'),
   hightoll_line: shot(onArches(15, -1.5), DECK + 2.2, at(8, -10), HIGHTOLL.top + 26, 0.38, 'The carrier line from the north road to Hightoll'),
-  hightoll_descent: shot(at(HIGHTOLL_LAND_GATE.x, 47), HIGHTOLL.top + 2.4, REED_ROAD_LANDING, 10, 0.42, 'The descent line · from the Land Gate to the Reed Road'),
-  hightoll_air: shot(at(150, -120), 170, at(12, 0), HIGHTOLL.top + 20, 0.42, 'Hightoll · on its rock at the end of the Arches'),
+  hightoll_descent: shot(at(HIGHTOLL_LAND_GATE.x, 47), HIGHTOLL.top + 2.4, REED_ROAD_LANDING, 10, 0.42, 'The descent line, from the Land Gate to the Reed Road'),
+  hightoll_air: shot(at(150, -120), 170, at(12, 0), HIGHTOLL.top + 20, 0.42, 'Hightoll, on its rock at the end of the Arches'),
 };
 
 // ---------------------------------------------------------------- the crags and the meadow

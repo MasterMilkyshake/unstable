@@ -54,11 +54,11 @@ ACTIONS.openTemper = (ui = G.ui) => {
         const pips = Array.from({ length: TEMPER_MAX }, (_, i) => `<i class="${i < t ? 'on' : ''}"></i>`).join('');
         let cost = '<span class="muted">Fully tempered</span>';
         if (c) {
-          const needs = Object.entries(c.needs).map(([k, n]) => `<span class="${(ch.inventory.items[k] || 0) >= n ? 'good' : 'bad'}">${ITEMS[k].icon} ${ITEMS[k].name} ${ch.inventory.items[k] || 0}/${n}</span>`).join(' · ');
-          cost = `<span class="${ch.silver >= c.silver ? 'good' : 'bad'}">${c.silver} silver</span> · ${needs}`;
+          const needs = Object.entries(c.needs).map(([k, n]) => `<span class="${(ch.inventory.items[k] || 0) >= n ? 'good' : 'bad'}">${ITEMS[k].name} ${ch.inventory.items[k] || 0}/${n}</span>`).join(', ');
+          cost = `<span class="${ch.silver >= c.silver ? 'good' : 'bad'}">${c.silver} silver</span>, ${needs}`;
         }
-        return `<div class="shop-row"><div class="ico">🗡️</div><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[w.rarity]}">${escapeHtml(weaponDisplayName(it))}${eq ? ' <span class="pill">equipped</span>' : ''}</div>
-          <div class="ds">${WEAPON_CLASSES[w.cls].label} · +${Math.round(PER.physDmg * t * 100)}% damage, +${Math.round(PER.postureDmg * t * 100)}% posture</div><div class="ds">${cost}</div></div>
+        return `<div class="shop-row"><div style="flex:1"><div class="nm" style="color:${RARITY_COLORS[w.rarity]}">${escapeHtml(weaponDisplayName(it))}${eq ? ' <span class="pill">equipped</span>' : ''}</div>
+          <div class="ds">${WEAPON_CLASSES[w.cls].label}, +${Math.round(PER.physDmg * t * 100)}% damage, +${Math.round(PER.postureDmg * t * 100)}% posture</div><div class="ds">${cost}</div></div>
           <div class="trait-pips" style="margin-right:8px">${pips}</div><button class="btn small primary" data-temper="${it.uid}" ${c && can(c) ? '' : 'disabled'}>Temper</button></div>`;
       }).join('') || '<div class="muted">You carry no weapons worth tempering.</div>';
       return `<h2>TEMPERING</h2><p class="muted" style="text-align:center;margin-top:0">"Every fold drives the weakness out. Three folds is all good steel can take." Each temper adds 7% damage and 5% posture damage while the weapon is wielded.</p>

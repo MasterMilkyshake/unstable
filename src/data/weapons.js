@@ -440,7 +440,7 @@ export function weaponFeelText(w) {
   const f = weaponFeel(w);
   const sign = (v) => (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toFixed(1);
   const parts = [`reach ${sign(f.reach)} m`, `speed ${Math.round(f.speed * 100)}%`, `chip ${Math.round(f.chip * 100)}%`, `pierce ${Math.round(f.pen * 100)}%`, `weight ${f.weight}`];
-  return parts.join(' · ') + (f.trait ? ` · ${f.trait.name}: ${f.trait.desc}` : '');
+  return parts.join(', ') + (f.trait ? `, ${f.trait.name}: ${f.trait.desc}` : '');
 }
 
 export function weaponDisplayName(item) {

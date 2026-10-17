@@ -16,9 +16,9 @@ export function ensureStanding(ch) {
   return ch;
 }
 
-// Story-driven open war (set by the main storyline).
+// Open war: the harbor fight (war_<faction>) or a standing fallen to Hated.
 export function atWar(ch, f) {
-  return !!(ch.flags && ch.flags[`war_${f}`]);
+  return !!(ch.flags && ch.flags[`war_${f}`]) || (ch.rep && ch.rep[f] <= HATED);
 }
 
 const standingOf = (p) => {
@@ -58,7 +58,7 @@ export function addRep(ch, f, n, quiet = false) {
   if (!quiet && G.ui) {
     const sign = (m) => (m > 0 ? '+' : '−') + Math.abs(m);
     const rivals = Object.entries(changes).filter(([g]) => g !== f).map(([g, m]) => `${FACTIONS[g].short} ${sign(m)}`);
-    G.ui.toast(`${FACTIONS[f].name}: ${sign(n)} standing${rivals.length ? ` · ${rivals.join(' · ')}` : ''}`, n > 0 ? 'good' : 'bad');
+    G.ui.toast(`${FACTIONS[f].name}: ${sign(n)} standing${rivals.length ? `, ${rivals.join(', ')}` : ''}`, n > 0 ? 'good' : 'bad');
     for (const [g, after, m] of crossed) G.ui.toast(`You are now ${after} with ${FACTIONS[g].short}.`, m > 0 ? 'quest' : 'bad');
   }
   if (crossed.some(([, , m]) => m > 0)) standingRewards(ch);
@@ -213,9 +213,9 @@ ACTIONS.wantedText = () => {
   for (const f in ch.wanted) if (ch.wanted[f] > 0 && (!best || ch.wanted[f] > ch.wanted[best])) best = f;
   if (best) {
     const s = Math.ceil(ch.wanted[best]);
-    return `WANTED · ${FACTIONS[best].short.toUpperCase()} ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    return `WANTED BY ${FACTIONS[best].short.toUpperCase()} (${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')})`;
   }
-  for (const f in FACTIONS) if (atWar(ch, f)) return `AT WAR · ${FACTIONS[f].short.toUpperCase()}`;
+  for (const f in FACTIONS) if (atWar(ch, f)) return `AT WAR, ${FACTIONS[f].short.toUpperCase()}`;
   return null;
 };
 

@@ -116,7 +116,9 @@ export const REGION_LOCATIONS = [
   { name: 'Meridian', x: 790, z: -580, r: 300 },
   { name: 'Fort Meridian', x: 790, z: -556, r: 62 },
   { name: 'The Chain Citadel', x: 790, z: -627, r: 29 },
-  { name: 'Meridian Lower Works', x: 697, z: -574, r: 38 },
+  // The Lower Works sit on the supply terrace (h 16) under the bastion (h 46). The lift and the
+  // Iron Stair climb inside this circle, so above maxY the place is Fort Meridian (world.locationAt).
+  { name: 'Meridian Lower Works', x: 697, z: -574, r: 38, maxY: 31, above: 'Fort Meridian' },
   { name: 'Signal Keepers Camp', x: 941, z: -584, r: 18 },
   { name: 'The Silent Signal', x: 948, z: -673, r: 24 },
   { name: 'Meridian Ward', x: 676, z: -484, r: 40 },
@@ -139,8 +141,8 @@ export const REGION_FERRY_ROUTES = [{ id: 'dock_hush', name: 'The Hush', x: -690
 // Garrisons and the creatures of the new reaches.
 export const REGION_SPAWNERS = [
   // ---- story bosses
-  { type: 'vice_warden', x: 790, z: -556, count: 1, radius: 0, respawn: 0, boss: true, when: (ch) => !!(ch.flags && ch.flags.war_enclave) },
-  { type: 'grand_warden', x: 6000, z: 6096, count: 1, radius: 0, respawn: 0, boss: true, when: (ch) => ch.quests && ch.quests.bastion?.state === 'done' },
+  { type: 'vice_warden', x: 790, z: -556, count: 1, radius: 0, respawn: 0, boss: true, when: (ch) => !!(ch.flags && ch.flags.war_enclave) || (ch.rep?.enclave ?? 0) <= -50 || ch.quests?.bastion?.state === 'active' },
+  { type: 'grand_warden', x: 6000, z: 6096, count: 1, radius: 0, respawn: 0, boss: true, when: (ch) => (ch.bossesDefeated || []).includes('vice_warden') || ch.quests?.bastion?.state === 'done' },
   // ---- Meridian: the Enclave garrison
   { type: 'gloomowl', x: 977, z: -539, count: 1, radius: 7, respawn: 160 },
   { type: 'peacekeeper', x: 946, z: -662, count: 1, radius: 0, respawn: 180, face: 0 },

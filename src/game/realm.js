@@ -1,11 +1,11 @@
 // The realm: world-layout systems owned together — regional mist, save migration for the
-// enlarged Anchorage, and the entry point for factions, the main story and the world map.
+// enlarged Anchorage, and the entry point for factions, the story threads and the world map.
 import * as THREE from 'three';
 import { G } from '../core/globals.js';
 import { UPDATE_HOOKS, ACTIONS } from './hooks.js';
 import { WORLD_LAYOUT, migrateWorldPosition } from '../data/worldPlacement.js';
 export { relocateLegacy } from '../data/worldPlacement.js';
-import { islandAtPoint, regionAtPoint, DEFAULT_RESPAWN, STRUCTURES } from '../data/world.js';
+import { islandAtPoint, regionAtPoint, DEFAULT_RESPAWN } from '../data/world.js';
 import { damp } from '../core/util.js';
 import { factionDialogueApi } from './factions.js';
 import '../data/storyDialogue.js'; // storyline NPC dialogue
