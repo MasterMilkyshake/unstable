@@ -8,7 +8,7 @@ Everything (terrain, characters, creatures, weapons, effects, music and sound) i
 
 ```bash
 npm install
-npm run dev        # opens http://localhost:5173
+npm run dev
 ```
 
 For a production build: `npm run build`, then `npm run preview`. The output in `dist/` is a static site you can host anywhere.
