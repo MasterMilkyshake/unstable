@@ -1038,31 +1038,6 @@ function mist(x, y, z, w, h, rng) {
   return g;
 }
 
-// The plunge pool the falls have worn into the floor: dark water with rings running out.
-const POOL_FRAG = /* glsl */ `
-  uniform float uTime; uniform vec3 uDeep; uniform vec3 uFoam; varying vec2 vUv;
-  void main(){
-    vec2 c = vUv - 0.5; float r = length(c) * 2.0;
-    float ring = sin(r * 18.0 - uTime * 3.0) * 0.5 + 0.5;
-    float foam = (1.0 - smoothstep(0.0, 0.55, r)) * (0.5 + 0.5 * ring);
-    vec3 col = mix(uDeep, uFoam, foam * 0.6 + ring * 0.08);
-    gl_FragColor = vec4(col, 1.0);
-    #include <fog_fragment>
-  }`;
-
-function pool(x, y, z, r) {
-  const mat = new THREE.ShaderMaterial({
-    uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uTime: { value: 0 }, uDeep: { value: new THREE.Color('#2c3a47') }, uFoam: { value: new THREE.Color('#7d8f9d') } }]),
-    vertexShader: /* glsl */ `varying vec2 vUv;\n#include <fog_pars_vertex>\nvoid main(){ vUv = uv; vec4 mvPosition = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mvPosition;\n#include <fog_vertex>\n}`,
-    fragmentShader: '#include <fog_pars_fragment>\n' + POOL_FRAG,
-    fog: true,
-  });
-  const m = new THREE.Mesh(new THREE.CircleGeometry(r, 24).rotateX(-Math.PI / 2), mat);
-  m.position.set(x, y, z);
-  m.name = 'rift_fall_pool';
-  return m;
-}
-
 function waterfall(world, r, low, anims, rng) {
   // the sea comes through where the ravine is widest
   const t = 0.5;
@@ -1101,11 +1076,6 @@ function waterfall(world, r, low, anims, rng) {
   const ms = mist(p.x, floor, p.z, w * 2.2, 14, rng);
   world.scene.add(ms);
   anims.push(ms);
-  if (!low) {
-    const pl = pool(p.x, floor + 0.06, p.z, Math.max(wl, wd) * 0.7 + 1.5);
-    world.scene.add(pl);
-    anims.push(pl);
-  }
   world.addLight(new THREE.Vector3(p.x, floor + 4, p.z), '#b9c9da', 0.9, 20, true, 0.6);
   return { x: p.x, z: p.z, floor, abyss, hw };
 }

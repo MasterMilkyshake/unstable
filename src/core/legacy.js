@@ -1,4 +1,4 @@
-// Legacy: what outlives a wiped character, shared by every slot. The register of the lost (each
+// Legacy: what outlives a wiped character, shared by every slot. The lost (each
 // wiped character), Remembrance (earned by its progress, spent at character creation) and one
 // heirloom the lost character leaves at the Wash, which the next new character may claim once.
 // It keeps its own localStorage key: Save.clearCharacter never touches it.

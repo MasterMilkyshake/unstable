@@ -244,6 +244,12 @@ export function buildRiftSpire(world, exclusions, state) {
   if (fine) {
     const L = STAIR_A.n * runA, ang = Math.atan2(f1 - pTop, L);
     k.at({ x: STAIR_A.x0 + L / 2, y: (pTop + f1) / 2 + 0.95, z: STAIR_A.z - STAIR_A.w / 2 + 0.06, rz: ang }, (b) => b.block(0, 0, 0, Math.hypot(L, f1 - pTop), 0.1, 0.1, 'wood'));
+    // posts carrying the rail down to the treads, so it is held, not hung
+    for (let i = 0; i < STAIR_A.n; i += 3) {
+      const x = STAIR_A.x0 + runA * (i + 0.5), yT = pTop + riseA * (i + 1);
+      const yR = pTop + ((x - STAIR_A.x0) / L) * (f1 - pTop) + 0.95;
+      if (yR - yT > 0.2) k.slab(x, yT, STAIR_A.z - STAIR_A.w / 2 + 0.06, 0.08, yR - yT, 0.08, 'wood');
+    }
   }
   // Stair B: from the guardroom up its west side to the archive.
   for (let i = 0; i < STAIR_B.n; i++) {

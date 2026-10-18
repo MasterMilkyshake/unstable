@@ -248,6 +248,8 @@ class CombatLayer {
   }
 }
 
+const BED_LEVEL = 0.55;
+
 class AmbientBed {
   constructor(ctx, dest, noise) {
     this.gain = ctx.createGain();
@@ -292,12 +294,14 @@ class AmbientBed {
     const san = clamp(sanity ?? 1, 0, 1);
     const extra = preset.sanity ? (1 - san) * 0.14 : 0;
     const duck = 1 - heat * 0.45;
-    this.gain.gain.setTargetAtTime(preset.vol * duck + extra, t, 1.1);
+    // the region's bed sits well under everything (it was a near-constant band of noise loud
+    // enough to read as hiss on its own)
+    this.gain.gain.setTargetAtTime((preset.vol * BED_LEVEL) * duck + extra, t, 1.1);
     this.filter.frequency.setTargetAtTime(preset.f, t, 1.1);
     this.filter.Q.setTargetAtTime(preset.q, t, 1.1);
     this.lfo.frequency.setTargetAtTime(low ? 0.05 : preset.lfoRate, t, 0.8);
     this.lfoG.gain.setTargetAtTime(low ? 0 : preset.lfoDepth, t, 0.8);
-    this.g2.gain.setTargetAtTime(low ? 0 : (preset.vol2 || 0) * duck, t, 1.1);
+    this.g2.gain.setTargetAtTime(low ? 0 : (preset.vol2 || 0) * BED_LEVEL * duck, t, 1.1);
     this.f2.frequency.setTargetAtTime(preset.f2 || 1200, t, 1.1);
   }
 }
@@ -307,8 +311,9 @@ class AmbientBed {
 // by night, a hearth by a fire, and calls now and then (birds, gulls, frogs, a dog, a hammer,
 // a far bell). Indoors, all of it and the rain go through a muffle.
 const PLACE_LAYERS = {
-  surf: { type: 'lowpass', f: 520, q: 0.5, lfo: 0.11, lfoTo: 'gain', depth: 0.6, max: 0.12 },
-  wind: { type: 'bandpass', f: 420, q: 0.55, lfo: 0.07, lfoTo: 'freq', depth: 180, max: 0.1 },
+  surf: { type: 'lowpass', f: 480, q: 0.5, lfo: 0.11, lfoTo: 'gain', depth: 0.6, max: 0.07 },
+  // wind: low-passed (no hiss), quiet, swelling in gusts (PlaceBed.gust) rather than a steady roar
+  wind: { type: 'lowpass', f: 320, q: 0.5, lfo: 0.05, lfoTo: 'freq', depth: 90, max: 0.045 },
   town: { type: 'bandpass', f: 620, q: 1.3, lfo: 2.7, lfoTo: 'gain', depth: 0.45, max: 0.035 },
   hearth: { type: 'bandpass', f: 1700, q: 0.8, lfo: 0.9, lfoTo: 'gain', depth: 0.5, max: 0.03 },
 };
@@ -343,6 +348,8 @@ class PlaceBed {
       lfo.start();
       this.layers[k] = { g, max: L.max };
     }
+    // the gusts' clock and their two slow phases, so no two sessions blow alike
+    this.gustPh = [Math.random() * 100, Math.random() * 100, Math.random() * 100];
     // crickets: a high tone chopped by a fast pulse
     const c = ctx.createOscillator();
     c.frequency.value = 4400;
@@ -365,11 +372,29 @@ class PlaceBed {
     this.layers.crickets = { g: cg, max: 0.008 };
   }
 
+  // 0..1: slow gusts that swell and die away, with still stretches between (about a third of
+  // the time it is near calm)
+  gust(t) {
+    const [a, b, c] = this.gustPh;
+    const s = Math.sin(t * 0.07 + a) * 0.55 + Math.sin(t * 0.19 + b) * 0.3 + Math.sin(t * 0.43 + c) * 0.15;
+    return Math.pow(Math.max(0, (s + 0.25) / 1.25), 1.6);
+  }
+
+  // How exposed to the wind the place is, 0..1: height (a cliff, a tower, a peak) and open sea;
+  // a town's streets shelter it, a roof all but shuts it out, and the Rift has none (place {}).
+  exposure(P) {
+    if (P.indoor) return 0.04;
+    const open = Math.max(P.height || 0, (P.shore || 0) * 0.45);
+    return Math.min(1, open) * (1 - (P.town || 0) * 0.7);
+  }
+
   apply(place, t, night, low) {
     const P = place || {};
-    const set = (k, v) => this.layers[k].g.gain.setTargetAtTime(Math.max(0, Math.min(1, v)) * this.layers[k].max, t, 1.2);
+    const set = (k, v, tau = 1.2) => this.layers[k].g.gain.setTargetAtTime(Math.max(0, Math.min(1, v)) * this.layers[k].max, t, tau);
     set('surf', P.shore || 0);
-    set('wind', low ? (P.height || 0) * 0.6 : P.height || 0);
+    const g = this.gust(t);
+    this.windNow = this.exposure(P) * (0.15 + 0.85 * g);
+    set('wind', this.windNow * (low ? 0.6 : 1), 2.2);
     set('town', (P.town || 0) * (night ? 0.3 : 1));
     set('hearth', P.fire || 0);
     set('crickets', low ? 0 : night && (P.green || 0) > 0 ? P.green * (1 - (P.town || 0) * 0.6) : 0);
@@ -382,7 +407,7 @@ export class AudioSys {
     this.ready = false;
     this.mood = 'menu';
     this.mode = 'menu';
-    this.vol = { master: 0.8, sfx: 0.9, music: 0.5 };
+    this.vol = { master: 0.8, sfx: 0.9, music: 0.5, ambient: 0.7 };
     this.lastPlay = {};
     this.musicTimer = 0;
     this.low = false;
@@ -461,8 +486,12 @@ export class AudioSys {
     this.muffle.type = 'lowpass';
     this.muffle.frequency.value = 18000;
     this.muffle.connect(this.sfx);
-    this.ambient = new AmbientBed(ctx, this.muffle, this.noise);
-    this.placeBed = new PlaceBed(ctx, this.muffle, this.noise);
+    // the world's beds (region, place, weather) and calls run through their own level, under
+    // Effects and Master
+    this.ambBus = ctx.createGain();
+    this.ambBus.connect(this.muffle);
+    this.ambient = new AmbientBed(ctx, this.ambBus, this.noise);
+    this.placeBed = new PlaceBed(ctx, this.ambBus, this.noise);
 
     this.ready = true;
     this.applyVolumes();
@@ -489,17 +518,28 @@ export class AudioSys {
         g.gain.value = 0;
         src.connect(f);
         f.connect(g);
-        g.connect(this.muffle);
+        g.connect(this.ambBus);
         src.start();
         return g;
       };
-      this.weatherBed = { rain: mk('highpass', 2400, 0.4), rainBody: mk('bandpass', 900, 0.6), wind: mk('lowpass', 380, 0.8) };
+      this.weatherBed = { rain: mk('highpass', 2400, 0.4), rainBody: mk('bandpass', 900, 0.6), wind: mk('lowpass', 260, 0.5) };
     }
     const t = ctx.currentTime;
     const b = this.weatherBed;
-    b.rain.gain.setTargetAtTime(rain * 0.09, t, 0.8);
-    b.rainBody.gain.setTargetAtTime(rain * 0.05, t, 0.8);
-    b.wind.gain.setTargetAtTime(wind * 0.16, t, 1.2);
+    b.rain.gain.setTargetAtTime(rain * 0.06, t, 0.8);
+    b.rainBody.gain.setTargetAtTime(rain * 0.04, t, 0.8);
+    this.weatherWind = wind;
+    this._applyWeatherWind(t);
+  }
+
+  // The weather's wind: gusting with the place's and as sheltered, never a steady hiss (it was a
+  // flat 0.16 of white noise under 380 Hz whenever the weather blew, indoors and in towns too).
+  _applyWeatherWind(t) {
+    if (!this.weatherBed) return;
+    const P = this.mode === 'play' && !this.scene.inRift ? this.place : {};
+    const shelter = P.indoor ? 0.05 : 1 - (P.town || 0) * 0.6;
+    const g = this.placeBed.gust(t);
+    this.weatherBed.wind.gain.setTargetAtTime((this.weatherWind || 0) * 0.06 * shelter * (0.2 + 0.8 * g), t, 2.2);
   }
 
   applyVolumes() {
@@ -508,6 +548,7 @@ export class AudioSys {
     this.master.gain.setTargetAtTime(this.vol.master, t, 0.05);
     this.sfx.gain.setTargetAtTime(this.vol.sfx, t, 0.05);
     this.music.gain.setTargetAtTime(this.vol.music, t, 0.05);
+    this.ambBus.gain.setTargetAtTime(this.vol.ambient ?? 0.7, t, 0.05);
   }
 
   setVolumes(v) {
@@ -637,6 +678,7 @@ export class AudioSys {
     const P = this.mode === 'play' && !this.scene.inRift ? this.place : {};
     const t = this.ctx.currentTime;
     this.placeBed.apply(P, t, this.scene.night, this.low);
+    this._applyWeatherWind(t);
     this.muffle.frequency.setTargetAtTime(P.indoor ? 650 : 18000, t, 0.35);
   }
 
@@ -644,7 +686,7 @@ export class AudioSys {
   _placeOut(vol) {
     const g = this.ctx.createGain();
     g.gain.value = vol;
-    g.connect(this.muffle);
+    g.connect(this.ambBus);
     g.connect(this.reverbSend);
     this._track(g, this.ctx.currentTime + 3);
     return g;

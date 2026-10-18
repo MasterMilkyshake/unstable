@@ -38,6 +38,7 @@ import { clamp, rand, randInt, chance, choice, uid, angleWrap, hypot } from '../
 import { bodyRadius } from '../combat/combat.js';
 import { cameraOrbit, cameraClearance, easeFocus } from './cameraCollision.js';
 import { Warmup } from './warmup.js';
+import { killHealShare } from './riftBalance.js';
 import { applyStartingAttunement } from './creation.js';
 
 const _v = new THREE.Vector3();
@@ -197,7 +198,7 @@ export class Game {
 
     this.input = G.input = new Input(canvas);
     this.audio = G.audio = new AudioSys();
-    this.audio.setVolumes({ master: this.settings.master, sfx: this.settings.sfx, music: this.settings.music });
+    this.audio.setVolumes({ master: this.settings.master, sfx: this.settings.sfx, music: this.settings.music, ambient: this.settings.ambient });
     this.audio.setQuality(this.settings.quality);
     this.vfx = G.vfx = new VFX(this.scene);
     this.world = G.world = new World(this.scene);
@@ -310,7 +311,7 @@ export class Game {
     const requality = this.warmup && this._quality !== s.quality;
     this._quality = s.quality;
     Save.saveSettings(s);
-    this.audio.setVolumes({ master: s.master, sfx: s.sfx, music: s.music });
+    this.audio.setVolumes({ master: s.master, sfx: s.sfx, music: s.music, ambient: s.ambient });
     this.audio.setQuality(s.quality);
     this.camera.fov = s.fov;
     this.camera.updateProjectionMatrix();
@@ -472,12 +473,13 @@ export class Game {
       <p>The sea gave you back on the Wash, the southern beach of the Saltreach Coast, with no name and no past. It does that. People call you tide-born.</p>
       <p>Nobody is waiting for you and nothing has to be done first. Towns to trade and train in, islands across the water, old guardians, a Rift under the sea where the dead wake up: go where you like, in any order.</p>
       <p>Old Wren, at the fire on this beach, can point you a few ways.</p>
-      <div class="divider"></div><button class="btn wide primary" data-a="close">Get up</button></div>`, { pauses: true, noX: true });
+      <div class="divider"></div><button class="btn wide primary" data-a="close">Get up</button></div>`, {
+      pauses: true, noX: true, confirmKey: true,
+      // however it is closed (the button, Enter, E or Esc), the beach comes back the same way
+      onClose: () => setTimeout(() => this.ui.toast(keyText('Old Wren is by the campfire. Talk to her [{interact}] for directions, or just set off.'), 'quest'), 1200),
+    });
     el.addEventListener('click', (e) => {
-      if (!e.target.closest('[data-a="close"]')) return;
-      this.ui.closeModal();
-      this.input.requestLock();
-      setTimeout(() => this.ui.toast(keyText('Old Wren is by the campfire. Talk to her [{interact}] for directions, or just set off.'), 'quest'), 1200);
+      if (e.target.closest('[data-a="close"]')) this.ui.closeModal();
     });
   }
 
@@ -627,6 +629,12 @@ export class Game {
     if (s.outfitDrop) this.giveOutfit(s.outfitDrop);
     this.ch.stats.kills++;
     this.quests.onKill(e.type);
+    // in the Rift a kill is how health comes back (game/riftBalance.js)
+    if (this.inRift && killer === p && !p.dead && !p.knocked && p.hp < p.maxHp) {
+      p.heal(p.maxHp * killHealShare(e));
+      G.vfx?.ring?.(p.pos, 'phys', 1.6, 0.35, { color: '#ff8a8a' });
+      this.audio.play('heal', { vol: 0.7 });
+    }
   }
 
   startBoss(e) {

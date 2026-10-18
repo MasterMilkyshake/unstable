@@ -96,3 +96,30 @@ test('the Wash Prospect and the Redwake Watchfire are reached by line from the W
     if (a.name.includes('Watchfire')) assert.ok(need(walked) > 3, `without the line the Watchfire needs ${need(walked)} latches`);
   }
 });
+
+test('jumping off a line mid-ride lets go with the run carried on and a hop, and the line is not retaken at once', async () => {
+  const { LINE_JUMP } = await import('../src/game/ziplines.js');
+  const line = lines.find((l) => l.def.id === 'line_wash_prospect');
+  const p = { pos: new THREE.Vector3(line.curve.a.x, line.curve.floorA, line.curve.a.z), vel: new THREE.Vector3(), yaw: 0, fallStart: 0, zip: null, grounded: true };
+  G.player = p;
+  G.world = world;
+  assert.ok(ACTIONS.rideLine(line.def.id));
+  assert.equal(p.zip.canJump(), false, 'no letting go while still reaching for the bar');
+  for (let t = 0; t < 3; t += 1 / 60) p.zip.step(p, 1 / 60);
+  assert.ok(p.zip && p.zip.canJump(), 'mid-line, the rider can jump');
+  const v = p.zip.v, y = p.pos.y;
+  p.zip.jump(p);
+  assert.equal(p.zip, null, 'the rider is off the line');
+  assert.equal(line.riding, null, 'the line is free');
+  const along = Math.hypot(p.vel.x, p.vel.z);
+  assert.ok(along > v * LINE_JUMP.keep * 0.9 && along <= v, `the run is carried on (${along.toFixed(1)} of ${v.toFixed(1)} m/s)`);
+  assert.ok(p.vel.x * line.curve.dir.x + p.vel.z * line.curve.dir.z > 0, 'forward along the line');
+  assert.ok(p.vel.y > 2, `a hop up off the bar (${p.vel.y.toFixed(1)} m/s)`);
+  assert.equal(p.fallStart, y, 'the fall is counted from where the rider let go');
+  assert.ok(p.zipCool > 0, 'a short wait before a line is taken again');
+  assert.equal(ACTIONS.rideLine(line.def.id), false, 'the line is not retaken straight away');
+  p.zipCool = 0;
+  p.pos.set(line.curve.a.x, line.curve.floorA, line.curve.a.z);
+  assert.ok(ACTIONS.rideLine(line.def.id), 'after the wait the line is taken again');
+  while (p.zip) p.zip.step(p, 1 / 30);
+});

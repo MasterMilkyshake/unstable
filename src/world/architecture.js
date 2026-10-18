@@ -684,24 +684,39 @@ export function buildArchitecture(world, exclusions, add, mat) {
         beam([0, 12.8, -7], [0, 15, -7], 0.08, 'metal');
       }
     } else if (s.kind === 'shelter') {
-      // Lived-in salvage pavilion: plank floor, bunks, workbench and hanging nets.
-      box(0, 0.08, 0, 10.4, 0.16, 8.2, 'dark', true);
-      for (const x of [-5, 5]) for (const z of [-4, 4]) post(x, z, 5, 0.45);
-      for (const side of [-1, 1]) beam([side * 5, 4.6, -4], [side * 5, 4.6, 4], 0.16, 'dark');
-      roof(0, 5, 0, 12, 10, 2.7);
-      for (let i = 0; i < 4; i++) {
-        box(-3 + i * 2, 0.28, -1.4, 1.25, 0.35, 2.6, 'dark');
-        box(-3 + i * 2, 0.48, -1.7, 1.15, 0.12, 1.9, 'cloth');
+      // Lived-in salvage pavilion: plank floor, bunks, workbench and hanging nets. The deck is
+      // laid level with the highest ground under it on a footing down to the lowest, and
+      // everything in it stands on the deck (it was laid at the centre's height, so on the
+      // Wash's slope the deck sank into the bank on one side and the workbench, legless,
+      // hung a metre over the grass on the other).
+      let lo = Infinity, hi = -Infinity;
+      for (let i = 0; i <= 4; i++) for (let j = 0; j <= 4; j++) {
+        const p = k.position(-5.2 + i * 2.6, 0, -4.1 + j * 2.05);
+        const gy = world.terrain.heightAt(p.x, p.z) - g.position.y;
+        lo = Math.min(lo, gy);
+        hi = Math.max(hi, gy);
       }
-      box(-3.6, 0.7, 2.4, 2.6, 0.18, 1.2, 'dark');
-      k.solid(-3.6, 0.4, 2.4, 2.6, 0.8, 1.2);
-      for (let i = 0; i < 3; i++) box(-4.4 + i * 0.7, 0.95, 2.4, 0.45, 0.28, 0.55, 'edge');
-      box(3.6, 0.45, 2.2, 1.1, 0.9, 1.1, 'dark', true);
-      box(3.5, 1.15, 2.1, 0.95, 0.5, 0.95, 'edge');
-      beam([-4.4, 4.4, 3.2], [4.4, 4.4, 3.2], 0.07, 'dark');
-      for (let i = 0; i < 7; i++) beam([-3.6 + i * 1.2, 4.4, 3.2], [-3.6 + i * 1.2, 3.5, 3.2], 0.03, 'metal');
-      lantern(4, 3.5, 3, 1.5);
-      lantern(-4, 3.4, -3, 1.2);
+      const fy = Math.max(0, hi);
+      if (fy - lo > 0.05) box(0, (fy + lo - 0.4) / 2, 0, 10.2, fy - lo + 0.4, 8.0, 'stone', true);
+      box(0, fy + 0.08, 0, 10.4, 0.16, 8.2, 'dark', true);
+      for (const x of [-5, 5]) for (const z of [-4, 4]) post(x, z, 5 + fy, 0.45);
+      for (const side of [-1, 1]) beam([side * 5, fy + 4.6, -4], [side * 5, fy + 4.6, 4], 0.16, 'dark');
+      roof(0, fy + 5, 0, 12, 10, 2.7);
+      for (let i = 0; i < 4; i++) {
+        box(-3 + i * 2, fy + 0.28, -1.4, 1.25, 0.35, 2.6, 'dark');
+        box(-3 + i * 2, fy + 0.48, -1.7, 1.15, 0.12, 1.9, 'cloth');
+      }
+      // the workbench, on four legs to the deck
+      box(-3.6, fy + 0.7, 2.4, 2.6, 0.18, 1.2, 'dark');
+      for (const dx of [-1.15, 1.15]) for (const dz of [-0.45, 0.45]) box(-3.6 + dx, fy + 0.16 + 0.225, 2.4 + dz, 0.14, 0.45, 0.14, 'dark');
+      k.solid(-3.6, fy + 0.4, 2.4, 2.6, 0.8, 1.2);
+      for (let i = 0; i < 3; i++) box(-4.4 + i * 0.7, fy + 0.95, 2.4, 0.45, 0.28, 0.55, 'edge');
+      box(3.6, fy + 0.45, 2.2, 1.1, 0.9, 1.1, 'dark', true);
+      box(3.5, fy + 1.15, 2.1, 0.95, 0.5, 0.95, 'edge');
+      beam([-4.4, fy + 4.4, 3.2], [4.4, fy + 4.4, 3.2], 0.07, 'dark');
+      for (let i = 0; i < 7; i++) beam([-3.6 + i * 1.2, fy + 4.4, 3.2], [-3.6 + i * 1.2, fy + 3.5, 3.2], 0.03, 'metal');
+      lantern(4, fy + 3.5, 3, 1.5);
+      lantern(-4, fy + 3.4, -3, 1.2);
       clearance = 11;
     } else if (s.kind === 'arcade') {
       for (let i = 0; i < 3; i++) arch((i - 1) * 12, 0, 10.75, 9 + (i === 1 ? 2 : 0), 5);

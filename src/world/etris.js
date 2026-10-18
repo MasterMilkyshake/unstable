@@ -818,40 +818,90 @@ export function buildGalleon(world, s, add, mat) {
     const wv = 4 + i * 1.3;
     k.box(0, y, 0, wv, 1.3, L * (0.78 + i * 0.06), hull, i >= 1);
   }
-  // the deck on the hull: solid down to the top course, so nothing slips in under it
-  k.box(0, 3.3, 0, 8.6, 0.3, L * 0.95, '#6a5038');
-  k.solid(0, 2.7, 0, 8.6, 0.75, L * 0.95);
-  // bow and stern
-  const bow = new THREE.Mesh(new THREE.ConeGeometry(4.2, 7, 4), k.m(hull));
-  bow.rotation.set(Math.PI / 2, Math.PI / 4, 0);
-  bow.scale.set(1, 1, 0.5);
-  bow.position.set(0, 1.2, L * 0.52);
-  g.add(bow);
-  k.box(0, 4.4, L * 0.58, 0.3, 0.3, 5, hull);
-  k.box(0, 5.5, -L * 0.38, 8.4, 4.4, L * 0.2, hull, true);
-  k.box(0, 7.9, -L * 0.38, 8.8, 0.3, L * 0.22, '#6a5038', true);
-  for (let i = 0; i < 4; i++) k.box(-3 + i * 2, 5.6, -L * 0.48 - 0.05, 1.1, 1.1, 0.1, k.glow());
-  k.box(0, 4.6, L * 0.32, 8, 2.2, L * 0.12, hull, true);
-  // gunports
-  for (const sx of [-1, 1]) for (let i = 0; i < 7; i++) k.box(sx * 4.9, 1.6, -L * 0.3 + i * (L * 0.09), 0.1, 0.7, 0.9, '#121214');
-  // masts, yards and sails
+  const dark = '#' + new THREE.Color(hull).multiplyScalar(0.7).getHexString();
+  // the wale: the top course carried up to the deck, so the deck is boxed in, not perched
+  k.box(0, 3.0, 0, 7.9, 0.5, L * 0.96, hull);
+  // the deck on the hull, inside its sides: solid down to the top course
+  k.box(0, 3.3, 0, 7.6, 0.3, L * 0.94, '#6a5038');
+  k.solid(0, 2.7, 0, 7.9, 0.75, L * 0.95);
+  // the bow: a raked, knife-edged stem, one wedge per course, each flush with its course's
+  // forward face and running on to the stem, upper courses reaching further
+  const stem = (wv, y, zb, ze) => {
+    const h = 0.65, x = wv / 2;
+    const v = [
+      [-x, y - h, zb], [x, y - h, zb], [x, y + h, zb], [-x, y + h, zb], [0, y - h, ze], [0, y + h, ze],
+    ];
+    const tri = [[0, 4, 5], [0, 5, 3], [1, 2, 5], [1, 5, 4], [3, 5, 2], [0, 1, 4]];
+    const pos = [];
+    for (const t of tri) for (const i of t) pos.push(...v[i]);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, k.m(hull));
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    g.add(mesh);
+  };
+  for (let i = 0; i < 4; i++) {
+    const zb = (L * (0.78 + i * 0.06)) / 2 - 0.02;
+    stem(4 + i * 1.3, -1.8 + i * 1.3, zb, L * 0.5 + 1.2 + i * 1.3);
+  }
+  stem(7.9, 3.0 - 0.4, (L * 0.96) / 2 - 0.02, L * 0.5 + 5.7); // the wale's own run to the stem
+  // stern and fore castles, inside the hull's width, planked in strakes, railed round the top
+  const castle = (z, d, y0, h, w) => {
+    k.box(0, y0 + h / 2, z, w, h, d, hull, true);
+    for (let yy = y0 + 0.55; yy < y0 + h - 0.2; yy += 0.75) {
+      for (const sx of [-1, 1]) k.box(sx * (w / 2 + 0.03), yy, z, 0.06, 0.12, d - 0.1, dark);
+      k.box(0, yy, z + d / 2 + 0.03, w - 0.1, 0.12, 0.06, dark);
+      k.box(0, yy, z - d / 2 - 0.03, w - 0.1, 0.12, 0.06, dark);
+    }
+    k.box(0, y0 + h + 0.12, z, w + 0.2, 0.24, d + 0.2, '#6a5038', true);
+    rail(w, d, z, y0 + h + 0.24);
+  };
+  const rail = (w, d, z, y) => {
+    const hw = w / 2 - 0.08, hd = d / 2 - 0.08;
+    for (const sx of [-1, 1]) k.box(sx * hw, y + 0.9, z, 0.14, 0.12, d - 0.16, dark);
+    for (const sz of [-1, 1]) k.box(0, y + 0.9, z + sz * hd, w - 0.16, 0.12, 0.14, dark);
+    for (const sx of [-1, 1]) for (let t = -hd; t <= hd + 1e-6; t += (2 * hd) / Math.max(1, Math.round((2 * hd) / 1.6))) k.box(sx * hw, y + 0.45, z + t, 0.12, 0.9, 0.12, dark);
+    for (const sz of [-1, 1]) for (let t = -hw; t <= hw + 1e-6; t += (2 * hw) / Math.max(1, Math.round((2 * hw) / 1.6))) k.box(t, y + 0.45, z + sz * hd, 0.12, 0.9, 0.12, dark);
+  };
+  castle(-L * 0.38, L * 0.2, 3.45, 4.2, 7.5);
+  for (let i = 0; i < 4; i++) k.box(-2.7 + i * 1.8, 5.6, -L * 0.48 - 0.05, 1.0, 1.1, 0.1, k.glow());
+  castle(L * 0.33, L * 0.12, 3.45, 2.0, 7.2);
+  // the waist's bulwarks, from castle to castle along the deck's edges
+  const wz0 = -L * 0.28, wz1 = L * 0.27;
+  for (const sx of [-1, 1]) {
+    k.box(sx * 3.82, 3.75, (wz0 + wz1) / 2, 0.16, 0.6, wz1 - wz0, hull);
+    k.box(sx * 3.82, 4.1, (wz0 + wz1) / 2, 0.26, 0.1, wz1 - wz0, dark);
+  }
+  // the bowsprit, stepped into the forecastle and run out over the stem, pitched up
+  const bsA = new THREE.Vector3(0, 5.0, L * 0.36), bsB = new THREE.Vector3(0, 8.2, L * 0.5 + 10);
+  const bs = k.box(0, (bsA.y + bsB.y) / 2, (bsA.z + bsB.z) / 2, 0.4, 0.4, bsA.distanceTo(bsB), hull);
+  bs.rotation.x = -Math.atan2(bsB.y - bsA.y, bsB.z - bsA.z);
+  // gunports, let into the top course's side
+  for (const sx of [-1, 1]) for (let i = 0; i < 7; i++) k.box(sx * 3.97, 2.1, -L * 0.3 + i * (L * 0.09), 0.06, 0.7, 0.9, '#121214');
+  // masts stepped on the deck, yards crossed on their fore faces, sails hung from the yards
   const sail = mat(s.sail || '#d9d2c2', { double: true });
-  [L * 0.24, -L * 0.02, -L * 0.26].forEach((z, i) => {
+  [L * 0.22, -L * 0.02, -L * 0.25].forEach((z, i) => {
     const mh = 22 - i * 3;
     k.box(0, 3.4 + mh / 2, z, 0.6, mh, 0.6, hull);
     for (let j = 0; j < 2; j++) {
-      const yy = 3.4 + mh * (0.45 + j * 0.3);
-      k.box(0, yy + 2.4, z, 9 - j * 2.4, 0.3, 0.3, hull);
-      const sl = new THREE.Mesh(new THREE.PlaneGeometry(8.4 - j * 2.4, 4.6 - j), sail);
-      sl.position.set(0, yy, z + 0.35);
+      const yard = 3.4 + mh * (0.45 + j * 0.3) + 2.4;
+      const sw = 8.4 - j * 2.4, sh = 4.6 - j;
+      k.box(0, yard, z + 0.45, sw + 0.6, 0.3, 0.3, hull);
+      const sl = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), sail);
+      sl.position.set(0, yard - 0.12 - sh / 2, z + 0.62);
       g.add(sl);
     }
-    // pennant in the faction colour
-    const f = k.box(0.9, 3.4 + mh + 0.4, z, 1.8, 0.6, 0.05, mat(st.accent, { double: true }));
+    // a pennant in the faction colour, flown from a staff on the masthead
+    k.box(0, 3.4 + mh + 0.7, z, 0.12, 1.4, 0.12, hull);
+    const f = k.box(0.95, 3.4 + mh + 1.05, z, 1.8, 0.6, 0.05, mat(st.accent, { double: true }));
     f.castShadow = false;
   });
-  // stern banner
-  k.box(0, 9.6, -L * 0.48, 2.2, 3, 0.08, mat(st.accent, { double: true }));
+  // the ensign, on a staff at the taffrail
+  const ez = -L * 0.48 + 0.25, ey = 3.45 + 4.2 + 0.24;
+  k.box(0, ey + 1.8, ez, 0.14, 3.6, 0.14, hull);
+  k.box(1.15, ey + 2.9, ez, 2.2, 1.4, 0.06, mat(st.accent, { double: true }));
   add(g);
 }
 

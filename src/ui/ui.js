@@ -80,6 +80,8 @@ export class UI {
     this.measureCompass();
     window.addEventListener('resize', () => this.measureCompass());
     G.input.onKey = (e) => this.onKey(e);
+    // every panel that wants input keeps the cursor: no lock is taken while one is open
+    G.input.canLock = () => !this.modal && this.game.state === 'playing';
     this.screens.addEventListener('click', () => G.audio.init());
     $('#game').addEventListener('click', () => {
       G.audio.init();
@@ -296,7 +298,9 @@ export class UI {
     if (this.game.state !== 'playing' || !p) return;
     const ch = p.ch;
 
-    this.el.resume.classList.toggle('hidden', !!(G.input.locked || this.modal || p.dead));
+    // (not while a lock just asked for is still being granted, so closing a panel doesn't flash it)
+    const asking = G.input.lockAsked && performance.now() - G.input.lockAsked < 700;
+    this.el.resume.classList.toggle('hidden', !!(G.input.locked || this.modal || p.dead || asking));
 
     // left cluster
     setText(this.el.name, ch.name);
@@ -585,7 +589,7 @@ export class UI {
     el.innerHTML = html;
     this.screens.appendChild(el);
     const closable = opts.closable !== false;
-    this.modal = { id, el, pauses: !!opts.pauses, closable, onClose: opts.onClose, toggleKey: opts.toggleKey || null };
+    this.modal = { id, el, pauses: !!opts.pauses, closable, onClose: opts.onClose, toggleKey: opts.toggleKey || null, confirmKey: !!opts.confirmKey };
     const panel = el.querySelector('.panel');
     if (panel && closable && !opts.noX) {
       const x = document.createElement('button');
@@ -674,6 +678,11 @@ export class UI {
         const btns = m.el.querySelectorAll('.dl-opt');
         if (btns.length === 1) btns[0].click();
       }
+      // Enter takes a panel's one primary button (E too on a card that asks for nothing else)
+      if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'KeyE' && m.confirmKey)) {
+        const primary = [...m.el.querySelectorAll('button.primary')].filter((b) => !b.disabled);
+        if (primary.length === 1 && !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) primary[0].click();
+      }
       return true; // while a panel is open, keys belong to the panel
     }
     if (this.game.state === 'playing' && e.code === 'Escape' && !G.input.locked) {
@@ -737,9 +746,6 @@ export class UI {
   }
   openSlots(mode) {
     Screens.openSlots(this, mode);
-  }
-  openRegister() {
-    Screens.openRegister(this);
   }
   // The session's state shows in the Multiplayer panel only; the HUD keeps no corner text for it.
   lanExposed() {

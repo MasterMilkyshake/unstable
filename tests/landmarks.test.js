@@ -39,3 +39,16 @@ test('sources sit on carriers that suit them, and nothing glows', () => {
     });
   }
 });
+
+test('fishing spots keep their prompt and water point, with no ripple rings drawn on the water', async () => {
+  const { FISHING_SPOTS } = await import('../src/world/landmarks.js');
+  const world = makeWorld();
+  world.docks = { dock_wash: { end: { x: 10, z: 10 }, dir: { x: 0, z: 1 } } };
+  buildLandmarks(world, []);
+  assert.equal(world.fishingSpots.length, FISHING_SPOTS.length + 1, 'a spot at every dock end and listed shore');
+  for (const s of world.fishingSpots) assert.ok(s.water && Number.isFinite(s.water.x) && Number.isFinite(s.water.y), 'each spot knows where its line goes in');
+  assert.equal(world.interactables.filter((i) => i.kind === 'fishing').length, world.fishingSpots.length, 'each spot can be fished');
+  world.scene.traverse((o) => {
+    assert.ok(!(o.geometry && o.geometry.type === 'RingGeometry'), 'no ring decal on the water');
+  });
+});

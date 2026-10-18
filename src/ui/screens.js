@@ -46,7 +46,6 @@ export function showMainMenu(ui) {
     <div class="menu-btns">
       ${filled ? `<button class="btn primary" data-a="continue">Continue<span class="cont-info">${cont ? `${escapeHtml(cont.name)}, ${raceName(cont.race)}, Power ${cont.level}` : `${filled} of ${SLOT_COUNT} slots`}</span></button>` : ''}
       <button class="btn ${filled ? '' : 'primary'}" data-a="new">New Game</button>
-      ${legacy.lost.length ? `<button class="btn" data-a="register">Register of the Lost<span class="cont-info">${legacy.lost.length} ${legacy.lost.length === 1 ? 'name' : 'names'}, ${legacy.remembrance} Remembrance</span></button>` : ''}
       <button class="btn" data-a="lan">Multiplayer</button>
       <button class="btn" data-a="settings">Settings</button>
       <button class="btn" data-a="help">How to Play</button>
@@ -64,9 +63,6 @@ export function showMainMenu(ui) {
         break;
       case 'new':
         openSlots(ui, 'new');
-        break;
-      case 'register':
-        openRegister(ui);
         break;
       case 'lan':
         ui.openLan(true);
@@ -104,7 +100,7 @@ export function openSlots(ui, mode) {
   let confirmSlot = null;
   const titles = { load: 'CONTINUE', new: 'CHOOSE A SLOT', lan: 'BRING A CHARACTER' };
   const notes = {
-    load: 'Each slot keeps its own character, backup and lives. Settings and the Register of the Lost are shared.',
+    load: 'Each slot keeps its own character, backup and lives. Settings and Remembrance are shared.',
     new: 'The new soul washes ashore in the slot you choose. Replacing a character erases its save and backup.',
     lan: 'Choose who joins the shared world. An empty slot starts a new character first.',
   };
@@ -173,29 +169,6 @@ export function openSlots(ui, mode) {
     const x = panel.querySelector('.modal-x');
     panel.innerHTML = render();
     if (x) panel.appendChild(x);
-  });
-}
-
-// Every character whose last name-knot was spent, newest first, and what the coast remembers.
-export function openRegister(ui) {
-  hideMainMenu(ui);
-  const l = Legacy.load();
-  const entries = l.lost.slice().reverse().map((e) => `<div class="lost-row">
-      <div class="row-flex"><span class="lost-name">${escapeHtml(e.name)}</span><span class="space"></span><span class="gold lost-earned">+${e.earned} Remembrance</span></div>
-      <div class="slot-meta">${escapeHtml(e.raceName || raceName(e.race))}, Power ${e.level}, <i>${escapeHtml(e.cause || 'Lost')}</i></div>
-      <div class="slot-meta">${fmtPlaytime(e.playtime)} played, ${e.kills} foes felled, ${e.chapters} ${e.chapters === 1 ? 'story thread' : 'story threads'} taken up${e.chapter ? ` (${escapeHtml(e.chapter)})` : ''}</div>
-      <div class="slot-meta">Great foes slain: ${e.foes.length ? e.foes.map(escapeHtml).join(', ') : 'none'}</div>
-      ${e.heirloom ? `<div class="slot-meta">Left <span class="gold">${escapeHtml(e.heirloom)}</span> at the Wash${e.claimedBy ? `, taken up by ${escapeHtml(e.claimedBy)}` : ''}</div>` : ''}
-    </div>`).join('');
-  const waiting = l.heirloom ? `<div class="slot-note"><span class="gold">${escapeHtml(l.heirloom.name)}</span>, left by ${escapeHtml(l.heirloom.from || 'one who came before')}, waits in the keepsake chest at the Wash for the next soul to wash ashore.</div>` : '';
-  const el = ui.openModal('register', `<div class="panel register-panel"><h2>THE REGISTER OF THE LOST</h2>
-    <p class="muted slots-note">When a tide-born dies in the Rift, or its last name-knot frays, Old Wren strikes the name in her blanket register. The coast keeps a little of what they did: Remembrance, spent when the next soul washes ashore.</p>
-    <div class="row-flex register-total"><span>Remembrance <b class="gold">${l.remembrance}</b></span><span class="space"></span><span class="muted">${l.earned} earned in all</span></div>
-    ${waiting}
-    <div class="lost-list">${entries || '<div class="muted" style="text-align:center;margin:16px 0">No names have been struck.</div>'}</div>
-    <div class="divider"></div><div class="row-flex"><button class="btn" data-a="back">Back</button><span class="space"></span></div></div>`, { onClose: () => showMainMenu(ui) });
-  el.addEventListener('click', (e) => {
-    if (e.target.closest('[data-a="back"]')) ui.closeModal(false);
   });
 }
 
@@ -513,6 +486,7 @@ export function openSettings(ui, back) {
       ${slider('master', 'Master Volume', 0, 1, 0.05)}
       ${slider('sfx', 'Effects Volume', 0, 1, 0.05)}
       ${slider('music', 'Music Volume', 0, 1, 0.05)}
+      ${slider('ambient', 'Ambience Volume', 0, 1, 0.05)}
       <h3>GRAPHICS</h3>
       <div class="settings-row"><span>Quality</span><div class="row-flex">${q('high', 'High')}${q('medium', 'Medium')}${q('low', 'Low')}</div><span></span></div>
       <div class="muted settings-note">High: bloom, light shafts, water reflections. Medium: the same at a lower resolution, without reflections. Low: no post-processing, the fastest.</div>
@@ -575,7 +549,7 @@ export function openHelp(ui, back) {
         <p><b class="gold">Power.</b> Experience earns investment points one at a time. Invest the fifteenth point earned since your last Power to rise to the next ${k('menu')}: each rise brings a talent, a mantra and a full heal.</p>
         <p><b class="gold">Mantras</b> cost ether. Learn them as you rise; empower them with Mantra Sparks at an altar.</p>
         <p><b class="gold">Death.</b> On the surface it drags you into the Rift, whole: go through the keep and out its north door, ride the stone lift to the summit and step through the Wound to get home. A death in the Rift ends the character for good. Quitting or reloading in danger costs one of your three lives; an Ember of Life restores one.</p>
-        <p><b class="gold">The end of a character.</b> After a death in the Rift, or its last life, the character is gone. Its name goes into the Register of the Lost, it earns Remembrance for the souls who come after, and it may leave one heirloom at the Wash.</p>
+        <p><b class="gold">The end of a character.</b> After a death in the Rift, or its last life, the character is gone. It earns Remembrance for the souls who come after, and it may leave one heirloom at the Wash.</p>
         <p><b class="gold">Survive.</b> Eat and drink (a new character's hotbar keeps water on <kbd>9</kbd> and bread on <kbd>0</kbd>). Wells refill waterskins. Sit at a campfire to cook and to invest your points (lay one from three Sticks or a Firewood); only an innkeeper's room sets where you wake.</p>
         <p><b class="gold">Three save slots</b> each keep their own character. Settings and the Register are shared. More in the Journal's Guide ${k('journal')}.</p>
       </div>
@@ -610,7 +584,7 @@ export function deathScreen(ui, title, sub, time, then) {
   }, time);
 }
 
-// The end of a character: its line in the register, the Remembrance it earned, and the one
+// The end of a character: what it did, the Remembrance it earned, and the one
 // heirloom it leaves at the Wash. info is null when an unfinished choice is picked up again.
 export function showWipe(ui, info) {
   const l = Legacy.load();

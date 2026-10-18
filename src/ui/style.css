@@ -190,9 +190,8 @@ kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1p
 .menu-btns .btn { font-size: 16px; padding: 13px; }
 .cont-info { font-family: var(--serif); font-size: 13px; letter-spacing: 0; color: var(--muted); display: block; margin-top: 3px; text-transform: none; }
 
-/* save slots, the register of the lost, the wipe screen */
+/* save slots, the wipe screen */
 .slots-panel { width: min(640px, calc(94 * var(--sw))); }
-.register-panel { width: min(700px, calc(94 * var(--sw))); max-height: calc(88 * var(--sh)); display: flex; flex-direction: column; }
 .wipe-panel { width: min(600px, calc(94 * var(--sw))); max-height: calc(92 * var(--sh)); overflow-y: auto; }
 .slots-note { margin: -4px 0 12px; font-size: 14px; text-align: center; }
 .slot-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; margin: 8px 0; border: 1px solid var(--line-strong); background: rgba(0, 0, 0, 0.3); }
@@ -204,11 +203,6 @@ kbd { font-family: var(--display); font-size: 12px; padding: 1px 6px; border: 1p
 .slot-row .btn { flex: none; }
 .slot-confirm { margin: 10px 0 4px; padding: 12px 14px; border: 1px solid #8a3a3a; background: rgba(60, 14, 14, 0.35); font-size: 15px; }
 .slot-note { margin: 4px 0 10px; padding: 10px 14px; border: 1px solid var(--line-strong); background: rgba(214, 196, 150, 0.06); font-size: 15px; }
-.register-total { font-family: var(--display); letter-spacing: 0.08em; margin: 2px 0 8px; }
-.lost-list { overflow-y: auto; min-height: 0; flex: 1; padding-right: 4px; }
-.lost-row { padding: 10px 12px; margin: 6px 0; border-left: 2px solid var(--line-strong); background: rgba(0, 0, 0, 0.25); }
-.lost-name { font-family: var(--display); font-size: 17px; letter-spacing: 0.08em; color: var(--text); text-decoration: line-through; text-decoration-color: rgba(214, 196, 150, 0.45); }
-.lost-earned { font-family: var(--display); font-size: 13px; }
 .vow-confirm { margin: 0 0 10px; padding: 10px 14px; border: 1px solid var(--line-strong); background: rgba(214, 196, 150, 0.06); font-size: 15px; }
 .vow-card.on { box-shadow: 0 0 0 1px var(--gold), 0 0 14px rgba(214, 196, 150, 0.35); }
 #captions { position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; }

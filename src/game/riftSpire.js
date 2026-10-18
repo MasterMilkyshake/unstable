@@ -47,8 +47,8 @@ UPDATE_HOOKS.push((game, dt) => {
   const h = Math.max(0, p.pos.y - ground);
   if (h < 6) return;
   const t = Math.min(1, h / SPIRE.summitH);
-  // Additive location pressure. player.survival still drains 0.75/s.
-  p.addSanity(-dt * (0.12 + t * 0.72));
+  // Additive location pressure, over the Rift's own drain (game/riftBalance.js RIFT_SANITY_DRAIN).
+  p.addSanity(-dt * (0.05 + t * 0.35)); // was 0.12 + 0.72 t: at the summit 0.5/s in all, five times the Rift's own
 });
 
 ACTIONS.finishAscent = (game) => {

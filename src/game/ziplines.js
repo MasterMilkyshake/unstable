@@ -10,6 +10,9 @@ const GRAB = 0.35; // seconds to reach up and take the bar
 const RAMP = 1.1; // seconds to come up to speed
 const EASE = 7; // metres from the end where the trolley starts to brake
 const ease = (t) => t * t * (3 - 2 * t);
+// letting go mid-line: how much of the run is kept, the hop up off the bar, and how long before
+// a line can be taken again (so the jump doesn't land straight back on the trolley)
+export const LINE_JUMP = { keep: 0.75, hop: 5.5, regrab: 0.9 };
 
 class Ride {
   constructor(line, p) {
@@ -18,6 +21,7 @@ class Ride {
     this.grab = 0;
     this.run = 0;
     this.s = 0;
+    this.v = 0;
     this.at = new THREE.Vector3();
     line.riding = p;
   }
@@ -39,6 +43,7 @@ class Ride {
     this.run += dt;
     const left = curve.len - this.s;
     const v = def.speed * Math.min(1, 0.15 + this.run / RAMP) * Math.max(0.3, Math.min(1, left / EASE));
+    this.v = v;
     this.s = Math.min(curve.len, this.s + v * dt);
     const t = this.s / curve.len;
     const hold = this.hang(t);
@@ -54,6 +59,24 @@ class Ride {
     p.vel.set(curve.dir.x * 2.5, 0, curve.dir.z * 2.5);
     p.fallStart = p.pos.y;
     G.audio?.play('block', { pos: p.pos, pitch: 0.6, vol: 0.6 });
+    this.release(p);
+  }
+
+  // Jump pressed on the line: once the bar is taken, let go with the run carried on along the
+  // cable and a hop up; the fall from here counts as any other.
+  canJump() {
+    return this.grab >= 1 && this.s > 0;
+  }
+  jump(p) {
+    const { curve } = this.line;
+    const t0 = Math.max(0, this.s / curve.len - 0.002), t1 = Math.min(1, this.s / curve.len + 0.002);
+    const a = curve.point(t0), b = curve.point(t1);
+    const dir = b.sub(a).normalize();
+    p.vel.copy(dir).multiplyScalar(this.v * LINE_JUMP.keep);
+    p.vel.y = Math.max(0, p.vel.y) + LINE_JUMP.hop;
+    p.fallStart = p.pos.y;
+    p.zipCool = LINE_JUMP.regrab;
+    G.audio?.play('jump', { pos: p.pos });
     this.release(p);
   }
 
@@ -74,7 +97,7 @@ class Ride {
 ACTIONS.rideLine = (id) => {
   const p = G.player;
   const line = G.world?.carrierLines?.find((l) => l.def.id === id);
-  if (!p || !line || line.riding || p.zip || p.dead || p.knocked || p.boat) return false;
+  if (!p || !line || line.riding || p.zip || p.dead || p.knocked || p.boat || p.zipCool > 0) return false;
   p.cancelAttack?.();
   p.sitting = false;
   p.blocking = false;

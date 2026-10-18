@@ -155,13 +155,11 @@ export function buildLandmarks(world, exclusions) {
   }
   for (const s of FISHING_SPOTS) spots.push(s);
   world.fishingSpots = [];
-  const ripple = mat('#d8f0ff', { emissive: '#8fd0ff', ei: 0.6, transparent: true, opacity: 0.55, depthWrite: false });
-  const rippleGeo = new THREE.RingGeometry(0.5, 0.62, 20).rotateX(-Math.PI / 2);
   for (const s of spots) {
     const ground = terrain.heightAt(s.x, s.z);
     const pos = new THREE.Vector3(s.x, Math.max(ground, s.dock ? 0.9 : ground) + 0.6, s.z);
-    // ripples on the nearest water, a few meters out
-    const rp = new THREE.Group();
+    // where the line goes in: the nearest water, a few meters out (no marker on it; the spot's
+    // own prompt finds it)
     const wy = s.pool === 'rift' ? ground + 0.05 : -0.05;
     let wx = s.x;
     let wz = s.z;
@@ -183,22 +181,7 @@ export function buildLandmarks(world, exclusions) {
         wz = s.z + d.dir.z * 3;
       }
     }
-    rp.position.set(wx, wy, wz);
-    const rings = [];
-    for (let i = 0; i < 3; i++) {
-      const m = new THREE.Mesh(rippleGeo, ripple);
-      rp.add(m);
-      rings.push(m);
-    }
-    world.scene.add(rp);
-    world.animated.push((t) => {
-      rings.forEach((m, i) => {
-        const k = (t * 0.5 + i / 3) % 1;
-        m.scale.setScalar(0.6 + k * 2.2);
-      });
-      ripple.opacity = 0.45;
-    });
-    const spot = { pos, pool: s.pool, water: rp.position.clone() };
+    const spot = { pos, pool: s.pool, water: new THREE.Vector3(wx, wy, wz) };
     world.fishingSpots.push(spot);
     world.addInteract({ id: 'fish_' + world.fishingSpots.length, kind: 'fishing', pos, radius: s.dock ? 3.2 : 4, label: 'Fish', use: (game) => act('startFishing', spot) });
   }

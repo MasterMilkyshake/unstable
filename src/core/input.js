@@ -147,6 +147,12 @@ export class Input {
     window.addEventListener('blur', () => this.clear());
     document.addEventListener('pointerlockchange', () => {
       this.locked = document.pointerLockElement === this.canvas;
+      this.lockAsked = 0;
+      // a lock asked for before a panel opened can land after it: a panel keeps the cursor
+      if (this.locked && !this.canLock()) {
+        document.exitPointerLock();
+        return;
+      }
       if (!this.locked) this.clear();
       if (this.onLockChange) this.onLockChange(this.locked);
     });
@@ -158,8 +164,14 @@ export class Input {
     this.endFrame();
   }
 
+  // Whether the game may take the pointer now (ui/ui.js: not while a panel is open).
+  canLock() {
+    return true;
+  }
+
   requestLock() {
-    if (!this.locked && this.canvas.requestPointerLock) {
+    if (!this.locked && this.canLock() && this.canvas.requestPointerLock) {
+      this.lockAsked = performance.now();
       const fallback = () => {
         try {
           const q = this.canvas.requestPointerLock();

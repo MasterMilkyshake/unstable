@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { G } from '../core/globals.js';
 import { Actor, SWIM_Y, GRAVITY } from './actor.js';
+import { RIFT_SANITY_DRAIN } from '../game/riftBalance.js';
 import { HumanoidRig } from './rig.js';
 import { STANCE_FOR_CLASS } from './anims.js';
 import { RACE_BY_ID } from '../data/races.js';
@@ -30,6 +31,9 @@ const LATCH_LO = 1.2; // a top lower than this above the feet is jumped or stepp
 const LATCH_HI = 2.3; // the hands' reach above the feet
 const HANG = 1.95; // the feet hang this far below the edge
 const COYOTE = 0.12; // a jump pressed this soon after the feet left an edge (a tread, a kerb) still jumps
+// a stroke up out of swim-deep water: its speed (a hop of about a third of a metre) and the wait
+// before the next
+export const SWIM_STROKE = { v: 4.5, wait: 1.4 };
 const JUMP_BUFFER = 0.12; // a jump pressed this soon before landing jumps on touching down
 const GRAB_INTO = 0.5; // the hands catch an edge only when the input pushes into its wall (within 60 degrees)
 
@@ -68,6 +72,7 @@ export class Player extends Actor {
     // keys pressed a moment before they can act still fire (combat/rules.js INPUT_BUFFER)
     this.buf = { dodge: 0, crit: 0, chase: 0, jump: 0 };
     this.coyoteT = 0; // seconds a ground jump stays open after the feet left the ground
+    this.strokeCd = 0; // seconds before another stroke up out of swim-deep water
     this.lmbPress = 0; // counts LMB presses: a swing holds (flourish) only on the press that started it
     this.chaseWin = 0; // after an uppercut lands: seconds left to leap after the foe
     this.chaseTarget = null;
@@ -1333,8 +1338,10 @@ export class Player extends Actor {
     }
 
     // riding a carrier line: game/ziplines.js carries the rider along the cable
+    if (this.zipCool > 0) this.zipCool = Math.max(0, this.zipCool - dt);
     if (this.zip) {
       if (this.knocked || this.dead) this.zip.drop(this);
+      else if (canAct && this.zip.canJump() && I.consume('jump')) this.zip.jump(this);
       else {
         this.zip.step(this, dt);
         this.vel.set(0, 0, 0);
@@ -1581,9 +1588,15 @@ export class Player extends Actor {
         if (jumpPress) this.buf.jump = JUMP_BUFFER;
         if (this.buf.jump > 0 && !busy) {
           if (this.swimming) {
+            // in swim-deep water there is no ground to jump from: a press (never a buffered one)
+            // gives one stroke up, and the next waits out SWIM_STROKE.wait, so strokes can't chain
+            // into a run of jumps along the surface
             this.buf.jump = 0;
-            this.vel.y = this.mods.seafarer ? 9.2 : 6.5; // Seafarer: out of the water as off the ground
-            this.swimming = false;
+            if (jumpPress && this.strokeCd <= 0) {
+              this.vel.y = this.mods.seafarer ? 9.2 : SWIM_STROKE.v; // Seafarer: out of the water as off the ground
+              this.swimming = false;
+              this.strokeCd = SWIM_STROKE.wait;
+            }
           } else if (this.grounded || (this.coyoteT > 0 && this.vel.y <= 0.01)) {
             this.buf.jump = 0;
             this.coyoteT = 0;
@@ -1664,6 +1677,7 @@ export class Player extends Actor {
     if (!this.grounded && (this.wasGrounded || this.vel.y >= 0)) this.fallStart = this.pos.y;
     this.wasGrounded = this.grounded;
     this.coyoteT = this.grounded && !this.climbing ? COYOTE : Math.max(0, this.coyoteT - dt);
+    if (this.strokeCd > 0) this.strokeCd = Math.max(0, this.strokeCd - dt);
     this.speed = hypot(this.vel.x, this.vel.z);
 
     // footsteps
@@ -1741,6 +1755,9 @@ export class Player extends Actor {
   }
 
   onEnterWater() {
+    // a jump pressed on the way down is spent on the splash, not carried into the water
+    this.buf.jump = 0;
+    this.coyoteT = 0;
     G.audio.play('splash', { pos: this.pos });
     G.vfx.splash(this.pos);
     this.climbing = false;
@@ -1788,12 +1805,13 @@ export class Player extends Actor {
         this.hp = 0;
         this.onLethal(null);
       }
-    } else if (!this.inDanger && !this.knocked && ch.hunger > 15 && ch.water > 15) {
+    } else if (!this.inDanger && !this.knocked && ch.hunger > 15 && ch.water > 15 && !G.game.inRift) {
+      // (none in the Rift: down there health comes back from kills, game/riftBalance.js)
       this.hp = Math.min(this.maxHp, this.hp + this.maxHp * 0.012 * dt * (this.sitting ? 3 : 1));
     }
     // sanity
     if (G.game.inRift) {
-      this.addSanity(-dt * 0.75);
+      this.addSanity(-dt * RIFT_SANITY_DRAIN);
       if (ch.sanity <= 0 && !this.knocked) {
         this.hp -= this.maxHp * 0.02 * dt;
         if (this.hp <= 0) {

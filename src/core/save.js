@@ -1,6 +1,6 @@
 // localStorage persistence: three character slots, each with its own rolling backup, plus the
 // settings every slot shares. Saves are migrated on load (core/migrate.js), and the backup guards
-// against a corrupted write. Legacy (the register of the lost) keeps its own key: core/legacy.js.
+// against a corrupted write. Legacy (the lost characters and Remembrance) keeps its own key: core/legacy.js.
 import { migrateCharacter } from './migrate.js';
 
 export const SLOT_COUNT = 3;
@@ -48,6 +48,7 @@ const SETTING_RULES = {
   master: [0.8, 0, 1],
   sfx: [0.9, 0, 1],
   music: [0.45, 0, 1],
+  ambient: [0.7, 0, 1], // wind, surf, rain and the place's own sounds (under Effects and Master)
   shadows: [true],
   quality: ['high', ['high', 'medium', 'low']],
   damageNumbers: [true],
