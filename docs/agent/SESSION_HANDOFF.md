@@ -1,5 +1,21 @@
 # Session handoff
 
+## Round 5 apply + Watch yard table (2026-10-21)
+
+**Branch:** `main` at `0d0bd99` (round 5 already on HEAD). Uncommitted: `src/world/architecture.js`, `tests/architecture.test.js`.
+
+**Grok Bot's apply:** `~/Downloads/round5.patch` restored from `git diff 47e5618 0d0bd99`. `git apply --check` fails as expected — every hunk is already in the tree. Did not re-apply.
+
+**Table:** the Watch Muster Yard slab at local (5, 4) in front of the Saltreach barracks was a 20 cm box centred at y=1.1 with no legs. It now has a top on four legs to the yard, collider from foot to top (same pattern as the Wash shelter workbench).
+
+**Tests:** `npm test` 588/588 in 84 s. New test asserts the `watch_yard` collider at world (-20, -33) meets terrain and is 0.88 m tall (legs + top), not a 1.2 m floating slab.
+
+**Dev:** `npm run dev` on http://localhost:5173/. Playwright close-up of the yard: four legs on packed earth, cloth and metal on the top, 0 console errors.
+
+**Do not commit** unless the user asks.
+
+---
+
 **Date:** 2026-10-15
 
 **Branch/commit:** `agent/rift-rework` in the worktree `~/Downloads/unstable-rift`: one commit of Rift changes plus this record, on top of `agent/m1-closeout` (PR #14). Its PR goes against `agent/m1-closeout` and is retargeted to `main` once #14 merges.

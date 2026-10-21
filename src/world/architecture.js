@@ -621,16 +621,27 @@ export function buildArchitecture(world, exclusions, add, mat) {
       buildPassWatch(world, s, exclusions, add);
       clearance = 14;
     } else if (s.kind === 'yard') {
+      const groundAt = (lx, lz) => {
+        const p = k.position(lx, 0, lz);
+        return world.terrain.heightAt(p.x, p.z) - g.position.y;
+      };
       const ground = new THREE.Mesh(new THREE.CircleGeometry(8.5, 18).rotateX(-Math.PI / 2), mat('#8a8167'));
       ground.position.y = 0.035; ground.receiveShadow = true; g.add(ground);
       for (const x of [-7, 7]) {
         post(x, -6, 6, 0.35);
         banner(x, 4, -5.7, 3);
       }
-      box(5, 1.1, 4, 3.5, 0.2, 1.9, 'dark');
-      k.solid(5, 0.6, 4, 3.5, 1.2, 1.9);
-      box(5, 1.22, 4, 2.8, 0.025, 1.4, 'cloth');
-      for (const x of [4, 5, 6]) box(x, 1.36, 4, 0.14, 0.22, 0.14, 'metal');
+      // muster table in front of the barracks: four legs to the ground under it (it was a
+      // 20 cm slab centred at y=1.1 with no legs, hanging a metre over the yard)
+      const tx = 5, tz = 4, tw = 3.5, td = 1.9, topH = 0.18, legH = 0.7;
+      const fy = Math.max(0, groundAt(tx, tz));
+      box(tx, fy + legH + topH / 2, tz, tw, topH, td, 'dark');
+      for (const dx of [-tw / 2 + 0.18, tw / 2 - 0.18]) for (const dz of [-td / 2 + 0.18, td / 2 - 0.18]) {
+        box(tx + dx, fy + legH / 2, tz + dz, 0.14, legH, 0.14, 'dark');
+      }
+      k.solid(tx, fy + (legH + topH) / 2, tz, tw, legH + topH, td);
+      box(tx, fy + legH + topH + 0.013, tz, 2.8, 0.025, 1.4, 'cloth');
+      for (const x of [tx - 1, tx, tx + 1]) box(x, fy + legH + topH + 0.16, tz, 0.14, 0.22, 0.14, 'metal');
       for (const z of [-1.5, 0, 1.5]) beam([-7, 0.1, z], [-7, 3, z], 0.09, 'metal');
       box(-7, 1.1, 0, 0.35, 0.25, 4.3, 'dark');
       k.solid(-7, 0.62, 0, 0.35, 1.24, 4.3);

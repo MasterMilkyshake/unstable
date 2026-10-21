@@ -222,6 +222,18 @@ test('every inn has an open doorway, supported room floor, sleeping loft and saf
   }
 });
 
+test('the Watch yard table in front of the barracks stands on legs to the ground', () => {
+  const rec = world.architecture.find((a) => a.id === 'watch_yard');
+  assert.ok(rec, 'Watch Muster Yard is built');
+  const tx = rec.x + 5, tz = rec.z + 4;
+  const ground = world.terrain.heightAt(tx, tz);
+  const table = [...world.colliders.all].find((c) => c.tag === 'watch_yard'
+    && Math.abs(c.x - tx) < 0.2 && Math.abs(c.z - tz) < 0.2 && c.hw > 1.4);
+  assert.ok(table, 'the muster table has a collider');
+  assert.ok(table.y0 <= ground + 0.2, `table foot ${table.y0.toFixed(2)} should meet ground ${ground.toFixed(2)}`);
+  assert.ok(Math.abs((table.y1 - table.y0) - 0.88) < 0.05, `table height ${table.y1 - table.y0} is the top on four legs, not a floating slab`);
+});
+
 test('all regional landmarks are built, vegetation is excluded and meshes are batched', () => {
   assert.equal(world.architecture.length, ARCHITECTURE.length);
   for (const s of ARCHITECTURE) {
